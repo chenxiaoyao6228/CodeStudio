@@ -1,6 +1,11 @@
 {
   "name": "code-studio",
   "version": "0.0.0",
+  "author": "chenxiaoyao6228@163.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chenxiaoyao6228/codestudio"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
