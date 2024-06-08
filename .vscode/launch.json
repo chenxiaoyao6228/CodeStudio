@@ -3,11 +3,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ng serve",
+      "name": "Launch Chrome against localhost",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: start",
-      "url": "http://localhost:4200/"
+      "url": "http://localhost:4200",
+      "sourceMaps": true,
+      "webRoot": "${workspaceRoot}",
+      "skipFiles": [
+        "node_modules/**",
+        "**/node_modules/**"
+      ]
     },
     {
       "name": "ng test",

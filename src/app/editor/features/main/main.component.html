@@ -1,16 +1,18 @@
-<div class="main-wrap">
-  <!-- <app-drag orientation="vertical" [elementCount]="3" [config]="configs">
-    <app-drag-item [label]="editors[0].label"> -->
-  <div id="sidebar">sidebar</div>
-  <!-- </app-drag-item> -->
-  <!-- <app-drag-item [label]="editors[1].label" class="edit"> -->
-  <app-edit id="edit"></app-edit>
-  <!-- </app-drag-item> -->
-  <!-- <app-drag-item [label]="editors[2].label"> -->
-  <div id="output">
-    <div class="preview">preview</div>
-    <div class="console">console</div>
-  </div>
-  <!-- </app-drag-item> -->
-  <!-- </app-drag> -->
-</div>
+<resizer-container class="row" direction="row">
+  <resizer [isFirstElement]="true">
+    <div id="sidebar">sidebar</div>
+  </resizer>
+  <resizer>
+    <app-edit id="edit"></app-edit>
+  </resizer>
+  <resizer>
+    <resizer-container class="col" direction="col">
+      <resizer [isFirstElement]="true">
+        <div class="preview">preview</div>
+      </resizer>
+      <resizer>
+        <div class="console">console</div>
+      </resizer>
+    </resizer-container>
+  </resizer>
+</resizer-container>

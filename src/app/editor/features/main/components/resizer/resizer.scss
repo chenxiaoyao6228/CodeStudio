@@ -1,0 +1,31 @@
+:host {
+  display: flex;
+  position: relative;
+  flex-grow: 1;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+:host-context(.row) {
+  flex-direction: row;
+}
+
+:host-context(.col) {
+  flex-direction: column;
+}
+
+.resizer-bar {
+  background-color: #ccc;
+  cursor: e-resize;
+}
+
+.resizer-bar.row {
+  width: 10px;
+  height: 100%;
+}
+
+.resizer-bar.col {
+  height: 10px;
+  width: 100%;
+  cursor: n-resize;
+}
