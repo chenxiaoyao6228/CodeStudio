@@ -1,0 +1,46 @@
+.main-wrap {
+  height: 100%;
+  flex: 1;
+  display: flex;
+  position: relative;
+
+  #sidebar,
+  #edit,
+  #output {
+    height: 100%;
+    overflow: auto;
+    flex-grow: 1;
+  }
+
+  #sidebar {
+    position: relative;
+    width: 33%;
+    background-color: #5c1919;
+  }
+
+  #edit {
+    width: 33%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: auto;
+  }
+
+  #output {
+    width: 33%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid palevioletred;
+    .preview {
+      flex: 1;
+      background-color: blue;
+    }
+    .console {
+      flex: 1;
+      border-color: aquamarine;
+    }
+  }
+}
