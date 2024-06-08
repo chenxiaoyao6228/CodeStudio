@@ -7,15 +7,8 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-editor',
   standalone: true,
-  imports: [
-    CommonModule,
-    HeaderComponent,
-    FooterComponent,
-    MainComponent,
-  ],
+  imports: [CommonModule, HeaderComponent, FooterComponent, MainComponent],
   templateUrl: './editor.component.html',
-  styleUrl: './editor.component.scss'
+  styleUrl: './editor.component.scss',
 })
-export class EditorComponent {
-
-}
+export class EditorComponent {}

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, ContentChildren, Input, QueryList, SimpleChanges, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ContentChildren,
+  ElementRef,
+  Inject,
+  Input,
+  QueryList,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { ResizeManagerService } from './resize-manager.service';
 import { ResizerComponent } from './resizer';
 
@@ -8,13 +18,14 @@ import { ResizerComponent } from './resizer';
   template: '<ng-content></ng-content>',
   styleUrls: ['./resize-container.scss'],
   providers: [ResizeManagerService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResizerContainerComponent {
   @Input() direction: 'col' | 'row' = 'row';
-  private resizeService = inject(ResizeManagerService);
   @ContentChildren(ResizerComponent) resizers!: QueryList<ResizerComponent>;
 
+  private el = inject(ElementRef);
+  private resizeService = inject(ResizeManagerService);
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['direction']) {
@@ -24,7 +35,15 @@ export class ResizerContainerComponent {
 
   ngAfterContentInit() {
     const resizerArray = this.resizers.toArray();
-    this.resizeService.setResizelist(resizerArray.map((resizer) => resizer.getOptions()));
-  }
+    // setFirst to get childIndex set for later resize
+    this.resizeService.setResizelist(
+      resizerArray.map((resizer) => resizer.getOptions())
+    );
 
+    const initialRect = this.el.nativeElement.getBoundingClientRect();
+    this.resizeService.setContainerSize({
+      width: initialRect.right - initialRect.left,
+      height: initialRect.bottom - initialRect.top,
+    });
+  }
 }

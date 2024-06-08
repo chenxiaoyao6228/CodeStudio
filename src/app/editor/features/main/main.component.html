@@ -1,18 +1,20 @@
 <resizer-container class="row" direction="row">
-  <resizer [isFirstElement]="true">
+  <resizer [isFirstElement]="true" [percentage]="10">
     <div id="sidebar">sidebar</div>
   </resizer>
-  <resizer>
+  <resizer [percentage]="40">
     <app-edit id="edit"></app-edit>
   </resizer>
-  <resizer>
-    <resizer-container class="col" direction="col">
-      <resizer [isFirstElement]="true">
-        <div class="preview">preview</div>
-      </resizer>
-      <resizer>
-        <div class="console">console</div>
-      </resizer>
-    </resizer-container>
+  <resizer [percentage]="50">
+    <div id="output">
+      <resizer-container class="col" direction="col">
+        <resizer [isFirstElement]="true" [percentage]="90">
+          <div class="preview">preview</div>
+        </resizer>
+        <resizer [percentage]="10">
+          <div class="console">console</div>
+        </resizer>
+      </resizer-container>
+    </div>
   </resizer>
 </resizer-container>

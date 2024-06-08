@@ -7,7 +7,8 @@ interface ResizeItem {
   maxSize: number;
   width: number;
   height: number;
-  resizer: ResizerComponent
+  resizer: ResizerComponent;
+  percentage: number;
 }
 
 type Direction = 'col' | 'row';
@@ -16,24 +17,35 @@ type Direction = 'col' | 'row';
 export class ResizeManagerService {
   direction: Direction = 'row';
   resizeList: ResizeItem[] = [];
+  containerSize: { width: number; height: number } = { width: 0, height: 0 };
 
   setDirection(dir: Direction) {
-    this.direction = dir
+    this.direction = dir;
+  }
+
+  setContainerSize({ width, height }: { width: number; height: number }) {
+    this.containerSize = { width, height };
   }
 
   setResizelist(list: ResizeItem[]) {
-    this.resizeList = list
-  }
-  updateResizelistItem(id: string, item: ResizeItem) {
-    console.log("item", item);
-    const index = this.resizeList.findIndex((i) => i.id === id);
-    if (index !== -1) {
-      this.resizeList[index] = item
-    }
+    this.resizeList = list;
+
+    let percentage = 0;
+    this.resizeList.forEach((item) => {
+      percentage += item.percentage;
+      if (percentage > 100) {
+        throw new Error('resizer percentage sum > 100');
+      }
+      item.width = this.direction === 'row' ? item.percentage : 100;
+      item.height = this.direction === 'col' ? item.percentage : 100;
+      item.resizer.updateSize('width', item.width);
+      item.resizer.updateSize('height', item.height);
+    });
   }
 
-
-  calculateNewSize({ id, delta }: { id: string, delta: number }) {
+  calculateNewSize({ id, delta: _delta }: { id: string; delta: number }) {
+    const delta =
+      (_delta / this.containerSize[this.getSizeFlagFromDir()]) * 100;
 
     const index = this.resizeList.findIndex((i) => i.id === id);
 
@@ -41,7 +53,7 @@ export class ResizeManagerService {
       return;
     }
 
-    const sizeFlag = getSizeFlagFromDir(this.direction)
+    const sizeFlag = getSizeFlagFromDir(this.direction);
 
     const preEle = this.resizeList[index - 1];
     const nextEle = this.resizeList[index]; // firstElement does not have resize-bar
@@ -49,24 +61,29 @@ export class ResizeManagerService {
     const newSizeOfPrev = preEle[sizeFlag] + delta;
     const newSizeOfNext = nextEle[sizeFlag] - delta;
 
-    if (newSizeOfPrev < preEle.minSize || newSizeOfNext < nextEle.minSize) {
+    if (
+      newSizeOfPrev < preEle.minSize / preEle[sizeFlag] ||
+      newSizeOfNext < nextEle.minSize / nextEle[sizeFlag]
+    ) {
       return;
     }
 
-
-    this.resizeList.forEach(item => {
+    this.resizeList.forEach((item) => {
       if (item.id === id) {
-        item[sizeFlag] = newSizeOfNext
-
+        item[sizeFlag] = newSizeOfNext;
       } else if (item.id === preEle.id) {
-        item[sizeFlag] = newSizeOfPrev
+        item[sizeFlag] = newSizeOfPrev;
       }
-      const size = item[sizeFlag]
-      item.resizer.updateSize({ size, sizeFlag })
-    })
+    });
+    this.resizeList.forEach((item) => {
+      item.resizer.updateSize(sizeFlag, item[sizeFlag]);
+    });
 
     function getSizeFlagFromDir(dir: Direction) {
-      return dir === 'row' ? 'width' : 'height'
+      return dir === 'row' ? 'width' : 'height';
     }
+  }
+  getSizeFlagFromDir() {
+    return this.direction === 'row' ? 'width' : 'height';
   }
 }
