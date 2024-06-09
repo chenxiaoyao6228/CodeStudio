@@ -1,4 +1,4 @@
-# CodeStudio
+# @js-rocks/code-studio
 
 A web code runner
 
@@ -7,3 +7,7 @@ A web code runner
 ```js
 ng serve
 ```
+
+## Reference
+
+- https://material.angular.io/guide/theming-your-components

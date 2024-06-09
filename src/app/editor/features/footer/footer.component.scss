@@ -1,7 +1,9 @@
 .footer-wrap {
   height: 30px;
-  border: 1px solid blueviolet;
-
+  display: flex;
+  align-items: center;
+  overflow: hidden;
   .assets {
+    height: 30px;
   }
 }

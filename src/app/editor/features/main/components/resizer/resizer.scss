@@ -15,17 +15,24 @@
 }
 
 .resizer-bar {
-  background-color: #ccc;
-  cursor: e-resize;
+  opacity: 0;
+  &:hover {
+    background-color: rebeccapurple;
+    opacity: 1;
+    // transition: opacity 0.1s ease-out;
+  }
 }
 
 .resizer-bar.row {
-  width: 10px;
+  cursor: col-resize;
+  width: 4px;
+  margin: 0px -1.5px;
   height: 100%;
 }
 
 .resizer-bar.col {
-  height: 10px;
   width: 100%;
-  cursor: n-resize;
+  height: 4px;
+  margin: -1.5px 0px;
+  cursor: row-resize;
 }
