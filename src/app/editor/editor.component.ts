@@ -36,6 +36,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
 export class EditorComponent {
   nodeContainerService = inject(NodeContainerService);
   ngAfterViewInit() {
-    // this.nodeContainerService.init();
+    this.nodeContainerService.init();
   }
 }

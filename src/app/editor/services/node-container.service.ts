@@ -1,11 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  FileSystemTree,
-  WebContainer,
-  WebContainerProcess,
-} from '@webcontainer/api';
+import { FileSystemTree, WebContainer } from '@webcontainer/api';
 import { FileService } from './filefetcher.service';
-import { lastValueFrom } from 'rxjs';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { EditorStateService } from './editor-state.service';
+import { StartupPhase } from '../constant';
+import { files } from '../mockFile';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +12,8 @@ import { lastValueFrom } from 'rxjs';
 export class NodeContainerService {
   webContainer: WebContainer | null = null;
   fileService = inject(FileService);
+  editorStateService = inject(EditorStateService);
+  previewUrl$: BehaviorSubject<string> = new BehaviorSubject('');
   constructor() {}
 
   async init() {
@@ -26,6 +27,8 @@ export class NodeContainerService {
     await this.startDevServer();
   }
   private async bootContainer() {
+    this.editorStateService.setPhase(StartupPhase.BOOTING);
+
     if (this.webContainer) {
       return this.webContainer;
     }
@@ -33,7 +36,15 @@ export class NodeContainerService {
     return this.webContainer;
   }
   private async installDeps() {
+    this.editorStateService.setPhase(StartupPhase.INSTALLING);
+
     const installProcess = await this.spawnProcess('npm', ['install']);
+
+    if (await installProcess.exit) {
+      console.error('🙀🙀🙀: Failed to intall deps');
+      this.editorStateService.setPhase(StartupPhase.ERROR);
+      return;
+    }
 
     installProcess.output.pipeTo(
       new WritableStream({
@@ -52,15 +63,30 @@ export class NodeContainerService {
   }
 
   async startDevServer() {
+    this.editorStateService.setPhase(StartupPhase.STARTING_DEV_SERVER);
+
     const webContainer = await this.bootContainer();
     const process = await webContainer.spawn('npm', ['run', 'dev']);
+
+    if (await process.exit) {
+      console.error('🙀🙀🙀: Failed to start dev server');
+      this.editorStateService.setPhase(StartupPhase.ERROR);
+      return;
+    }
+
+    webContainer.on('server-ready', (port: number, url: string) => {
+      this.editorStateService.setPhase(StartupPhase.READY);
+      this.previewUrl$.next(url);
+    });
+
     return process;
   }
 
   async processZipFile(): Promise<void> {
-    const fileTree = await lastValueFrom(this.fileService.getZipFile());
+    // const fileTree = await lastValueFrom(this.fileService.getZipFile());
 
-    await this.mountFiles(fileTree);
+    // await this.mountFiles(fileTree);
+    await this.mountFiles(files);
   }
 
   private async mountFiles(fileSystemTree: FileSystemTree): Promise<void> {

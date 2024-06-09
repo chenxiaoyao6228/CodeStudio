@@ -1,6 +1,9 @@
 import {
   Component,
+  DestroyRef,
+  ElementRef,
   Signal,
+  ViewChild,
   computed,
   effect,
   inject,
@@ -11,6 +14,9 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { StartupPhase } from '@app/editor/constant';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NodeContainerService } from '@app/editor/services/node-container.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 
 interface IPhaseItem {
   key: StartupPhase;
@@ -66,7 +72,12 @@ const DEFAULT_PHASE_LIST = [
   styleUrl: './preview.component.scss',
 })
 export class PreviewComponent {
+  @ViewChild('previewIframe') previewIframe:
+    | ElementRef<HTMLIFrameElement>
+    | undefined;
+  private readonly destroyRef = inject(DestroyRef);
   private editorStateService = inject(EditorStateService);
+  private nodeContainerService = inject(NodeContainerService);
 
   phases = computed<IPhaseItem[]>(() => {
     const currentPhase = this.editorStateService.getPhase();
@@ -112,5 +123,12 @@ export class PreviewComponent {
 
   trackByPhaseKey(index: number, phase: IPhaseItem): StartupPhase {
     return phase.key;
+  }
+  ngAfterViewInit() {
+    this.nodeContainerService.previewUrl$
+      .pipe(map((url) => ({ url })))
+      .subscribe(({ url }) => {
+        this.previewIframe!.nativeElement.src = url ?? '';
+      });
   }
 }
