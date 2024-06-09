@@ -1,0 +1,45 @@
+<div id="preview-panel">
+  @if(isReady()) {
+  <iframe
+    #previewIframe
+    allow="cross-origin-isolated"
+    class="preview-iframe"
+  ></iframe>
+  }@else {
+  <div class="loading-container">
+    <div class="loading-container-inner">
+      <h5 class="loading-title">{{ currentPhaseItem()?.message }}</h5>
+
+      <mat-progress-bar
+        mode="determinate"
+        [value]="progressValue()"
+        class="progress-bar"
+      ></mat-progress-bar>
+
+      <div class="loading-steps">
+        @for (phase of phases().slice(0,-1); track phase.key) {
+        <div class="loading-step">
+          @if(phase.loading) {
+          <div class="loading-icon-wrap">
+            <mat-icon class="loading-icon">loop</mat-icon>
+          </div>
+          <div class="loading-text">
+            {{ phase.message }}
+          </div>
+          }@else {
+          <mat-checkbox
+            class="loading-checkbox"
+            [checked]="phase.completed"
+          ></mat-checkbox>
+          <div>
+            {{ phase.message }}
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  }
+</div>

@@ -1,18 +1,20 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { StartupPhase } from '../constant';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EditorStateService {
-  private _phase = StartupPhase.NOT_STARTED;
-  private _files = [];
+  private _phase = signal(StartupPhase.NOT_STARTED);
   constructor() {}
 
   setPhase(phase: StartupPhase) {
-    this._phase = phase;
+    this._phase.set(phase);
   }
   getPhase() {
-    return this._phase;
+    return this._phase();
+  }
+  resetPhase() {
+    this._phase.set(StartupPhase.NOT_STARTED);
   }
 }

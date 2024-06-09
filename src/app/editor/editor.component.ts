@@ -4,11 +4,19 @@ import { FooterComponent } from './features/footer/footer.component';
 import { MainComponent } from './features/main/main.component';
 import { CommonModule } from '@angular/common';
 import { NodeContainerService } from './services/node-container.service';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-editor',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FooterComponent, MainComponent],
+  imports: [
+    CommonModule,
+    HeaderComponent,
+    FooterComponent,
+    MainComponent,
+
+    MatCheckbox,
+  ],
   template: `
     <app-editor-header></app-editor-header>
     <app-editor-main></app-editor-main>
@@ -28,6 +36,6 @@ import { NodeContainerService } from './services/node-container.service';
 export class EditorComponent {
   nodeContainerService = inject(NodeContainerService);
   ngAfterViewInit() {
-    this.nodeContainerService.init();
+    // this.nodeContainerService.init();
   }
 }
