@@ -4,6 +4,7 @@ import { EditComponent } from './edit/edit.component';
 import { ResizerContainerComponent } from './components/resizer/resize-container';
 import { ResizerComponent } from './components/resizer/resizer';
 import { PreviewComponent } from './ouput/preview/preview.component';
+import { TerminalComponent } from './ouput/terminal/terminal.component';
 
 @Component({
   selector: 'app-editor-main',
@@ -14,6 +15,7 @@ import { PreviewComponent } from './ouput/preview/preview.component';
     ResizerContainerComponent,
     ResizerComponent,
     PreviewComponent,
+    TerminalComponent,
   ],
   providers: [],
   templateUrl: './main.component.html',

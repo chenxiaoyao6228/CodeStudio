@@ -8,11 +8,11 @@
   <resizer [percentage]="50">
     <div id="output">
       <resizer-container class="col" direction="col">
-        <resizer [isFirstElement]="true" [percentage]="90">
+        <resizer [isFirstElement]="true" [percentage]="70">
           <app-preview class="preview"></app-preview>
         </resizer>
-        <resizer [percentage]="10">
-          <div class="console">console</div>
+        <resizer [percentage]="30">
+          <app-terminal class="console"></app-terminal>
         </resizer>
       </resizer-container>
     </div>

@@ -5,6 +5,7 @@ import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { EditorStateService } from './editor-state.service';
 import { StartupPhase } from '../constant';
 import { files } from '../mockFile';
+import { TerminalService } from '../features/main/ouput/terminal/terminal.service';
 
 const NPM_PACKAGE_MANAGER = 'npm';
 const STSRT_COMMAND = 'dev'; // TODO: should have a 'codestudio' item in package.json for setting
@@ -15,6 +16,7 @@ const STSRT_COMMAND = 'dev'; // TODO: should have a 'codestudio' item in package
 export class NodeContainerService {
   webContainer: WebContainer | null = null;
   fileService = inject(FileService);
+  terminalService = inject(TerminalService);
   editorStateService = inject(EditorStateService);
   previewUrl$: BehaviorSubject<string> = new BehaviorSubject('');
   constructor() {}
@@ -34,6 +36,8 @@ export class NodeContainerService {
       return this.webContainer;
     }
 
+    this.terminalService.write('[codeStudio]: Booting WebContainer...');
+
     this.editorStateService.setPhase(StartupPhase.BOOTING);
     this.webContainer = await WebContainer.boot();
 
@@ -49,7 +53,7 @@ export class NodeContainerService {
     installProcess.output.pipeTo(
       new WritableStream({
         write: (data) => {
-          console.log('installDeps: ', data);
+          this.terminalService.write(data);
         },
       })
     );
@@ -74,7 +78,7 @@ export class NodeContainerService {
     devServerProcess.output.pipeTo(
       new WritableStream({
         write: (data) => {
-          console.log('devServerProcess: ', data);
+          this.terminalService.write(data);
         },
       })
     );
@@ -97,7 +101,7 @@ export class NodeContainerService {
     const webContainer = await this.bootOrGetContainer();
 
     webContainer.on('error', ({ message }) => {
-      console.error('🙀🙀🙀: Error', message);
+      this.terminalService.write('[codeStudio]: Error🙀: ' + message);
       this.editorStateService.setPhase(StartupPhase.ERROR);
       this.cleanUp();
     });

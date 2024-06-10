@@ -12,4 +12,6 @@ ng serve
 
 - https://www.youtube.com/watch?v=ePhLo_VofFg&ab_channel=LearnWithJason
 - https://webcontainers.io
+- https://github.com/xtermjs/xterm.js
+- https://angular.dev/
 - https://material.angular.io/guide/theming-your-components

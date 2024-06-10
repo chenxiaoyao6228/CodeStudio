@@ -33,18 +33,20 @@ const DEFAULT_PHASE_LIST = [
   //   completed: false,
   //   loading: false,
   // },
+  
   {
     key: StartupPhase.BOOTING,
     message: 'Booting WebContainer',
     completed: false,
     loading: false,
   },
-  {
+   {
     key: StartupPhase.LOADING_FILES,
     message: 'Loading files',
     completed: false,
     loading: false,
   },
+ 
   {
     key: StartupPhase.INSTALLING,
     message: 'Installing dependencies',
