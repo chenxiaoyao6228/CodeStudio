@@ -24,7 +24,10 @@ export class NodeContainerService {
   terminalService = inject(TerminalService);
   editorStateService = inject(EditorStateService);
   previewUrl$: BehaviorSubject<string> = new BehaviorSubject('');
-  constructor() {}
+  constructor() {
+    // @ts-ignore
+    window._container = this;
+  }
 
   async init() {
     await this.startShell();
@@ -127,10 +130,10 @@ export class NodeContainerService {
 
     // event listener
     terminal.onKey(({ key, domEvent }) => {
-      if (domEvent.ctrlKey && domEvent.key === 'c') {
-        console.log('Ctrl + C was pressed');
-        this.stopDevServer();
-      }
+      // if (domEvent.ctrlKey && domEvent.key === 'c') {
+      //   console.log('Ctrl + C was pressed');
+      //   this.stopDevServer();
+      // }
     });
 
     return shellProcess;
@@ -149,15 +152,67 @@ export class NodeContainerService {
   }
 
   async processZipFile(): Promise<void> {
-    // const fileTree = await lastValueFrom(this.fileService.getZipFile());
-    // await this.mountFiles(fileTree);
+    const fileTree = await lastValueFrom(this.fileService.getZipFile());
+    await this.mountFiles(fileTree);
 
-    return await this.mountFiles(files);
+    // return await this.mountFiles(files);
   }
 
   private async mountFiles(fileSystemTree: FileSystemTree): Promise<void> {
     const webContainer = await this.webContainer!;
 
     await webContainer.mount(fileSystemTree);
+  }
+
+  async readFile(filePath: string): Promise<string> {
+    const webContainer = await this.bootOrGetContainer();
+
+    return webContainer.fs.readFile(filePath, 'utf-8');
+  }
+
+  async writeFile(path: string, content: string | Buffer): Promise<void> {
+    const webContainer = await this.bootOrGetContainer();
+
+    try {
+      await webContainer.fs.writeFile(path, content, 'utf-8');
+    } catch (error: any) {
+      console.log('write file error: ', error);
+      throw error;
+    }
+  }
+  count = 1;
+  async mockUpdateFile() {
+    try {
+      await this.writeFile(
+        'app.jsx',
+        `
+        import { useState } from "preact/hooks";
+  import "./app.css";
+  
+  export function App() {
+    const [count, setCount] = useState(0);
+  
+    return (
+      <>
+        <h1>Vite + Preact + ${this.count++}</h1>
+        <div class="card">
+          <button onClick={() => setCount((count) => count + 1)}>
+            count is {count}
+          </button>
+          <p>
+            Edit <code>src/app.jsx</code> and save to test HMR
+          </p>
+        </div>
+        <p class="read-the-docs">
+          Click on the Vite and Preact logos to learn more
+        </p>
+      </>
+    );
+  }
+        `
+      );
+    } catch (error) {
+      console.error('update file error: ', error);
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, from } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import JSZip from 'jszip';
 import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
 
@@ -9,7 +9,7 @@ import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
   providedIn: 'root',
 })
 export class FileService {
-  private fileUrl = 'http://localhost:4200/templates/vite-react.zip';
+  private fileUrl = `http://localhost:4200/templates/preact.zip`;
 
   constructor(private http: HttpClient) {}
 
@@ -28,7 +28,7 @@ export class FileService {
 
           for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
-            if (i === segments.length - 1) {
+            if (i === segments.length - 1 && !file.dir) {
               (current as FileSystemTree)[segment] = {
                 file: {
                   contents: await file.async('string'),
@@ -48,9 +48,7 @@ export class FileService {
         await Promise.all(
           Object.keys(zip.files).map(async (relativePath) => {
             const file = zip.files[relativePath];
-            if (!file.dir) {
-              await processFile(relativePath, file);
-            }
+            await processFile(relativePath, file);
           })
         );
 

@@ -39,6 +39,7 @@
     "@angular/cli": "^18.0.2",
     "@angular/compiler-cli": "^18.0.0",
     "@types/jasmine": "~5.1.0",
+    "adm-zip": "^0.5.14",
     "angular-eslint": "18.0.1",
     "eslint": "^9.3.0",
     "jasmine-core": "~5.1.0",
