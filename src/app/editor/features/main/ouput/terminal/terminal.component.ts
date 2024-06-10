@@ -24,16 +24,14 @@ export class TerminalComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      if (this.terminalEleRef) {
-        this.terminalService.open(this.terminalEleRef.nativeElement);
-      }
+    if (this.terminalEleRef) {
+      this.terminalService.open(this.terminalEleRef.nativeElement);
+    }
 
-      fromEvent(window, 'resize')
-        .pipe(debounceTime(50), takeUntilDestroyed(this.destroyRef))
-        .subscribe(() => {
-          this.terminalService.resizeToFit();
-        });
-    }, 2000);
+    fromEvent(window, 'resize')
+      .pipe(debounceTime(50), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.terminalService.resizeToFit();
+      });
   }
 }

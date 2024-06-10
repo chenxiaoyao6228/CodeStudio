@@ -1,5 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { FileSystemTree, WebContainer } from '@webcontainer/api';
+import {
+  FileSystemTree,
+  WebContainer,
+  WebContainerProcess,
+} from '@webcontainer/api';
 import { FileService } from './filefetcher.service';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { EditorStateService } from './editor-state.service';
@@ -14,6 +18,7 @@ const STSRT_COMMAND = 'dev'; // TODO: should have a 'codestudio' item in package
   providedIn: 'root',
 })
 export class NodeContainerService {
+  devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
   fileService = inject(FileService);
   terminalService = inject(TerminalService);
@@ -22,6 +27,7 @@ export class NodeContainerService {
   constructor() {}
 
   async init() {
+    await this.startShell();
     // boot container
     await this.bootOrGetContainer();
     // mount files
@@ -36,7 +42,7 @@ export class NodeContainerService {
       return this.webContainer;
     }
 
-    this.terminalService.write('[codeStudio]: Booting WebContainer...');
+    this.terminalService.write('[codeStudio]: Booting WebContainer...\n');
 
     this.editorStateService.setPhase(StartupPhase.BOOTING);
     this.webContainer = await WebContainer.boot();
@@ -82,12 +88,8 @@ export class NodeContainerService {
         },
       })
     );
-    //FIXME: 不能这么写!!! 不然永远不会返回url
-    // if (await devServerProcess.exit) {
-    //   console.error('🙀🙀🙀: Failed to start dev server');
-    //   this.editorStateService.setPhase(StartupPhase.ERROR);
-    //   return;
-    // }
+
+    this.devServerProcess = devServerProcess;
 
     webContainer.on('server-ready', (port: number, url: string) => {
       this.editorStateService.setPhase(StartupPhase.READY);
@@ -105,6 +107,40 @@ export class NodeContainerService {
       this.editorStateService.setPhase(StartupPhase.ERROR);
       this.cleanUp();
     });
+  }
+  async startShell() {
+    const webContainer = await this.bootOrGetContainer();
+    const terminal = this.terminalService.getXterminal();
+    const shellProcess = await webContainer.spawn('jsh');
+    shellProcess.output.pipeTo(
+      new WritableStream({
+        write(data) {
+          terminal.write(data);
+        },
+      })
+    );
+
+    const input = shellProcess.input.getWriter();
+    terminal.onData((data) => {
+      input.write(data);
+    });
+
+    // event listener
+    terminal.onKey(({ key, domEvent }) => {
+      if (domEvent.ctrlKey && domEvent.key === 'c') {
+        console.log('Ctrl + C was pressed');
+        this.stopDevServer();
+      }
+    });
+
+    return shellProcess;
+  }
+
+  stopDevServer() {
+    if (this.devServerProcess) {
+      this.devServerProcess.kill();
+      this.previewUrl$.next('404.html');
+    }
   }
 
   cleanUp() {

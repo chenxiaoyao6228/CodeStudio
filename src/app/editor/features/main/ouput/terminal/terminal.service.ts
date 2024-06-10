@@ -20,6 +20,10 @@ export class TerminalService {
     this.fitAddon = fitAddon;
   }
 
+  getXterminal() {
+    return this.xTerminal;
+  }
+
   open(element: HTMLElement) {
     this.xTerminal.open(element);
     this.resizeToFit();
