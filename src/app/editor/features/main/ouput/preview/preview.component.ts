@@ -27,12 +27,12 @@ interface IPhaseItem {
 }
 
 const DEFAULT_PHASE_LIST = [
-  {
-    key: StartupPhase.NOT_STARTED,
-    message: 'Waiting',
-    completed: false,
-    loading: false,
-  },
+  // {
+  //   key: StartupPhase.NOT_STARTED,
+  //   message: 'Waiting',
+  //   completed: false,
+  //   loading: false,
+  // },
   {
     key: StartupPhase.BOOTING,
     message: 'Booting WebContainer',
@@ -113,12 +113,10 @@ export class PreviewComponent {
   });
 
   constructor() {
-    //@ts-ignore
+    //@ts-ignore for testing
     // window.updateProgress = () => {
     //   this.editorStateService.setPhase(DEFAULT_PHASE_LIST[index++].key);
     // };
-    // // @ts-ignore
-    // window.updateProgress();
   }
 
   trackByPhaseKey(index: number, phase: IPhaseItem): StartupPhase {
@@ -128,7 +126,9 @@ export class PreviewComponent {
     this.nodeContainerService.previewUrl$
       .pipe(map((url) => ({ url })))
       .subscribe(({ url }) => {
-        this.previewIframe!.nativeElement.src = url ?? '';
+        if (url) {
+          this.previewIframe!.nativeElement.src = url ?? '';
+        }
       });
   }
 }

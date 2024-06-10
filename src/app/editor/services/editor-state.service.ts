@@ -9,6 +9,7 @@ export class EditorStateService {
   constructor() {}
 
   setPhase(phase: StartupPhase) {
+    console.log('phase:', phase);
     this._phase.set(phase);
   }
   getPhase() {

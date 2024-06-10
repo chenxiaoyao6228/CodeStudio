@@ -26,7 +26,7 @@ export const files = {
     "nodemon": "latest"
   },
   "scripts": {
-    "start": "nodemon --watch './' index.js"
+    "dev": "nodemon --watch './' index.js"
   }
 }`,
     },
