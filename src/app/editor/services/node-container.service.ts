@@ -10,18 +10,29 @@ import { EditorStateService } from './editor-state.service';
 import { StartupPhase } from '../constant';
 import { files } from '../mockFile';
 import { TerminalService } from '../features/main/ouput/terminal/terminal.service';
+import { IRouteParams } from '../editor.component';
+import { GithubFileService } from '@app/_shared/services/github.file.service';
 
-const NPM_PACKAGE_MANAGER = 'npm';
-const STSRT_COMMAND = 'dev'; // TODO: should have a 'codestudio' item in package.json for setting
+interface IOptions {
+  terminal: string;
+  pkgManager: 'npm' | 'yarn' | 'pnpm';
+  templateName?: string;
+  githubPath?: string; // zipFile or folder
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class NodeContainerService {
+  options: IOptions = {
+    terminal: 'dev',
+    pkgManager: 'npm', // TODO: should have a 'codestudio' item in package.json for setting
+  };
   devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
   fileService = inject(FileService);
   terminalService = inject(TerminalService);
+  githubFileService = inject(GithubFileService);
   editorStateService = inject(EditorStateService);
   previewUrl$: BehaviorSubject<string> = new BehaviorSubject('');
   constructor() {
@@ -29,12 +40,14 @@ export class NodeContainerService {
     window._container = this;
   }
 
-  async init() {
+  async init(options: IRouteParams) {
+    Object.assign(this.options, options);
+
     await this.startShell();
     // boot container
     await this.bootOrGetContainer();
     // mount files
-    await this.processZipFile();
+    await this.loadAndMountFiles();
     // install deps
     await this.installDeps();
     // start devServer
@@ -55,7 +68,7 @@ export class NodeContainerService {
   private async installDeps() {
     this.editorStateService.setPhase(StartupPhase.INSTALLING);
 
-    const installProcess = await this.spawnProcess(NPM_PACKAGE_MANAGER, [
+    const installProcess = await this.spawnProcess(this.options.pkgManager, [
       'install',
     ]);
 
@@ -79,10 +92,10 @@ export class NodeContainerService {
     this.editorStateService.setPhase(StartupPhase.STARTING_DEV_SERVER);
 
     const webContainer = await this.bootOrGetContainer();
-    const devServerProcess = await webContainer.spawn(NPM_PACKAGE_MANAGER, [
-      'run',
-      STSRT_COMMAND,
-    ]);
+    const devServerProcess = await webContainer.spawn(
+      this.options!.pkgManager,
+      ['run', this.options!.terminal]
+    );
 
     devServerProcess.output.pipeTo(
       new WritableStream({
@@ -151,8 +164,21 @@ export class NodeContainerService {
     this.webContainer?.teardown();
   }
 
-  async processZipFile(): Promise<void> {
-    const fileTree = await lastValueFrom(this.fileService.getZipFile());
+  async loadAndMountFiles(): Promise<void> {
+    this.editorStateService.setPhase(StartupPhase.LOADING_FILES);
+
+    let fileTree = {} as FileSystemTree;
+    if (this.options?.githubPath) {
+      const path = this.options?.githubPath;
+      if (this.githubFileService.validPath(path) && !path.endsWith('.zip')) {
+        fileTree = await this.githubFileService.downloadFolder(path);
+        console.log('fileTree', fileTree);
+        await this.mountFiles(fileTree);
+        return;
+      }
+    }
+
+    fileTree = await lastValueFrom(this.fileService.getZipFile());
     await this.mountFiles(fileTree);
 
     // return await this.mountFiles(files);

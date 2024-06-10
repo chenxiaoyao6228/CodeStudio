@@ -6,7 +6,13 @@ import { CommonModule } from '@angular/common';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
-export const routes: Routes = [{ path: '', component: EditorComponent }];
+export const routes: Routes = [
+  { path: '', component: EditorComponent },
+  {
+    path: 'edit',
+    component: EditorComponent,
+  },
+];
 
 export const appConfig: ApplicationConfig = {
   providers: [

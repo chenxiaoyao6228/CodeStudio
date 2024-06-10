@@ -1,10 +1,19 @@
-import { Component, inject } from '@angular/core';
+import { Component, Inject, inject } from '@angular/core';
 import { HeaderComponent } from './features/header/header.component';
 import { FooterComponent } from './features/footer/footer.component';
 import { MainComponent } from './features/main/main.component';
 import { CommonModule } from '@angular/common';
 import { NodeContainerService } from './services/node-container.service';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { ActivatedRoute } from '@angular/router';
+import { GithubFileService } from '@app/_shared/services/github.file.service';
+
+export interface IRouteParams {
+  terminal: string;
+  pkgManager?: 'npm' | 'yarn' | 'pnpm';
+  templateName?: string;
+  githubPath?: string; // zipFile or  folder
+}
 
 @Component({
   selector: 'app-editor',
@@ -34,8 +43,17 @@ import { MatCheckbox } from '@angular/material/checkbox';
   ],
 })
 export class EditorComponent {
+  routeParams: IRouteParams = {
+    terminal: 'dev',
+  };
+  route = inject(ActivatedRoute);
   nodeContainerService = inject(NodeContainerService);
-  ngAfterViewInit() {
-    this.nodeContainerService.init();
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params: any) => {
+      this.routeParams = params;
+    });
+  }
+  async ngAfterViewInit() {
+    this.nodeContainerService.init(this.routeParams);
   }
 }
