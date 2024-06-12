@@ -29,13 +29,17 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min/vs",
+                "output": "/assets/vs/"
               }
             ],
             "styles": [
               "@angular/material/prebuilt-themes/magenta-violet.css",
               "src/styles.scss"
-            ],
-            "scripts": []
+            ]
           },
           "configurations": {
             "production": {
@@ -95,13 +99,17 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/monaco-editor/min/vs",
+                "output": "/assets/vs/"
               }
             ],
             "styles": [
               "@angular/material/prebuilt-themes/magenta-violet.css",
               "src/styles.scss"
-            ],
-            "scripts": []
+            ]
           }
         },
         "lint": {

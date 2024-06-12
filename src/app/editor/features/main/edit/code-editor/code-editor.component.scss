@@ -1,7 +1,8 @@
-.editor-wrap {
+.editor-container {
   position: absolute;
+  top: 0;
+  left: 0;
   width: calc(100% - 1px);
-  height: calc(100% - 1px);
-  outline: 0;
-  border: 0;
+  height: 100%;
+  border: 1px solid #fff;
 }
