@@ -1,0 +1,20 @@
+.host {
+  overflow: hidden;
+}
+
+.siderbar-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 8px 0 12px;
+  user-select: none;
+  border-bottom: 1px solid #fff;
+  .title {
+    font-size: 14px;
+  }
+  .download-icon {
+    // font-size: 14px;
+  }
+}

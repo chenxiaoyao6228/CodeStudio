@@ -1,0 +1,60 @@
+:host {
+  --mat-tree-node-min-height: 24px;
+  height: 100%;
+  user-select: none;
+  .file-tree-container {
+    position: relative;
+    .file-tree-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-tree-actions {
+      display: none;
+    }
+
+    .file-tree-container:hover .file-tree-actions {
+      display: block;
+    }
+  }
+
+  .mat-tree-node {
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    position: relative;
+    &.active {
+      --textColor: currentColor !important;
+      background-color: var(--list-inactiveSelectionBackground);
+      color: var(--sb-foreground);
+    }
+    .toggle-icon {
+      position: absolute;
+      left: -24px;
+      top: 0;
+    }
+  }
+
+  .mat-tree-node:hover {
+    opacity: 0.8;
+  }
+
+  .mat-tree-node-cotent {
+    display: flex;
+    align-items: center;
+    position: relative;
+    .mat-icon {
+      margin-right: 3px;
+    }
+  }
+
+  .mat-tree-node-folder {
+    font-weight: bold;
+  }
+
+  .mat-tree-node-file {
+    font-style: italic;
+  }
+}

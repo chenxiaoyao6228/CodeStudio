@@ -1,11 +1,11 @@
 <resizer-container class="row" direction="row">
-  <resizer [isFirstElement]="true" [percentage]="10">
-    <div id="sidebar">sidebar</div>
+  <resizer [isFirstElement]="true" [percentage]="15">
+    <app-sidebar id="sidebar">sidebar</app-sidebar>
   </resizer>
-  <resizer [percentage]="40">
+  <resizer [percentage]="35">
     <app-edit id="edit"></app-edit>
   </resizer>
-  <resizer [percentage]="50">
+  <resizer [percentage]="40">
     <div id="output">
       <resizer-container class="col" direction="col">
         <resizer [isFirstElement]="true" [percentage]="70">

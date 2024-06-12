@@ -23,7 +23,6 @@ export interface IRouteParams {
     HeaderComponent,
     FooterComponent,
     MainComponent,
-
     MatCheckbox,
   ],
   template: `

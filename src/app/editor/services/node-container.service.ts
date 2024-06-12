@@ -4,7 +4,7 @@ import {
   WebContainer,
   WebContainerProcess,
 } from '@webcontainer/api';
-import { FileService } from './filefetcher.service';
+import { FileService } from './file.service';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { EditorStateService } from './editor-state.service';
 import { StartupPhase } from '../constant';

@@ -9,7 +9,7 @@ import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
   providedIn: 'root',
 })
 export class FileService {
-  private fileUrl = `http://localhost:4200/templates/preact.zip`;
+  private fileUrl = `http://localhost:4200/templates/vanilla.zip`;
 
   constructor(private http: HttpClient) {}
 

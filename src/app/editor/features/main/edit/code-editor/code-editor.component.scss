@@ -1,3 +1,7 @@
 .editor-wrap {
-  border: 1px springgreen solid;
+  position: absolute;
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+  outline: 0;
+  border: 0;
 }
