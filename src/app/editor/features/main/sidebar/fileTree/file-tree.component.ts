@@ -1,13 +1,22 @@
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  effect,
+  OnChanges,
+  inject,
+} from '@angular/core';
+import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
-import { Component, OnChanges } from '@angular/core';
-import { MatTree, MatTreeModule, MatTreeNode } from '@angular/material/tree';
+import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
+import { Subscription } from 'rxjs';
+import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   MatTreeFlatDataSource,
   MatTreeFlattener,
 } from '@angular/material/tree';
-import { FlatTreeControl } from '@angular/cdk/tree';
-import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
-import { mockFileSystemTree } from './mock';
+import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { NgClass, NgStyle } from '@angular/common';
 
 export interface FileNode {
@@ -23,11 +32,13 @@ export interface FileNode {
   standalone: true,
   imports: [MatIconModule, MatTreeModule, NgClass, NgStyle],
   templateUrl: './file-tree.component.html',
-  styleUrl: './file-tree.component.scss',
+  styleUrls: ['./file-tree.component.scss'],
 })
-export class FileTreeComponent implements OnChanges {
-  fileSystemTree: FileSystemTree = mockFileSystemTree; // TODO: 改为input与output
+export class FileTreeComponent implements OnInit, OnDestroy {
+  editorState = inject(EditorStateService);
+  fileSystemTree: FileSystemTree | null = null;
   activeNode: FileNode | null = null;
+  private subscription: Subscription | null = null;
 
   private _transformer = (node: FileNode, level: number) => ({
     expandable: !!node.children && node.children.length > 0,
@@ -51,18 +62,25 @@ export class FileTreeComponent implements OnChanges {
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
   hasChild = (_: number, node: FileNode) => node.expandable;
+  loadedFileTreeEffect: any;
 
-  constructor() {
-    const fileTreeFromSystem = this.buildFileTree(this.fileSystemTree);
-    this.dataSource.data = fileTreeFromSystem;
+  constructor() {}
+
+  ngOnInit() {
+    this.editorState.loadedFileTree$.subscribe((fileTree) => {
+      this.fileSystemTree = fileTree;
+      this.dataSource.data = this.buildFileTree(fileTree);
+    });
   }
 
-  ngOnChanges() {
-    this.dataSource.data = this.buildFileTree(this.fileSystemTree);
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   buildFileTree(obj: FileSystemTree, level: number = 0): FileNode[] {
-    return Object.keys(obj).reduce<FileNode[]>((accumulator, key) => {
+    const nodes: FileNode[] = Object.keys(obj).map((key) => {
       const value = obj[key];
       const node: FileNode = {
         name: key,
@@ -80,8 +98,10 @@ export class FileTreeComponent implements OnChanges {
         node.expandable = node.children?.length > 0;
       }
 
-      return accumulator.concat(node);
-    }, []);
+      return node;
+    });
+
+    return nodes;
   }
 
   onNodeClick(node: FileNode): void {
@@ -110,24 +130,23 @@ export class FileTreeComponent implements OnChanges {
   createFile(): void {
     if (this.activeNode) {
       this.addToTree(
-        this.fileSystemTree,
+        this.fileSystemTree!,
         `${this.activeNode.name}/newFile.txt`,
         'New file content'
       );
-      this.ngOnChanges();
     }
   }
 
   createFolder(): void {
     if (this.activeNode) {
       this.addToTree(
-        this.fileSystemTree,
+        this.fileSystemTree!,
         `${this.activeNode.name}/newFolder/`,
         ''
       );
-      this.ngOnChanges();
     }
   }
+
   toggleNode(node: FileNode): void {
     this.treeControl.toggle(node);
     this.onNodeClick(node);

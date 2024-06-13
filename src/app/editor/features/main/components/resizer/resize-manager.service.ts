@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ResizerComponent } from './resizer';
 
+/*
+ * just found this package after implementation: https://www.npmjs.com/package/angular-split
+ */
+
 interface ResizeItem {
   id: string;
   minSize: number;

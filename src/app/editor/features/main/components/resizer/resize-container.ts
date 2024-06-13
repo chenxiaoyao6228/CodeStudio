@@ -3,7 +3,6 @@ import {
   Component,
   ContentChildren,
   ElementRef,
-  Inject,
   Input,
   QueryList,
   SimpleChanges,

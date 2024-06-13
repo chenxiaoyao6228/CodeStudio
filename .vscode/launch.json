@@ -6,7 +6,8 @@
       "name": "Launch Chrome against localhost",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:4200",
+      // "url": " http://localhost:4200/edit?terminal=dev&source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app",
+      "url": "http://localhost:4200?source=http://localhost:4200/templates/vite-react.zip",
       "sourceMaps": true,
       "webRoot": "${workspaceRoot}",
       "skipFiles": [

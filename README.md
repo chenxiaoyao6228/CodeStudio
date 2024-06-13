@@ -13,7 +13,7 @@ A web code runner
 - terminal: npm execute command after, default value: 'dev'
 - githubPath: a github folder path
 
-try 👉: http://localhost:4200/edit?terminal=dev&githubPath=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app
+try 👉: http://localhost:4200/edit?terminal=dev&source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app
 
 ## Development
 

@@ -9,11 +9,12 @@ import {
   OnDestroy,
   Output,
   Renderer2,
-  ViewChild, inject,
-  ChangeDetectionStrategy
+  ViewChild,
+  inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { fromEvent, Subject, takeUntil } from 'rxjs';
+import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
 import { CodeEditorService } from './code-editor.service';
 
 declare const monaco: any;
@@ -62,7 +63,7 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
       });
 
     fromEvent(window, 'resize')
-      .pipe(takeUntil(this.destroyRef$))
+      .pipe(debounceTime(50), takeUntil(this.destroyRef$))
       .subscribe(() => {
         if (this.editor) {
           this.editor.layout();

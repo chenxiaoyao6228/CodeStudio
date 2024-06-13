@@ -22,7 +22,7 @@ export class EditComponent {
   nodeContainerService = inject(NodeContainerService);
 
   content: string = `
-   111
+   
   `;
   language: string = 'javascript';
   filePath: string = '';

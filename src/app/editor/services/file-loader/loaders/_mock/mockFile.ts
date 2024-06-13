@@ -1,4 +1,4 @@
-export const files = {
+export const mockFiles = {
   'index.js': {
     file: {
       contents: `

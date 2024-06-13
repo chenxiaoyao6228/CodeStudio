@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { StartupPhase } from '@app/editor/constant';
+import { StartupPhase } from '@app/editor/constants';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { MatIconModule } from '@angular/material/icon';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
@@ -33,20 +33,21 @@ const DEFAULT_PHASE_LIST = [
   //   completed: false,
   //   loading: false,
   // },
-  
+
+  {
+    key: StartupPhase.LOADING_FILES,
+    message: 'Loading files',
+    completed: false,
+    loading: false,
+  },
+
   {
     key: StartupPhase.BOOTING,
     message: 'Booting WebContainer',
     completed: false,
     loading: false,
   },
-   {
-    key: StartupPhase.LOADING_FILES,
-    message: 'Loading files',
-    completed: false,
-    loading: false,
-  },
- 
+
   {
     key: StartupPhase.INSTALLING,
     message: 'Installing dependencies',

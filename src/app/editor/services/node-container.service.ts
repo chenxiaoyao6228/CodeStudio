@@ -4,37 +4,34 @@ import {
   WebContainer,
   WebContainerProcess,
 } from '@webcontainer/api';
-import { FileService } from './file.service';
-import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { EditorStateService } from './editor-state.service';
-import { StartupPhase } from '../constant';
-import { files } from '../mockFile';
+import { StartupPhase } from '../constants';
 import { TerminalService } from '../features/main/ouput/terminal/terminal.service';
 import { IRouteParams } from '../editor.component';
-import { GithubFileService } from '@app/_shared/services/github.file.service';
 
 interface IOptions {
   terminal: string;
   pkgManager: 'npm' | 'yarn' | 'pnpm';
-  templateName?: string;
-  githubPath?: string; // zipFile or folder
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class NodeContainerService {
+  // #deps
+  terminalService = inject(TerminalService);
+  editorStateService = inject(EditorStateService);
+  // #event
+  previewUrl$: BehaviorSubject<string> = new BehaviorSubject('');
+  // #state
   options: IOptions = {
     terminal: 'dev',
     pkgManager: 'npm', // TODO: should have a 'codestudio' item in package.json for setting
   };
   devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
-  fileService = inject(FileService);
-  terminalService = inject(TerminalService);
-  githubFileService = inject(GithubFileService);
-  editorStateService = inject(EditorStateService);
-  previewUrl$: BehaviorSubject<string> = new BehaviorSubject('');
+
   constructor() {
     // @ts-ignore
     window._container = this;
@@ -47,7 +44,7 @@ export class NodeContainerService {
     // boot container
     await this.bootOrGetContainer();
     // mount files
-    await this.loadAndMountFiles();
+    await this.mountFiles();
     // install deps
     await this.installDeps();
     // start devServer
@@ -164,30 +161,17 @@ export class NodeContainerService {
     this.webContainer?.teardown();
   }
 
-  async loadAndMountFiles(): Promise<void> {
-    this.editorStateService.setPhase(StartupPhase.LOADING_FILES);
+  private async mountFiles(): Promise<void> {
+    const fileSystemTree = this.editorStateService.getLoadedFileTree();
 
-    let fileTree = {} as FileSystemTree;
-    if (this.options?.githubPath) {
-      const path = this.options?.githubPath;
-      if (this.githubFileService.validPath(path) && !path.endsWith('.zip')) {
-        fileTree = await this.githubFileService.downloadFolder(path);
-        console.log('fileTree', fileTree);
-        await this.mountFiles(fileTree);
-        return;
-      }
+    if (!fileSystemTree) {
+      throw new Error('fileSystemTree is null');
     }
-
-    fileTree = await lastValueFrom(this.fileService.getZipFile());
-    await this.mountFiles(fileTree);
-
-    // return await this.mountFiles(files);
-  }
-
-  private async mountFiles(fileSystemTree: FileSystemTree): Promise<void> {
     const webContainer = await this.webContainer!;
 
     await webContainer.mount(fileSystemTree);
+
+    // this.editorStateService.setLoadedFileTree(null);
   }
 
   async readFile(filePath: string): Promise<string> {

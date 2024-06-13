@@ -1,22 +1,19 @@
-import { Injectable } from '@angular/core';
 import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
+import { IFileLoader, IFileLoaderConfig } from '../type';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class GithubFileService {
+export class GithubFileLoader implements IFileLoader {
   private GITHUB_API_BASE_URL = 'https://api.github.com/repos';
 
   constructor() {}
 
-  validPath(path: string): boolean {
+  static validatePath(path: string): boolean {
     const urlPattern =
       /^https:\/\/github\.com\/[^\/]+\/[^\/]+\/tree\/[^\/]+\/.+/;
     return urlPattern.test(path);
   }
 
-  async downloadFolder(path: string): Promise<FileSystemTree> {
-    const { owner, repo, branch, folderPath } = this.parseGitHubUrl(path);
+  async loadFiles({ source }: { source: string }): Promise<FileSystemTree> {
+    const { owner, repo, branch, folderPath } = this.parseGitHubUrl(source);
     return await this.fetchGitHubFolderAsFileSystemTree(
       owner,
       repo,
@@ -43,7 +40,12 @@ export class GithubFileService {
     folderPath: string
   ): Promise<FileSystemTree> {
     const apiUrl = `${this.GITHUB_API_BASE_URL}/${owner}/${repo}/contents/${folderPath}?ref=${branch}`;
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, {
+      // https://stackoverflow.com/questions/39907742/github-api-is-responding-with-a-403-when-using-requests-request-function
+      headers: {
+        'User-Agent': 'request',
+      },
+    });
     const files = await response.json();
 
     if (!Array.isArray(files)) {
