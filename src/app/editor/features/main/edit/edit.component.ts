@@ -2,10 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewChild,
+  effect,
   inject,
 } from '@angular/core';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
 import { AppEditorComponent } from './code-editor/code-editor.component';
+import { EditorStateService } from '@app/editor/services/editor-state.service';
+import { CodeEditorService } from './code-editor/code-editor.service';
 
 @Component({
   standalone: true,
@@ -19,37 +22,48 @@ export class EditComponent {
   @ViewChild(AppEditorComponent) editorComponent:
     | AppEditorComponent
     | undefined;
-  nodeContainerService = inject(NodeContainerService);
 
-  content: string = `
-   
-  `;
-  language: string = 'javascript';
-  filePath: string = '';
+  private readonly nodeContainerService = inject(NodeContainerService);
+  private readonly editorStateService = inject(EditorStateService);
+  private readonly codeEditorService = inject(CodeEditorService);
 
   options = {
     theme: 'vs-dark',
-    language: this.language,
+    language: 'javascript',
     fontSize: 16,
     wordWrap: 'on',
     automaticLayout: true,
   };
 
-  ngOnInit() {
-    this.loadFileContent();
+  constructor() {
+    effect(async () => {
+      const currentFilePath = this.editorStateService.geCurrentFilePath();
+      if (currentFilePath) {
+        try {
+          const content = await this.nodeContainerService.readFile(
+            currentFilePath
+          );
+          if (content) {
+            this.codeEditorService.openOrCreateFile(
+              content,
+              this.getLanguageByFilePath(currentFilePath),
+              currentFilePath
+            );
+          }
+          console.log('content', content);
+        } catch (error) {
+          console.log('error', error);
+        }
+      }
+    });
+  }
 
+  ngOnInit() {
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   ngOnDestroy() {
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
-  }
-
-  async loadFileContent() {
-    if (this.filePath) {
-      this.content = await this.nodeContainerService.readFile(this.filePath);
-      this.setLanguageByFilePath(this.filePath);
-    }
   }
 
   async handleKeyDown(event: KeyboardEvent) {
@@ -60,16 +74,12 @@ export class EditComponent {
   }
 
   async saveFile() {
-    if (this.content) {
-      await this.nodeContainerService.writeFile(this.filePath, this.content);
-    }
+    // if (this.model().content) {
+    //   // await this.nodeContainerService.writeFile(this.filePath, this.content);
+    // }
   }
 
-  handleEditorChange(value: string) {
-    this.content = value;
-  }
-
-  setLanguageByFilePath(filePath: string) {
+  getLanguageByFilePath(filePath: string) {
     const suffix = filePath.split('.').pop() || 'default';
 
     const languageMap: { [key: string]: string } = {
@@ -86,6 +96,6 @@ export class EditComponent {
       default: 'json',
     };
 
-    this.language = languageMap[suffix] || 'json';
+    return languageMap[suffix] || 'json';
   }
 }

@@ -64,7 +64,7 @@ export class EditorComponent {
         const fileTree = await this.fileLoaderService.loadFiles({
           source: this.routeParams.source || 'mock',
         });
-        this.editorStateService.setLoadedFileTree(fileTree);
+        this.editorStateService.setFileTree(fileTree);
       } catch (error) {
         console.error('Failed to load files: ', error);
         throw error;

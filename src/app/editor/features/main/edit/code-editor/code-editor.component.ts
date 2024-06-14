@@ -18,6 +18,13 @@ import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
 import { CodeEditorService } from './code-editor.service';
 
 declare const monaco: any;
+
+export interface EditorModel {
+  content: string;
+  language?: string;
+  uri?: any;
+}
+
 @Component({
   standalone: true,
   selector: 'app-monaco-editor',
@@ -35,14 +42,10 @@ declare const monaco: any;
 })
 export class AppEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer') editorContentRef!: ElementRef;
-
-  @Input() options: any;
-  @Input() content: string = '';
   @Input() @HostBinding('style.height') height: string = '100%';
+  @Input() options: any; // initialize options
 
-  @Output() contentChange = new EventEmitter<string>();
-  @Output() readonly editorInitialized: EventEmitter<any> =
-    new EventEmitter<any>();
+  @Output() modelChange = new EventEmitter<EditorModel>();
 
   private destroyRef$: Subject<void> = new Subject<void>();
   private editor: any = undefined;
@@ -73,14 +76,10 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
 
   private initMonaco(): void {
     const options = this.options;
-    const language = this.options['language'];
     const editorWrapper: HTMLDivElement = this.editorContentRef.nativeElement;
 
     if (!this.editor) {
-      this.editor = monaco.editor.create(editorWrapper, options);
-      this.editor.setModel(monaco.editor.createModel(this.content, language));
-
-      this.editorInitialized.emit(this.editor);
+      this.editor = this.codeEditorService.initEditor(editorWrapper, options);
 
       this.renderer.setStyle(
         this.editorContentRef.nativeElement,
@@ -93,15 +92,12 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  //  ------------ ngModel end -----------------
-
   private setValueEmitter() {
     if (this.editor) {
       const model = this.editor.getModel();
       this.disposables.push(
         model.onDidChangeContent(() => {
           const value = model.getValue();
-          this.contentChange.emit(value);
         })
       );
     }

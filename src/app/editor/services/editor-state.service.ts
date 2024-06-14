@@ -1,19 +1,19 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { StartupPhase } from '../constants';
 import { FileSystemTree } from '@webcontainer/api';
-import { BehaviorSubject } from 'rxjs';
+
+export interface IFileItem {
+  fileName: string;
+  content: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class EditorStateService {
   private _phase = signal(StartupPhase.NOT_STARTED);
-  private _loadedFileTree: WritableSignal<FileSystemTree | null> =
-    signal<FileSystemTree | null>(null);
-
-  loadedFileTree$: BehaviorSubject<FileSystemTree> = new BehaviorSubject({});
-
-  private currentOpendFileTree: FileSystemTree | null = null;
+  private _loadedFileTree: WritableSignal<FileSystemTree> = signal({});
+  private _currentFilePath: WritableSignal<string | null> = signal(null);
 
   constructor() {}
 
@@ -30,12 +30,19 @@ export class EditorStateService {
     this._phase.set(StartupPhase.NOT_STARTED);
   }
 
-  getLoadedFileTree(): FileSystemTree | null {
+  getFileTree(): FileSystemTree | null {
     return this._loadedFileTree();
   }
 
-  setLoadedFileTree(fileTree: FileSystemTree) {
+  setFileTree(fileTree: FileSystemTree) {
     this._loadedFileTree.set(fileTree);
-    this.loadedFileTree$.next(fileTree);
+  }
+
+  setCurrentFilePath(filePath: string) {
+    this._currentFilePath.set(filePath);
+  }
+
+  geCurrentFilePath() {
+    return this._currentFilePath();
   }
 }

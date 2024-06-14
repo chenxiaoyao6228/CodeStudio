@@ -2,15 +2,13 @@ import {
   Component,
   OnInit,
   OnDestroy,
-  ChangeDetectorRef,
   effect,
-  OnChanges,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
 import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
-import { Subscription } from 'rxjs';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   MatTreeFlatDataSource,
@@ -24,6 +22,7 @@ export interface FileNode {
   type: 'file' | 'directory';
   expandable: boolean;
   level: number;
+  filePath: string;
   children?: FileNode[];
 }
 
@@ -33,18 +32,19 @@ export interface FileNode {
   imports: [MatIconModule, MatTreeModule, NgClass, NgStyle],
   templateUrl: './file-tree.component.html',
   styleUrls: ['./file-tree.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FileTreeComponent implements OnInit, OnDestroy {
+export class FileTreeComponent {
   editorState = inject(EditorStateService);
   fileSystemTree: FileSystemTree | null = null;
   activeNode: FileNode | null = null;
-  private subscription: Subscription | null = null;
 
   private _transformer = (node: FileNode, level: number) => ({
     expandable: !!node.children && node.children.length > 0,
     name: node.name,
     level: level,
     type: node.type,
+    filePath: node.filePath,
   });
 
   treeControl = new FlatTreeControl<FileNode>(
@@ -62,24 +62,23 @@ export class FileTreeComponent implements OnInit, OnDestroy {
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
   hasChild = (_: number, node: FileNode) => node.expandable;
-  loadedFileTreeEffect: any;
 
-  constructor() {}
-
-  ngOnInit() {
-    this.editorState.loadedFileTree$.subscribe((fileTree) => {
-      this.fileSystemTree = fileTree;
-      this.dataSource.data = this.buildFileTree(fileTree);
+  constructor() {
+    effect(() => {
+      const fileTree = this.editorState.getFileTree();
+      if (fileTree) {
+        const builtTree = this.buildFileTree(fileTree);
+        console.log('builtTree', builtTree);
+        this.dataSource.data = builtTree;
+      }
     });
   }
 
-  ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  buildFileTree(obj: FileSystemTree, level: number = 0): FileNode[] {
+  buildFileTree(
+    obj: FileSystemTree,
+    level: number = 0,
+    basePath = ''
+  ): FileNode[] {
     const nodes: FileNode[] = Object.keys(obj).map((key) => {
       const value = obj[key];
       const node: FileNode = {
@@ -87,13 +86,15 @@ export class FileTreeComponent implements OnInit, OnDestroy {
         type: 'file',
         level: level,
         expandable: false,
+        filePath: level === 0 ? key : basePath + '/' + key,
       };
 
       if (value.hasOwnProperty('directory')) {
         node.type = 'directory';
         node.children = this.buildFileTree(
           (value as DirectoryNode).directory,
-          level + 1
+          level + 1,
+          level === 0 ? node.name : basePath + '/' + node.name
         );
         node.expandable = node.children?.length > 0;
       }
@@ -106,12 +107,21 @@ export class FileTreeComponent implements OnInit, OnDestroy {
 
   onNodeClick(node: FileNode): void {
     this.activeNode = node;
+    if (node.type === 'file') {
+      this.editorState.setCurrentFilePath(node.filePath);
+    }
   }
 
   isActive(node: FileNode): boolean {
     return this.activeNode === node;
   }
 
+  toggleNode(node: FileNode): void {
+    this.treeControl.toggle(node);
+    this.onNodeClick(node);
+  }
+
+  // file handling
   addToTree(tree: FileSystemTree, path: string, content: string): void {
     const parts = path.split('/');
     const fileName = parts.pop();
@@ -145,10 +155,5 @@ export class FileTreeComponent implements OnInit, OnDestroy {
         ''
       );
     }
-  }
-
-  toggleNode(node: FileNode): void {
-    this.treeControl.toggle(node);
-    this.onNodeClick(node);
   }
 }

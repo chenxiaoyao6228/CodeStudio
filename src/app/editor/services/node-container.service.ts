@@ -162,7 +162,7 @@ export class NodeContainerService {
   }
 
   private async mountFiles(): Promise<void> {
-    const fileSystemTree = this.editorStateService.getLoadedFileTree();
+    const fileSystemTree = this.editorStateService.getFileTree();
 
     if (!fileSystemTree) {
       throw new Error('fileSystemTree is null');

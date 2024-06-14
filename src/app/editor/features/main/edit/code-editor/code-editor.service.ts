@@ -1,6 +1,8 @@
 import { Inject, Injectable, InjectionToken, Optional } from '@angular/core';
 import { AsyncSubject } from 'rxjs';
 
+declare const monaco: any;
+
 export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
   'appMonacoBaseHref'
 );
@@ -11,6 +13,7 @@ export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
 export class CodeEditorService {
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
+  private editor: any = undefined;
 
   constructor(@Optional() @Inject(APP_MONACO_BASE_HREF) private base: string) {
     this.loadMonacoScript();
@@ -47,5 +50,22 @@ export class CodeEditorService {
     } else {
       onGotAmdLoader();
     }
+  }
+
+  initEditor(editorWrapper: HTMLElement, options: any): void {
+    if (!this.editor) {
+      this.editor = monaco.editor.create(editorWrapper, options);
+    }
+    return this.editor;
+  }
+
+  openOrCreateFile(content: string, language: string, filePath: string) {
+    const uri = monaco.Uri.parse(filePath);
+    const existingModel = monaco.editor.getModel(uri);
+    if (existingModel) {
+      return existingModel;
+    }
+    const model = monaco.editor.createModel(content, language, uri);
+    this.editor.setModel(model);
   }
 }

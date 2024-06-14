@@ -1,10 +1,4 @@
 <div class="top">
   <div class="open-files">tabs</div>
 </div>
-<div class="bottom">
-  <app-monaco-editor
-    [options]="options"
-    [content]="content"
-    (contentChange)="handleEditorChange($event)"
-  ></app-monaco-editor>
-</div>
+<app-monaco-editor class="bottom" [options]="options"></app-monaco-editor>
