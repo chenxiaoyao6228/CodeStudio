@@ -25,19 +25,33 @@ export class ZipFileLoader implements IFileLoader {
       for (let i = 0; i < segments.length; i++) {
         const segment = segments[i];
         if (i === segments.length - 1 && !file.dir) {
+          let contents: string | Uint8Array;
+
+          // @ts-ignore
+          if (file._dataBinary) {
+            // Handle binary files
+            contents = await file.async('uint8array');
+          } else {
+            // Handle text files
+            contents = await file.async('string');
+          }
+
           (current as FileSystemTree)[segment] = {
             file: {
-              contents: await file.async('string'),
+              contents: contents,
             },
           };
         } else {
+          if (segment === '') {
+            continue;
+          }
           if (!(segment in (current as FileSystemTree))) {
             (current as FileSystemTree)[segment] = {
               directory: {},
             };
           }
           current = // @ts-ignore
-          (current as FileSystemTree)[segment].directory as DirectoryNode;
+            (current as FileSystemTree)[segment].directory as DirectoryNode;
         }
       }
     };
