@@ -4,8 +4,49 @@
   flex-direction: column;
 }
 .top {
-  line-height: 30px;
   border: 1px solid #fff;
+  .tabs {
+    display: flex;
+    height: 30px;
+    align-items: center;
+    overflow: hidden;
+    background-color: var(--sb-page-background);
+    .tab-item {
+      user-select: none;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--tab-inactiveBackground);
+      color: var(--sb-foreground-alt);
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 400;
+
+      padding: 0;
+      padding-inline-end: 4px;
+      padding-inline-start: 10px;
+      cursor: pointer;
+
+      &.active {
+        background-color: var(--tab-activeBackground);
+      }
+      .text {
+        min-width: 60px;
+        max-width: 100px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .close {
+        width: 20px;
+        padding: 2px;
+        text-align: center;
+        cursor: pointer;
+      }
+    }
+  }
 }
 .bottom {
   flex: 1;

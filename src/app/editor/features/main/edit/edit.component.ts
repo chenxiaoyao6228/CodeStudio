@@ -2,13 +2,22 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewChild,
+  WritableSignal,
   effect,
   inject,
+  signal,
 } from '@angular/core';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
 import { AppEditorComponent } from './code-editor/code-editor.component';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CodeEditorService } from './code-editor/code-editor.service';
+
+interface ITabItem {
+  filePath: string;
+  name: string;
+  active: boolean;
+  isPendingWrite: boolean;
+}
 
 @Component({
   standalone: true,
@@ -27,6 +36,8 @@ export class EditComponent {
   private readonly editorStateService = inject(EditorStateService);
   private readonly codeEditorService = inject(CodeEditorService);
 
+  openedTabs: WritableSignal<ITabItem[]> = signal([]);
+
   options = {
     theme: 'vs-dark',
     language: 'javascript',
@@ -43,14 +54,15 @@ export class EditComponent {
           const content = await this.nodeContainerService.readFile(
             currentFilePath
           );
+          this.updateTabs(currentFilePath);
           if (content) {
-            this.codeEditorService.openOrCreateFile(
+            this.codeEditorService.openOrCreateFile({
               content,
-              this.getLanguageByFilePath(currentFilePath),
-              currentFilePath
-            );
+              language: this.getLanguageByFilePath(currentFilePath),
+              filePath: currentFilePath,
+            });
           }
-          console.log('content', content);
+          // console.log('content', content);
         } catch (error) {
           console.log('error', error);
         }
@@ -64,6 +76,64 @@ export class EditComponent {
 
   ngOnDestroy() {
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
+  }
+
+  updateTabs(filePath: string) {
+    const isTabExist = this.openedTabs().find((t) => t.filePath === filePath);
+    if (!isTabExist) {
+      const newTab = {
+        filePath: filePath,
+        name: this.extractFileName(filePath),
+        isPendingWrite: false,
+        active: true,
+      };
+      this.openedTabs.update((tabs) => [
+        ...tabs.map((t) => ({
+          ...t,
+          active: false,
+        })),
+        newTab,
+      ]);
+    } else {
+      this.openedTabs.update((tabs) =>
+        tabs.map((t) => ({
+          ...t,
+          active: t.filePath === filePath,
+        }))
+      );
+    }
+  }
+
+  selectTab(tab: ITabItem) {
+    this.editorStateService.setCurrentFilePath(tab.filePath);
+  }
+
+  closeTab(tabItem: ITabItem, event: Event) {
+    event.stopPropagation();
+
+    const openedTabs = this.openedTabs().slice();
+    const findIndex = openedTabs.findIndex(
+      (t) => t.filePath === tabItem.filePath
+    );
+
+    if (findIndex === -1) {
+      // If the specified tab is not found, return directly
+      return;
+    }
+
+    const newTabs = openedTabs.filter((t) => t.filePath !== tabItem.filePath);
+    this.openedTabs.set(newTabs);
+
+    if (newTabs.length === 0) {
+      // If there are no open tabs, set the current file path to an empty string
+      this.editorStateService.setCurrentFilePath('');
+    } else {
+      // Calculate the new active tab index, focusing on the previous tab if possible
+      const newActiveIndex = findIndex > 0 ? findIndex - 1 : 0;
+      this.editorStateService.setCurrentFilePath(
+        newTabs[newActiveIndex].filePath
+      );
+    }
   }
 
   async handleKeyDown(event: KeyboardEvent) {
@@ -97,5 +167,15 @@ export class EditComponent {
     };
 
     return languageMap[suffix] || 'json';
+  }
+
+  extractFileName(filePath: string): string {
+    const match = filePath.match(/[^/\\]+$/);
+
+    if (match) {
+      return match[0];
+    }
+
+    return '';
   }
 }

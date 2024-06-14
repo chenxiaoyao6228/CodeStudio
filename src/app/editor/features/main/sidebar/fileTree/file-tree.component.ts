@@ -5,6 +5,10 @@ import {
   effect,
   inject,
   ChangeDetectionStrategy,
+  Signal,
+  signal,
+  WritableSignal,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +19,7 @@ import {
   MatTreeFlattener,
 } from '@angular/material/tree';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
-import { NgClass, NgStyle } from '@angular/common';
+import { CommonModule, NgClass, NgStyle } from '@angular/common';
 
 export interface FileNode {
   name: string;
@@ -29,15 +33,16 @@ export interface FileNode {
 @Component({
   selector: 'app-file-tree',
   standalone: true,
-  imports: [MatIconModule, MatTreeModule, NgClass, NgStyle],
+  imports: [MatIconModule, MatTreeModule, CommonModule],
   templateUrl: './file-tree.component.html',
   styleUrls: ['./file-tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileTreeComponent {
   editorState = inject(EditorStateService);
-  fileSystemTree: FileSystemTree | null = null;
+  fileSystemTree: WritableSignal<FileSystemTree | null> = signal(null);
   activeNode: FileNode | null = null;
+  cdr = inject(ChangeDetectorRef);
 
   private _transformer = (node: FileNode, level: number) => ({
     expandable: !!node.children && node.children.length > 0,
@@ -64,6 +69,15 @@ export class FileTreeComponent {
   hasChild = (_: number, node: FileNode) => node.expandable;
 
   constructor() {
+    effect(() => {
+      const currentFilePath = this.editorState.geCurrentFilePath();
+      if (
+        currentFilePath &&
+        (!this.activeNode || this.activeNode?.filePath !== currentFilePath)
+      ) {
+        this.jumpToNode(currentFilePath);
+      }
+    });
     effect(() => {
       const fileTree = this.editorState.getFileTree();
       if (fileTree) {
@@ -105,6 +119,33 @@ export class FileTreeComponent {
     return nodes;
   }
 
+  private findNodeByFilePath(
+    filePath: string,
+    nodes: FileNode[]
+  ): FileNode | null {
+    for (let node of nodes) {
+      if (node.filePath === filePath) {
+        return node;
+      }
+      if (node.children) {
+        const found = this.findNodeByFilePath(filePath, node.children);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
+  }
+
+  private jumpToNode(filePath: string): void {
+    const node = this.findNodeByFilePath(filePath, this.dataSource.data);
+    if (node) {
+      this.activeNode = node;
+      this.treeControl.expand(node);
+      this.cdr.detectChanges();
+    }
+  }
+
   onNodeClick(node: FileNode): void {
     this.activeNode = node;
     if (node.type === 'file') {
@@ -113,7 +154,7 @@ export class FileTreeComponent {
   }
 
   isActive(node: FileNode): boolean {
-    return this.activeNode === node;
+    return this.activeNode?.filePath === node?.filePath;
   }
 
   toggleNode(node: FileNode): void {
@@ -140,7 +181,7 @@ export class FileTreeComponent {
   createFile(): void {
     if (this.activeNode) {
       this.addToTree(
-        this.fileSystemTree!,
+        this.fileSystemTree()!,
         `${this.activeNode.name}/newFile.txt`,
         'New file content'
       );
@@ -150,7 +191,7 @@ export class FileTreeComponent {
   createFolder(): void {
     if (this.activeNode) {
       this.addToTree(
-        this.fileSystemTree!,
+        this.fileSystemTree()!,
         `${this.activeNode.name}/newFolder/`,
         ''
       );

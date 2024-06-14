@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EditComponent } from './edit/edit.component';
 import { ResizerContainerComponent } from './components/resizer/resize-container';
@@ -22,5 +22,6 @@ import { SidebarComponent } from './sidebar/sidebar.component';
   providers: [],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent {}

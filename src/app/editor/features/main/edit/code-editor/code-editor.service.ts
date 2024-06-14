@@ -59,13 +59,17 @@ export class CodeEditorService {
     return this.editor;
   }
 
-  openOrCreateFile(content: string, language: string, filePath: string) {
+  openOrCreateFile(params: {
+    filePath: string;
+    content?: string;
+    language?: string;
+  }) {
+    const { content, language, filePath } = params;
     const uri = monaco.Uri.parse(filePath);
-    const existingModel = monaco.editor.getModel(uri);
-    if (existingModel) {
-      return existingModel;
+    let model = monaco.editor.getModel(uri);
+    if (!model) {
+      model = monaco.editor.createModel(content, language, uri);
     }
-    const model = monaco.editor.createModel(content, language, uri);
     this.editor.setModel(model);
   }
 }

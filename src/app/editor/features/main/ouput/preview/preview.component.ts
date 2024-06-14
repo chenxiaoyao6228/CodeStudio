@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -73,6 +74,7 @@ const DEFAULT_PHASE_LIST = [
   imports: [MatCheckbox, MatProgressBar, MatIconModule],
   templateUrl: './preview.component.html',
   styleUrl: './preview.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PreviewComponent {
   @ViewChild('previewIframe') previewIframe:

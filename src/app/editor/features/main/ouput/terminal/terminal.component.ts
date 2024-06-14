@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -17,6 +18,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   template: '<div #terminal class="terminal"></div>',
   styleUrls: ['./terminal.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TerminalComponent {
   @ViewChild('terminal') terminalEleRef: ElementRef<HTMLElement> | undefined;
