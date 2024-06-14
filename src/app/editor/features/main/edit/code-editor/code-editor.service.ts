@@ -72,4 +72,9 @@ export class CodeEditorService {
     }
     this.editor.setModel(model);
   }
+  getCurrentFileContent() {
+    const model = this.editor.getModel();
+    const content = model.getValue();
+    return content;
+  }
 }

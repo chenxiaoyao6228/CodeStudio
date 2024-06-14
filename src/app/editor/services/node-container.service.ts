@@ -32,10 +32,7 @@ export class NodeContainerService {
   devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
 
-  constructor() {
-    // @ts-ignore
-    window._container = this;
-  }
+  constructor() {}
 
   async init(options: IRouteParams) {
     Object.assign(this.options, options);
@@ -188,41 +185,6 @@ export class NodeContainerService {
     } catch (error: any) {
       console.log('write file error: ', error);
       throw error;
-    }
-  }
-  count = 1;
-  async mockUpdateFile() {
-    try {
-      await this.writeFile(
-        'app.jsx',
-        `
-        import { useState } from "preact/hooks";
-  import "./app.css";
-  
-  export function App() {
-    const [count, setCount] = useState(0);
-  
-    return (
-      <>
-        <h1>Vite + Preact + ${this.count++}</h1>
-        <div class="card">
-          <button onClick={() => setCount((count) => count + 1)}>
-            count is {count}
-          </button>
-          <p>
-            Edit <code>src/app.jsx</code> and save to test HMR
-          </p>
-        </div>
-        <p class="read-the-docs">
-          Click on the Vite and Preact logos to learn more
-        </p>
-      </>
-    );
-  }
-        `
-      );
-    } catch (error) {
-      console.error('update file error: ', error);
     }
   }
 }

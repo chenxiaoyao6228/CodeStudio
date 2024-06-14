@@ -37,6 +37,16 @@ export class EditComponent {
   private readonly codeEditorService = inject(CodeEditorService);
 
   openedTabs: WritableSignal<ITabItem[]> = signal([]);
+  // openedTabs: WritableSignal<ITabItem[]> = signal(
+  //   ['README.md', 'vite.config.js', 'package.json', '.gitignore'].map(
+  //     (i, index) => ({
+  //       filePath: i,
+  //       name: i,
+  //       active: index === 1,
+  //       isPendingWrite: true,
+  //     })
+  //   )
+  // );
 
   options = {
     theme: 'vs-dark',
@@ -144,9 +154,20 @@ export class EditComponent {
   }
 
   async saveFile() {
-    // if (this.model().content) {
-    //   // await this.nodeContainerService.writeFile(this.filePath, this.content);
-    // }
+    const filePath = this.editorStateService.geCurrentFilePath();
+    if (filePath) {
+      const content = this.codeEditorService.getCurrentFileContent();
+      if (content) {
+        this.nodeContainerService.writeFile(filePath, content);
+
+        this.openedTabs.update((tabs) =>
+          tabs.map((t) => ({
+            ...t,
+            isPendingWrite: t.filePath === filePath ? false : t.isPendingWrite,
+          }))
+        );
+      }
+    }
   }
 
   getLanguageByFilePath(filePath: string) {
