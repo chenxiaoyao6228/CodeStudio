@@ -6,6 +6,9 @@ import {
   signal,
   WritableSignal,
   ChangeDetectorRef,
+  Signal,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,6 +30,12 @@ export interface FileNode {
   children?: FileNode[];
 }
 
+type fileOperation =
+  | 'creatingFile'
+  | 'creatingFolder'
+  | 'renaming'
+  | 'deleting';
+
 @Component({
   selector: 'app-file-tree',
   standalone: true,
@@ -36,10 +45,13 @@ export interface FileNode {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileTreeComponent {
+  @ViewChild('editingInputBox') editingInput!: ElementRef;
   editorState = inject(EditorStateService);
   fileSystemTree: WritableSignal<FileSystemTree | null> = signal(null);
+  editingOperation: WritableSignal<fileOperation | null> = signal(null);
+  editingNode: WritableSignal<FileNode | null> = signal(null);
   activeNode: FileNode | null = null;
-  hoverNode: FileNode | null = null;
+  // hoverNode: FileNode | null = null;
   cdr = inject(ChangeDetectorRef);
 
   private _transformer = (node: FileNode, level: number) => ({
@@ -132,7 +144,7 @@ export class FileTreeComponent {
       return node;
     });
 
-    return nodes;
+    return nodes || [];
   }
 
   private findNodeByFilePath(
@@ -169,6 +181,49 @@ export class FileTreeComponent {
     }
   }
 
+  onEditingBoxClick(node: FileNode, event: Event) {
+    event.stopPropagation();
+  }
+
+  onFileOperate(node: FileNode, op: fileOperation, event: Event) {
+    event.stopPropagation();
+    if (op === 'deleting') {
+      this.deleteNode(node);
+      return;
+    }
+
+    this.editingNode.set(node);
+    this.editingOperation.set(op);
+
+    setTimeout(() => {
+      this.editingInput.nativeElement.focus();
+    }, 0);
+  }
+
+  stopEditing(): void {
+    this.editingNode.set(null);
+  }
+
+  onEnter(node: FileNode): void {
+    this.stopEditing();
+    const value = this.editingInput.nativeElement.value;
+
+    const op = this.editingOperation();
+    const currentNodeType = node.type;
+    if (op === 'creatingFile') {
+      this.createFile(node, value);
+    } else if (op === 'creatingFolder') {
+      this.createFolder(node, value);
+    } else if (op === 'renaming') {
+      if (currentNodeType === 'directory') {
+        this.renameFolder(node, value);
+      } else {
+        this.renameFile(node, value);
+      }
+    }
+    this.editingInput.nativeElement.value = ''; // clear input
+  }
+
   isActive(node: FileNode): boolean {
     return this.activeNode?.filePath === node?.filePath;
   }
@@ -194,39 +249,24 @@ export class FileTreeComponent {
     current[fileName!] = { file: { contents: content } };
   }
 
-  createFile(): void {
-    if (this.activeNode) {
+  createFile(node: FileNode, name: string): void {
+    if (node) {
       this.addToTree(
         this.fileSystemTree()!,
-        `${this.activeNode.name}/newFile.txt`,
+        `${node.name}/${name}.txt`,
         'New file content'
       );
     }
   }
 
-  createFolder(): void {
-    if (this.activeNode) {
-      this.addToTree(
-        this.fileSystemTree()!,
-        `${this.activeNode.name}/newFolder/`,
-        ''
-      );
+  createFolder(node: FileNode, name: string): void {
+    if (node) {
+      this.addToTree(this.fileSystemTree()!, `${node.name}/${name}/`, '');
     }
   }
 
-  renameNode(node: FileNode): void {
-    // Implement rename node logic here
-  }
+  renameFile(node: FileNode, name: string): void {}
+  renameFolder(node: FileNode, name: string): void {}
 
-  duplicateNode(node: FileNode): void {
-    // Implement duplicate node logic here
-  }
-
-  deleteNode(node: FileNode): void {
-    // Implement delete node logic here
-  }
-
-  addChildNode(node: FileNode): void {
-    // Implement add child node logic here
-  }
+  deleteNode(node: FileNode): void {}
 }

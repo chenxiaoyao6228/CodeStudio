@@ -6,12 +6,52 @@
   font-size: 16px;
   .mat-tree-node {
     position: relative;
-    font-size: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
     border-radius: 4px;
     transition: background-color 0.3s;
+    &.editing {
+      .editing-box {
+        display: flex;
+        align-items: center;
+      }
+      &.creatingFile,
+      &.creatingFolder {
+        margin-bottom: 22px;
+        .editing-box {
+          top: 22px;
+        }
+      }
+      &.renaming {
+        .editing-box {
+          top: 0;
+        }
+      }
+    }
+    .mat-tree-node-content {
+      display: flex;
+      align-items: center;
+    }
+    .editing-box {
+      position: absolute;
+      display: none;
+      height: 22px;
+      z-index: 2;
+      overflow: hidden;
+      .edit-icon {
+      }
+      .edit-input {
+        flex-grow: 1;
+        outline: 0;
+        border: 0;
+        height: 100%;
+        padding: 2px 4px;
+        background: var(--sb-page-background);
+        border: 1px solid var(--inputValidation-infoBorder);
+        color: #fff;
+      }
+    }
     &:hover {
       opacity: 0.8;
       cursor: pointer !important;
@@ -37,32 +77,19 @@
       margin: auto 0;
     }
 
-    .mat-tree-node-content {
-      display: flex;
-      align-items: center;
-
-      .mat-icon {
-        margin-right: 3px;
-      }
-    }
-
     &:hover .node-actions {
       visibility: visible;
-    }
-
-    .mat-tree-node-folder {
-    }
-
-    .mat-tree-node-file {
     }
   }
   .mat-icon {
     width: 16px;
     height: 16px;
     font-size: 16px;
+    margin-right: 3px;
   }
 
   .node-actions {
+    z-index: 1;
     visibility: hidden;
     position: absolute;
     right: 0;
