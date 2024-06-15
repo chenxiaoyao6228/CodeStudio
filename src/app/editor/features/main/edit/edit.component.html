@@ -5,7 +5,14 @@
       <div class="text">
         {{ tab.name }}
       </div>
+      @if(tab.isPendingWrite) {
+      <div class="pending">
+        <div class="dot"></div>
+      </div>
+
+      }@else {
       <div class="close" (click)="closeTab(tab, $event)">&#x2715;</div>
+      }
     </div>
     }
   </div>

@@ -11,6 +11,7 @@ import { NodeContainerService } from '@app/editor/services/node-container.servic
 import { AppEditorComponent } from './code-editor/code-editor.component';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CodeEditorService } from './code-editor/code-editor.service';
+import { Subject, takeUntil } from 'rxjs';
 
 interface ITabItem {
   filePath: string;
@@ -36,6 +37,8 @@ export class EditComponent {
   private readonly editorStateService = inject(EditorStateService);
   private readonly codeEditorService = inject(CodeEditorService);
 
+  private destroyRef$: Subject<void> = new Subject<void>();
+
   openedTabs: WritableSignal<ITabItem[]> = signal([]);
   // openedTabs: WritableSignal<ITabItem[]> = signal(
   //   ['README.md', 'vite.config.js', 'package.json', '.gitignore'].map(
@@ -43,7 +46,7 @@ export class EditComponent {
   //       filePath: i,
   //       name: i,
   //       active: index === 1,
-  //       isPendingWrite: true,
+  //       isPendingWrite: false,
   //     })
   //   )
   // );
@@ -82,6 +85,15 @@ export class EditComponent {
 
   ngOnInit() {
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
+
+    this.codeEditorService.on('contentChanged', ({ content, filePath }) => {
+      this.openedTabs.update((tabs) =>
+        tabs.map((t) => ({
+          ...t,
+          isPendingWrite: t.filePath === filePath ? true : t.isPendingWrite,
+        }))
+      );
+    });
   }
 
   ngOnDestroy() {

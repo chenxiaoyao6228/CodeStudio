@@ -1,5 +1,9 @@
-import { Inject, Injectable, InjectionToken, Optional } from '@angular/core';
-import { AsyncSubject } from 'rxjs';
+import { Injectable, Inject, InjectionToken, Optional } from '@angular/core';
+import { EventEmitter } from '@app/_shared/service/Emitter';
+import { AsyncSubject, Observable } from 'rxjs';
+export interface CodeEditorEvents {
+  contentChanged: { content: string; filePath: string };
+}
 
 declare const monaco: any;
 
@@ -14,6 +18,7 @@ export class CodeEditorService {
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
   private editor: any = undefined;
+  private eventEmitter = new EventEmitter<CodeEditorEvents>();
 
   constructor(@Optional() @Inject(APP_MONACO_BASE_HREF) private base: string) {
     this.loadMonacoScript();
@@ -69,12 +74,42 @@ export class CodeEditorService {
     let model = monaco.editor.getModel(uri);
     if (!model) {
       model = monaco.editor.createModel(content, language, uri);
+      // listen to model change event
+      model.onDidChangeContent(() => {
+        const content = model.getValue();
+        this.emit('contentChanged', {
+          content,
+          filePath: model.uri.path.slice(1), // remove '/' at the front
+        });
+      });
     }
     this.editor.setModel(model);
   }
+
   getCurrentFileContent() {
     const model = this.editor.getModel();
     const content = model.getValue();
     return content;
+  }
+
+  on<K extends keyof CodeEditorEvents>(
+    event: K,
+    listener: (payload: CodeEditorEvents[K]) => void
+  ): void {
+    this.eventEmitter.on(event, listener);
+  }
+
+  off<K extends keyof CodeEditorEvents>(
+    event: K,
+    listener: (payload: CodeEditorEvents[K]) => void
+  ): void {
+    this.eventEmitter.off(event, listener);
+  }
+
+  emit<K extends keyof CodeEditorEvents>(
+    event: K,
+    payload: CodeEditorEvents[K]
+  ): void {
+    this.eventEmitter.emit(event, payload);
   }
 }

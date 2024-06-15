@@ -80,27 +80,14 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
 
     if (!this.editor) {
       this.editor = this.codeEditorService.initEditor(editorWrapper, options);
-
-      this.renderer.setStyle(
-        this.editorContentRef.nativeElement,
-        'height',
-        this.height
-      );
-
-      this.setValueEmitter();
-      this.editor.layout();
     }
-  }
+    this.renderer.setStyle(
+      this.editorContentRef.nativeElement,
+      'height',
+      this.height
+    );
 
-  private setValueEmitter() {
-    if (this.editor) {
-      const model = this.editor.getModel();
-      this.disposables.push(
-        model.onDidChangeContent(() => {
-          const value = model.getValue();
-        })
-      );
-    }
+    this.editor.layout();
   }
 
   ngOnDestroy(): void {
