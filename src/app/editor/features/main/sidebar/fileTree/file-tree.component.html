@@ -1,61 +1,74 @@
-<div class="file-tree-container">
-  <div class="file-tree-header">
-    <span>FILES</span>
-    <div class="file-tree-actions">
-      <button mat-icon-button (click)="createFile()">
-        <mat-icon>create</mat-icon>
-      </button>
-      <button mat-icon-button (click)="createFolder()">
-        <mat-icon>create_new_folder</mat-icon>
-      </button>
-    </div>
-  </div>
-  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
-    <mat-tree-node
-      *matTreeNodeDef="let node"
-      [ngStyle]="{ 'padding-left': (node.level + 1) * 24 + 'px' }"
-      (click)="onNodeClick(node)"
-      [ngClass]="{ active: isActive(node) }"
+<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+  <mat-tree-node
+    *matTreeNodeDef="let node"
+    [ngStyle]="{ 'padding-left': (node.level + 1) * 18 + 'px' }"
+    (click)="onNodeClick(node)"
+    [ngClass]="{ active: isActive(node), hover: hoverNode === node }"
+    (mouseenter)="hoverNode = node"
+    (mouseleave)="hoverNode = null"
+  >
+    <span
+      [ngClass]="{
+        'mat-tree-node-content': true,
+        'mat-tree-node-folder': node.type === 'directory',
+        'mat-tree-node-file': node.type === 'file'
+      }"
     >
-      <span
-        [ngClass]="{
-          'mat-tree-node-cotent': true,
-          'mat-tree-node-folder': node.type === 'directory',
-          'mat-tree-node-file': node.type === 'file'
-        }"
-      >
-        <mat-icon>{{
-          node.type === "directory" ? "folder" : "insert_drive_file"
-        }}</mat-icon>
-        {{ node.name }}
-      </span>
-    </mat-tree-node>
-    <mat-tree-node
-      matTreeNodeToggle
-      *matTreeNodeDef="let node; when: hasChild"
-      [ngStyle]="{ 'padding-left': (node.level + 1) * 24 + 'px' }"
-      (click)="onNodeClick(node)"
-      [ngClass]="{ active: isActive(node) }"
+      @if(node.level !== 0) {
+      <mat-icon>{{
+        node.type === "directory" ? "folder" : "insert_drive_file"
+      }}</mat-icon>
+      }
+      {{ node.name }}
+    </span>
+    <span class="node-actions">
+      @if( node.type === 'directory') {
+      <mat-icon>note_add</mat-icon>
+      <mat-icon>create_new_folder</mat-icon>
+      } @if(node.level !== 0) {
+      <mat-icon>edit</mat-icon>
+      <mat-icon>delete</mat-icon>
+      }
+    </span>
+  </mat-tree-node>
+  <mat-tree-node
+    matTreeNodeToggle
+    *matTreeNodeDef="let node; when: hasChild"
+    [ngStyle]="{ 'padding-left': (node.level + 1) * 18 + 'px' }"
+    (click)="onNodeClick(node)"
+    [ngClass]="{ active: isActive(node), hover: hoverNode === node }"
+    (mouseenter)="hoverNode = node"
+    (mouseleave)="hoverNode = null"
+  >
+    <mat-icon
+      class="toggle-icon"
+      [ngStyle]="{ left: node.level * 18 + 'px' }"
+      >{{
+        treeControl.isExpanded(node) ? "expand_more" : "chevron_right"
+      }}</mat-icon
     >
-      <mat-icon
-        class="toggle-icon"
-        [ngStyle]="{ left: node.level * 24 + 'px' }"
-        >{{
-          treeControl.isExpanded(node) ? "expand_more" : "chevron_right"
-        }}</mat-icon
-      >
-      <span
-        [ngClass]="{
-          'mat-tree-node-cotent': true,
-          'mat-tree-node-folder': node.type === 'directory',
-          'mat-tree-node-file': node.type === 'file'
-        }"
-      >
-        <mat-icon>{{
-          node.type === "directory" ? "folder" : "insert_drive_file"
-        }}</mat-icon>
-        {{ node.name }}
-      </span>
-    </mat-tree-node>
-  </mat-tree>
-</div>
+    <span
+      [ngClass]="{
+        'mat-tree-node-content': true,
+        'mat-tree-node-folder': node.type === 'directory',
+        'mat-tree-node-file': node.type === 'file'
+      }"
+    >
+      @if(node.level !== 0) {
+      <mat-icon>{{
+        node.type === "directory" ? "folder" : "insert_drive_file"
+      }}</mat-icon>
+      }
+      {{ node.name }}
+    </span>
+    <span class="node-actions">
+      @if( node.type === 'directory') {
+      <mat-icon>note_add</mat-icon>
+      <mat-icon>create_new_folder</mat-icon>
+      } @if(node.level !== 0) {
+      <mat-icon>edit</mat-icon>
+      <mat-icon>delete</mat-icon>
+      }
+    </span>
+  </mat-tree-node>
+</mat-tree>

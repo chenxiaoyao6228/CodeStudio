@@ -1,11 +1,8 @@
 import {
   Component,
-  OnInit,
-  OnDestroy,
   effect,
   inject,
   ChangeDetectionStrategy,
-  Signal,
   signal,
   WritableSignal,
   ChangeDetectorRef,
@@ -19,7 +16,7 @@ import {
   MatTreeFlattener,
 } from '@angular/material/tree';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
-import { CommonModule, NgClass, NgStyle } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 export interface FileNode {
   name: string;
@@ -42,6 +39,7 @@ export class FileTreeComponent {
   editorState = inject(EditorStateService);
   fileSystemTree: WritableSignal<FileSystemTree | null> = signal(null);
   activeNode: FileNode | null = null;
+  hoverNode: FileNode | null = null;
   cdr = inject(ChangeDetectorRef);
 
   private _transformer = (node: FileNode, level: number) => ({
@@ -87,8 +85,22 @@ export class FileTreeComponent {
       }
     });
   }
-
   buildFileTree(
+    obj: FileSystemTree,
+    level: number = 0,
+    basePath = ''
+  ): FileNode[] {
+    const _obj = {
+      FILES: {
+        directory: obj,
+      },
+    };
+    const realTree = this._buildFileTree(_obj, level, basePath);
+    // console.log('realTree', realTree);
+    return realTree;
+  }
+
+  _buildFileTree(
     obj: FileSystemTree,
     level: number = 0,
     basePath = ''
@@ -100,15 +112,19 @@ export class FileTreeComponent {
         type: 'file',
         level: level,
         expandable: false,
-        filePath: level === 0 ? key : basePath + '/' + key,
+        filePath: level === 0 ? '' : level === 1 ? key : basePath + '/' + key,
       };
 
       if (value.hasOwnProperty('directory')) {
         node.type = 'directory';
-        node.children = this.buildFileTree(
+        node.children = this._buildFileTree(
           (value as DirectoryNode).directory,
           level + 1,
-          level === 0 ? node.name : basePath + '/' + node.name
+          level === 0
+            ? ''
+            : level === 1
+            ? node.name
+            : basePath + '/' + node.name
         );
         node.expandable = node.children?.length > 0;
       }
@@ -196,5 +212,21 @@ export class FileTreeComponent {
         ''
       );
     }
+  }
+
+  renameNode(node: FileNode): void {
+    // Implement rename node logic here
+  }
+
+  duplicateNode(node: FileNode): void {
+    // Implement duplicate node logic here
+  }
+
+  deleteNode(node: FileNode): void {
+    // Implement delete node logic here
+  }
+
+  addChildNode(node: FileNode): void {
+    // Implement add child node logic here
   }
 }

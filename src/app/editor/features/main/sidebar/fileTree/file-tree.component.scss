@@ -1,60 +1,82 @@
 :host {
-  --mat-tree-node-min-height: 24px;
+  --mat-tree-node-min-height: 22px;
+  --mat-tree-container-background-color: var(--sb-page-background);
   height: 100%;
   user-select: none;
-  .file-tree-container {
-    position: relative;
-    .file-tree-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .file-tree-actions {
-      display: none;
-    }
-
-    .file-tree-container:hover .file-tree-actions {
-      display: block;
-    }
-  }
-
+  font-size: 16px;
   .mat-tree-node {
+    position: relative;
+    font-size: 16px;
     cursor: pointer;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
     border-radius: 4px;
     transition: background-color 0.3s;
-    position: relative;
+    &:hover {
+      opacity: 0.8;
+      cursor: pointer !important;
+    }
+
     &.active {
+      color: var(--sb-foreground);
       --textColor: currentColor !important;
       background-color: var(--list-inactiveSelectionBackground);
-      color: var(--sb-foreground);
+      .node-actions {
+        background-color: var(--list-inactiveSelectionBackground);
+      }
     }
+
     .toggle-icon {
       position: absolute;
       left: -24px;
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
       top: 0;
+      bottom: 0;
+      margin: auto 0;
+    }
+
+    .mat-tree-node-content {
+      display: flex;
+      align-items: center;
+
+      .mat-icon {
+        margin-right: 3px;
+      }
+    }
+
+    &:hover .node-actions {
+      visibility: visible;
+    }
+
+    .mat-tree-node-folder {
+    }
+
+    .mat-tree-node-file {
     }
   }
-
-  .mat-tree-node:hover {
-    opacity: 0.8;
+  .mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
   }
 
-  .mat-tree-node-cotent {
+  .node-actions {
+    visibility: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0 auto;
     display: flex;
     align-items: center;
-    position: relative;
+    gap: 2px;
     .mat-icon {
       margin-right: 3px;
+      &:hover {
+        opacity: 0.7;
+      }
     }
-  }
-
-  .mat-tree-node-folder {
-    font-weight: bold;
-  }
-
-  .mat-tree-node-file {
-    font-style: italic;
   }
 }
