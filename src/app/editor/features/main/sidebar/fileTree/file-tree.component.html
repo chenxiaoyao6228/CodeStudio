@@ -41,7 +41,7 @@
         <mat-icon class="edit-icon">create_new_folder</mat-icon>
         }
         <input
-          #editingInputBox
+          autocomplete="off"
           type="text"
           class="edit-input"
           (keyup.enter)="onEnter(node)"
@@ -101,7 +101,7 @@
         }
 
         <input
-          id="edit-input"
+          autocomplete="off"
           type="text"
           class="edit-input"
           (keyup.enter)="onEnter(node)"

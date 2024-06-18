@@ -2,16 +2,16 @@
   <resizer [isFirstElement]="true" [percentage]="20">
     <app-sidebar id="sidebar">sidebar</app-sidebar>
   </resizer>
-  <resizer [percentage]="40">
+  <resizer [percentage]="15">
     <app-edit id="edit"></app-edit>
   </resizer>
-  <resizer [percentage]="40">
+  <resizer [percentage]="65">
     <div id="output">
       <resizer-container class="col" direction="col">
-        <resizer [isFirstElement]="true" [percentage]="70">
+        <resizer [isFirstElement]="true" [percentage]="90">
           <app-preview class="preview"></app-preview>
         </resizer>
-        <resizer [percentage]="30">
+        <resizer [percentage]="10">
           <app-terminal class="console"></app-terminal>
         </resizer>
       </resizer-container>

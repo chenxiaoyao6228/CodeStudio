@@ -189,7 +189,7 @@ export class NodeContainerService {
     }
   }
 
-  async createFile(path: string, content: string = ''): Promise<void> {
+  async createFile(path: string, content = ''): Promise<void> {
     try {
       await this.writeFile(path, content);
     } catch (error: any) {
@@ -227,4 +227,50 @@ export class NodeContainerService {
       throw error;
     }
   }
+
+  getFileSystemTree = async (
+    dir: string,
+    filterFoldersPredicate: ((path?: string) => boolean) | undefined = () =>
+      true
+  ): Promise<FileSystemTree> => {
+    try {
+      const webContainer = await this.bootOrGetContainer();
+      const fs = webContainer.fs;
+
+      const files: FileSystemTree = {};
+
+      await loadContent(dir, files);
+
+      return files;
+
+      async function loadContent(currentDir: string, files: FileSystemTree) {
+        const entries = await fs.readdir(currentDir, { withFileTypes: true });
+
+        for (const entry of entries) {
+          const fullPath = normalizePath(`${currentDir}/${entry.name}`);
+
+          if (entry.isFile()) {
+            const content = await fs.readFile(fullPath, 'utf-8');
+            files[entry.name] = { file: { contents: content } };
+          } else if (
+            entry.isDirectory() &&
+            filterFoldersPredicate(entry.name)
+          ) {
+            files[entry.name] = { directory: {} };
+            // @ts-ignore
+            await loadContent(fullPath, files[entry.name].directory);
+          }
+        }
+      }
+      function normalizePath(path: string) {
+        if (path[0] === '/') {
+          return path.substring(1);
+        }
+        return path;
+      }
+    } catch (error) {
+      console.error('Error while fetching file system tree:', error);
+      throw error;
+    }
+  };
 }

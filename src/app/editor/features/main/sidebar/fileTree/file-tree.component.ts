@@ -8,6 +8,7 @@ import {
   ChangeDetectorRef,
   effect,
   computed,
+  OnInit,
 } from '@angular/core';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,9 +21,10 @@ import {
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CommonModule } from '@angular/common';
 
+type FileType = 'file' | 'directory';
 export interface FileNode {
   name: string;
-  type: 'file' | 'directory';
+  type: FileType;
   expandable: boolean;
   level: number;
   filePath: string;
@@ -44,10 +46,11 @@ type fileOperation =
   styleUrls: ['./file-tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FileTreeComponent {
+export class FileTreeComponent implements OnInit {
   /*
    * The Mat tree control use tree node reference to expand/collapse node
    * so we have to use a map to keep tack of the node, see the _transformer method
+   * otherwise the treeControl.expand(node) will not work
    * poor @angular/material docs......
    */
   trackingNodeMap = new Map();
@@ -57,17 +60,6 @@ export class FileTreeComponent {
   editorState = inject(EditorStateService);
   editingOperation: WritableSignal<fileOperation | null> = signal(null);
   editingNode: WritableSignal<FileNode | null> = signal(null);
-
-  fileSystemTree = computed(() => {
-    return this.editorState.getFileTree();
-  });
-  activeNode = computed(() => {
-    const node = this.findNodeByFilePath(
-      this.editorState.geCurrentFilePath() || '',
-      this.dataSource.data
-    );
-    return node;
-  });
 
   private _transformer = (node: FileNode, level: number) => {
     const _node = {
@@ -95,9 +87,18 @@ export class FileTreeComponent {
     (node) => node.children
   );
 
+  // data derived from fileSystemTree
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
   hasChild = (_: number, node: FileNode) => node.expandable;
+
+  activeNode = computed(() => {
+    const node = this.findNodeByFilePath(
+      this.editorState.geCurrentFilePath() || '',
+      this.dataSource.data
+    );
+    return node;
+  });
 
   constructor() {
     effect(() => {
@@ -106,14 +107,19 @@ export class FileTreeComponent {
         this.jumpToNode(currentFilePath);
       }
     });
-    effect(() => {
-      const fileTree = this.editorState.getFileTree();
+  }
 
-      if (fileTree) {
-        const builtTree = this.buildFileTree(fileTree);
-        this.dataSource.data = builtTree;
-      }
-    });
+  ngOnInit(): void {
+    const fileTree = this.editorState.getFileTree();
+
+    if (fileTree) {
+      const builtTree = this.buildFileTree(fileTree);
+      this.dataSource.data = builtTree;
+      this.expandNode(this.dataSource.data[0]);
+      this.cdr.markForCheck();
+      // reset
+      this.editorState.setFileTree({});
+    }
   }
 
   buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
@@ -122,42 +128,47 @@ export class FileTreeComponent {
         directory: obj,
       },
     };
-    const realTree = this._buildFileTree(_obj, level, basePath);
+    const realTree = _buildFileTree(_obj, level, basePath);
     return realTree;
-  }
-  // https://stackoverflow.com/questions/53280079/tree-how-to-keep-opened-states-when-tree-updated
-  _buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
-    const nodes: FileNode[] = Object.keys(obj).map((key) => {
-      const value = obj[key];
-      const filePath =
-        level === 0 ? '' : level === 1 ? key : basePath + '/' + key;
-      const node: FileNode = {
-        name: key,
-        type: 'file',
-        level: level,
-        expandable: false,
-        filePath: filePath,
-        id: level === 0 ? 'ROOT' : filePath.split('/').join('_'),
-      };
 
-      if (Object.prototype.hasOwnProperty.call(value, 'directory')) {
-        node.type = 'directory';
-        node.children = this._buildFileTree(
-          (value as DirectoryNode).directory,
-          level + 1,
-          level === 0
-            ? ''
-            : level === 1
-            ? node.name
-            : basePath + '/' + node.name
-        );
-        node.expandable = node.children?.length > 0;
-      }
+    // https://stackoverflow.com/questions/53280079/tree-how-to-keep-opened-states-when-tree-updated
+    function _buildFileTree(
+      obj: FileSystemTree,
+      level = 0,
+      basePath = ''
+    ): FileNode[] {
+      const nodes: FileNode[] = Object.keys(obj).map((key) => {
+        const value = obj[key];
+        const filePath =
+          level === 0 ? '' : level === 1 ? key : basePath + '/' + key;
+        const node: FileNode = {
+          name: key,
+          type: 'file',
+          level: level,
+          expandable: false,
+          filePath: filePath,
+          id: level === 0 ? 'ROOT' : filePath.split('/').join('_'),
+        };
 
-      return node;
-    });
+        if (Object.prototype.hasOwnProperty.call(value, 'directory')) {
+          node.type = 'directory';
+          node.children = _buildFileTree(
+            (value as DirectoryNode).directory,
+            level + 1,
+            level === 0
+              ? ''
+              : level === 1
+              ? node.name
+              : basePath + '/' + node.name
+          ).sort((a, b) => (b.type === 'directory' ? 1 : -1)); // directory shows first
+          node.expandable = node.children?.length > 0;
+        }
 
-    return nodes || [];
+        return node;
+      });
+
+      return nodes || [];
+    }
   }
 
   private findNodeByFilePath(
@@ -185,6 +196,7 @@ export class FileTreeComponent {
       // this.cdr.markForCheck(); // 主动触发变更检测
     }
   }
+
   private expandNodeFromAncestorRecursively(node: FileNode): void {
     const pathSegments = node.filePath.split('/');
     let currentPath = '';
@@ -303,32 +315,28 @@ export class FileTreeComponent {
     this.onNodeClick(node);
   }
 
-  addToTree(tree: FileSystemTree, path: string, content: string): void {
-    const parts = path.split('/');
-    const fileName = parts.pop();
-    let current: FileSystemTree = tree;
-
-    parts.forEach((part) => {
-      if (!current[part]) {
-        current[part] = { directory: {} };
-      }
-      current = (current[part] as DirectoryNode).directory;
-    });
-
-    current[fileName!] = { file: { contents: content } };
-
-    const builtTree = this.buildFileTree(this.fileSystemTree()!);
-    this.dataSource.data = builtTree;
-
-    this.cdr.markForCheck();
+  async getFsTreeWithoutNodeModules() {
+    const excludeFolders = ['node_modules'];
+    const ft = await this.nodeContainerService.getFileSystemTree(
+      '/',
+      (path?: string) => !!path && !excludeFolders.includes(path)
+    );
+    console.log('ft', ft);
+    return ft;
   }
 
   async createFile(parentNode: FileNode, name: string) {
     try {
       const path =
         parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
+
       await this.nodeContainerService.createFile(path);
-      this.addToTree(this.fileSystemTree()!, path, '');
+
+      const ft = await this.getFsTreeWithoutNodeModules();
+
+      const builtTree = this.buildFileTree(ft);
+      this.dataSource.data = builtTree;
+
       this.stopEditing();
       this.editorState.setCurrentFilePath(path);
     } catch (error) {
@@ -336,7 +344,24 @@ export class FileTreeComponent {
     }
   }
 
-  async createFolder(parentNode: FileNode, name: string) {}
+  async createFolder(parentNode: FileNode, name: string) {
+    try {
+      const path =
+        parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
+
+      await this.nodeContainerService.createFolder(path);
+
+      const ft = await this.getFsTreeWithoutNodeModules();
+
+      const builtTree = this.buildFileTree(ft);
+      this.dataSource.data = builtTree;
+
+      this.stopEditing();
+      this.editorState.setCurrentFilePath(path);
+    } catch (error) {
+      console.log('createFolder Error:', error);
+    }
+  }
 
   async renameFile(node: FileNode, name: string) {}
 
@@ -344,5 +369,5 @@ export class FileTreeComponent {
 
   async deleteNode(node: FileNode) {}
 
-  removeFromTree(tree: FileSystemTree, path: string): void {}
+  async removeFromTree(tree: FileSystemTree, path: string) {}
 }
