@@ -84,6 +84,7 @@ export class CodeEditorService {
       });
     }
     this.editor.setModel(model);
+    this.editor.focus();
   }
 
   getCurrentFileContent() {

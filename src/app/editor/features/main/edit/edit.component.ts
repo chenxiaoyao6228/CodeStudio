@@ -68,7 +68,7 @@ export class EditComponent {
             currentFilePath
           );
           this.updateTabs(currentFilePath);
-          if (content) {
+          if (content !== undefined) {
             this.codeEditorService.openOrCreateFile({
               content,
               language: this.getLanguageByFilePath(currentFilePath),

@@ -1,14 +1,13 @@
+import { NodeContainerService } from '@app/editor/services/node-container.service';
 import {
   Component,
-  effect,
-  inject,
   ChangeDetectionStrategy,
+  inject,
   signal,
   WritableSignal,
   ChangeDetectorRef,
-  Signal,
-  ViewChild,
-  ElementRef,
+  effect,
+  computed,
 } from '@angular/core';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,6 +26,7 @@ export interface FileNode {
   expandable: boolean;
   level: number;
   filePath: string;
+  id: string;
   children?: FileNode[];
 }
 
@@ -45,22 +45,43 @@ type fileOperation =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileTreeComponent {
-  @ViewChild('editingInputBox') editingInput!: ElementRef;
+  /*
+   * The Mat tree control use tree node reference to expand/collapse node
+   * so we have to use a map to keep tack of the node, see the _transformer method
+   * poor @angular/material docs......
+   */
+  trackingNodeMap = new Map();
+
+  cdr = inject(ChangeDetectorRef);
+  nodeContainerService = inject(NodeContainerService);
   editorState = inject(EditorStateService);
-  fileSystemTree: WritableSignal<FileSystemTree | null> = signal(null);
   editingOperation: WritableSignal<fileOperation | null> = signal(null);
   editingNode: WritableSignal<FileNode | null> = signal(null);
-  activeNode: FileNode | null = null;
-  // hoverNode: FileNode | null = null;
-  cdr = inject(ChangeDetectorRef);
 
-  private _transformer = (node: FileNode, level: number) => ({
-    expandable: !!node.children && node.children.length > 0,
-    name: node.name,
-    level: level,
-    type: node.type,
-    filePath: node.filePath,
+  fileSystemTree = computed(() => {
+    return this.editorState.getFileTree();
   });
+  activeNode = computed(() => {
+    const node = this.findNodeByFilePath(
+      this.editorState.geCurrentFilePath() || '',
+      this.dataSource.data
+    );
+    return node;
+  });
+
+  private _transformer = (node: FileNode, level: number) => {
+    const _node = {
+      expandable: !!node.children && node.children.length > 0,
+      name: node.name,
+      level: level,
+      type: node.type,
+      filePath: node.filePath,
+      id: node.id,
+    };
+
+    this.trackingNodeMap.set(_node.id, _node);
+    return _node;
+  };
 
   treeControl = new FlatTreeControl<FileNode>(
     (node) => node.level,
@@ -81,53 +102,45 @@ export class FileTreeComponent {
   constructor() {
     effect(() => {
       const currentFilePath = this.editorState.geCurrentFilePath();
-      if (
-        currentFilePath &&
-        (!this.activeNode || this.activeNode?.filePath !== currentFilePath)
-      ) {
+      if (currentFilePath) {
         this.jumpToNode(currentFilePath);
       }
     });
     effect(() => {
       const fileTree = this.editorState.getFileTree();
+
       if (fileTree) {
         const builtTree = this.buildFileTree(fileTree);
-        console.log('builtTree', builtTree);
         this.dataSource.data = builtTree;
       }
     });
   }
-  buildFileTree(
-    obj: FileSystemTree,
-    level: number = 0,
-    basePath = ''
-  ): FileNode[] {
+
+  buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
     const _obj = {
       FILES: {
         directory: obj,
       },
     };
     const realTree = this._buildFileTree(_obj, level, basePath);
-    // console.log('realTree', realTree);
     return realTree;
   }
-
-  _buildFileTree(
-    obj: FileSystemTree,
-    level: number = 0,
-    basePath = ''
-  ): FileNode[] {
+  // https://stackoverflow.com/questions/53280079/tree-how-to-keep-opened-states-when-tree-updated
+  _buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
     const nodes: FileNode[] = Object.keys(obj).map((key) => {
       const value = obj[key];
+      const filePath =
+        level === 0 ? '' : level === 1 ? key : basePath + '/' + key;
       const node: FileNode = {
         name: key,
         type: 'file',
         level: level,
         expandable: false,
-        filePath: level === 0 ? '' : level === 1 ? key : basePath + '/' + key,
+        filePath: filePath,
+        id: level === 0 ? 'ROOT' : filePath.split('/').join('_'),
       };
 
-      if (value.hasOwnProperty('directory')) {
+      if (Object.prototype.hasOwnProperty.call(value, 'directory')) {
         node.type = 'directory';
         node.children = this._buildFileTree(
           (value as DirectoryNode).directory,
@@ -151,7 +164,7 @@ export class FileTreeComponent {
     filePath: string,
     nodes: FileNode[]
   ): FileNode | null {
-    for (let node of nodes) {
+    for (const node of nodes) {
       if (node.filePath === filePath) {
         return node;
       }
@@ -168,14 +181,42 @@ export class FileTreeComponent {
   private jumpToNode(filePath: string): void {
     const node = this.findNodeByFilePath(filePath, this.dataSource.data);
     if (node) {
-      this.activeNode = node;
-      this.treeControl.expand(node);
-      this.cdr.detectChanges();
+      this.expandNodeFromAncestorRecursively(node);
+      // this.cdr.markForCheck(); // 主动触发变更检测
+    }
+  }
+  private expandNodeFromAncestorRecursively(node: FileNode): void {
+    const pathSegments = node.filePath.split('/');
+    let currentPath = '';
+    try {
+      this.expandNode(this.dataSource.data[0]);
+
+      for (const segment of pathSegments) {
+        currentPath += currentPath === '' ? `${segment}` : `/${segment}`;
+        const currentNode = this.findNodeByFilePath(
+          currentPath,
+          this.dataSource.data
+        );
+        if (currentNode) {
+          this.expandNode(currentNode);
+        }
+      }
+    } catch (error) {
+      console.error('expand node error:', error);
+      throw error;
+    }
+  }
+
+  expandNode(node: FileNode) {
+    const _node = this.trackingNodeMap.get(node.id);
+    if (_node) {
+      this.treeControl.expand(_node);
+    } else {
+      throw new Error('can not find node');
     }
   }
 
   onNodeClick(node: FileNode): void {
-    this.activeNode = node;
     if (node.type === 'file') {
       this.editorState.setCurrentFilePath(node.filePath);
     }
@@ -192,21 +233,47 @@ export class FileTreeComponent {
       return;
     }
 
+    if (node.type === 'directory' && !this.treeControl.isExpanded(node)) {
+      this.treeControl.expand(node);
+    }
     this.editingNode.set(node);
     this.editingOperation.set(op);
 
     setTimeout(() => {
-      this.editingInput.nativeElement.focus();
+      this.getCurrentActiveInput()?.focus();
     }, 0);
+  }
+
+  onBlur(event: Event) {
+    // this.editingNode.set(null);
   }
 
   stopEditing(): void {
     this.editingNode.set(null);
   }
 
+  getCurrentActiveInput() {
+    if (this.editingNode()) {
+      const id = this.editingNode()?.id;
+      if (id !== undefined) {
+        const activeNodeEle = document.querySelector('#' + id);
+        if (activeNodeEle) {
+          const activeInput = activeNodeEle.querySelector('input');
+          if (activeInput) {
+            return activeInput;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   onEnter(node: FileNode): void {
-    this.stopEditing();
-    const value = this.editingInput.nativeElement.value;
+    const value = this.getCurrentActiveInput()?.value;
+
+    if (!value) {
+      return;
+    }
 
     const op = this.editingOperation();
     const currentNodeType = node.type;
@@ -221,11 +288,14 @@ export class FileTreeComponent {
         this.renameFile(node, value);
       }
     }
-    this.editingInput.nativeElement.value = ''; // clear input
+
+    if (this.getCurrentActiveInput()) {
+      this.getCurrentActiveInput()!.value = ''; // clear input
+    }
   }
 
   isActive(node: FileNode): boolean {
-    return this.activeNode?.filePath === node?.filePath;
+    return this.activeNode()?.filePath === node?.filePath;
   }
 
   toggleNode(node: FileNode): void {
@@ -233,7 +303,6 @@ export class FileTreeComponent {
     this.onNodeClick(node);
   }
 
-  // file handling
   addToTree(tree: FileSystemTree, path: string, content: string): void {
     const parts = path.split('/');
     const fileName = parts.pop();
@@ -247,26 +316,33 @@ export class FileTreeComponent {
     });
 
     current[fileName!] = { file: { contents: content } };
+
+    const builtTree = this.buildFileTree(this.fileSystemTree()!);
+    this.dataSource.data = builtTree;
+
+    this.cdr.markForCheck();
   }
 
-  createFile(node: FileNode, name: string): void {
-    if (node) {
-      this.addToTree(
-        this.fileSystemTree()!,
-        `${node.name}/${name}.txt`,
-        'New file content'
-      );
+  async createFile(parentNode: FileNode, name: string) {
+    try {
+      const path =
+        parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
+      await this.nodeContainerService.createFile(path);
+      this.addToTree(this.fileSystemTree()!, path, '');
+      this.stopEditing();
+      this.editorState.setCurrentFilePath(path);
+    } catch (error) {
+      console.log('createFile Error:', error);
     }
   }
 
-  createFolder(node: FileNode, name: string): void {
-    if (node) {
-      this.addToTree(this.fileSystemTree()!, `${node.name}/${name}/`, '');
-    }
-  }
+  async createFolder(parentNode: FileNode, name: string) {}
 
-  renameFile(node: FileNode, name: string): void {}
-  renameFolder(node: FileNode, name: string): void {}
+  async renameFile(node: FileNode, name: string) {}
 
-  deleteNode(node: FileNode): void {}
+  async renameFolder(node: FileNode, name: string) {}
+
+  async deleteNode(node: FileNode) {}
+
+  removeFromTree(tree: FileSystemTree, path: string): void {}
 }

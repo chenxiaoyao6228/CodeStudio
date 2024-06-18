@@ -23,7 +23,7 @@ export class NodeContainerService {
   terminalService = inject(TerminalService);
   editorStateService = inject(EditorStateService);
   // #event
-  previewUrl$: BehaviorSubject<string> = new BehaviorSubject('');
+  previewUrl$ = new BehaviorSubject('');
   // #state
   options: IOptions = {
     terminal: 'dev',
@@ -47,6 +47,7 @@ export class NodeContainerService {
     // start devServer
     await this.startDevServer();
   }
+
   private async bootOrGetContainer() {
     if (this.webContainer) {
       return this.webContainer;
@@ -59,6 +60,7 @@ export class NodeContainerService {
 
     return this.webContainer;
   }
+
   private async installDeps() {
     this.editorStateService.setPhase(StartupPhase.INSTALLING);
 
@@ -76,6 +78,7 @@ export class NodeContainerService {
 
     return installProcess.exit;
   }
+
   async spawnProcess(command: string, args: string[]) {
     const webContainer = await this.bootOrGetContainer();
     const process = await webContainer.spawn(command, args);
@@ -118,6 +121,7 @@ export class NodeContainerService {
       this.cleanUp();
     });
   }
+
   async startShell() {
     const webContainer = await this.bootOrGetContainer();
     const terminal = this.terminalService.getXterminal();
@@ -167,13 +171,10 @@ export class NodeContainerService {
     const webContainer = await this.webContainer!;
 
     await webContainer.mount(fileSystemTree);
-
-    // this.editorStateService.setLoadedFileTree(null);
   }
 
   async readFile(filePath: string): Promise<string> {
     const webContainer = await this.bootOrGetContainer();
-
     return webContainer.fs.readFile(filePath, 'utf-8');
   }
 
@@ -181,9 +182,48 @@ export class NodeContainerService {
     const webContainer = await this.bootOrGetContainer();
 
     try {
-      await webContainer.fs.writeFile(path, content, 'utf-8');
+      await webContainer.fs.writeFile('/' + path, content, 'utf-8');
     } catch (error: any) {
       console.log('write file error: ', error);
+      throw error;
+    }
+  }
+
+  async createFile(path: string, content: string = ''): Promise<void> {
+    try {
+      await this.writeFile(path, content);
+    } catch (error: any) {
+      console.log('create file error: ', error);
+      throw error;
+    }
+  }
+
+  async createFolder(path: string): Promise<void> {
+    const webContainer = await this.bootOrGetContainer();
+    try {
+      await webContainer.fs.mkdir('/' + path, { recursive: true });
+    } catch (error: any) {
+      console.log('create folder error: ', error);
+      throw error;
+    }
+  }
+
+  async renameFileOrFolder(oldPath: string, newPath: string): Promise<void> {
+    const webContainer = await this.bootOrGetContainer();
+    try {
+      await webContainer.fs.rename(oldPath, newPath);
+    } catch (error: any) {
+      console.log('rename file/folder error: ', error);
+      throw error;
+    }
+  }
+
+  async deleteFileOrFolder(path: string): Promise<void> {
+    const webContainer = await this.bootOrGetContainer();
+    try {
+      await webContainer.fs.rm(path, { recursive: true, force: true });
+    } catch (error: any) {
+      console.log('delete file/folder error: ', error);
       throw error;
     }
   }

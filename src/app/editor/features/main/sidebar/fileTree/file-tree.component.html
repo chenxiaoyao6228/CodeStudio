@@ -1,89 +1,14 @@
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <!-- folder node -->
   <mat-tree-node
+    [attr.id]="node.id"
     *matTreeNodeDef="let node; when: hasChild"
     matTreeNodeToggle
     [ngClass]="{
       editing: editingNode()?.filePath === node.filePath,
-      creatingFile: editingOperation() === 'creatingFile',
-      creatingFolder: editingOperation() === 'creatingFolder',
-      renaming: editingOperation() === 'renaming',
-    }"
-    [ngStyle]="{ 'padding-left': (node.level + 1) * 18 + 'px' }"
-    (click)="onNodeClick(node)"
-    [ngClass]="{ active: isActive(node) }"
-  >
-    <mat-icon
-      class="toggle-icon"
-      [ngStyle]="{ left: node.level * 18 + 'px' }"
-      >{{
-        treeControl.isExpanded(node) ? "expand_more" : "chevron_right"
-      }}</mat-icon
-    >
-    <div
-      [ngClass]="{
-        'mat-tree-node-content': true
-      }"
-    >
-      @if(node.level !== 0) {
-      <mat-icon>{{
-        node.type === "directory" ? "folder" : "insert_drive_file"
-      }}</mat-icon>
-      }
-      {{ node.name }}
-    </div>
-
-    <!-- editingBox -->
-    <div
-      class="editing-box"
-      (click)="onEditingBoxClick(node, $event)"
-      [ngStyle]="{
-        left:
-          (node.level + 1) * 18 +
-          (editingOperation() === 'renaming' ? 18 : 0) +
-          'px'
-      }"
-    >
-      @if(editingOperation() === 'creatingFile') {
-      <mat-icon class="edit-icon">note_add</mat-icon>
-      } @if(editingOperation() === 'creatingFolder') {
-      <mat-icon class="edit-icon">create_new_folder</mat-icon>
-      }
-      <!-- (blur)="stopEditing()" -->
-      <input
-        #editingInputBox
-        type="text"
-        class="edit-input"
-        (keyup.enter)="onEnter(node)"
-      />
-    </div>
-    <!-- action-icons -->
-    <div class="node-actions">
-      @if( node.type === 'directory') {
-      <mat-icon (click)="onFileOperate(node, 'creatingFile', $event)"
-        >note_add</mat-icon
-      >
-      <mat-icon (click)="onFileOperate(node, 'creatingFolder', $event)"
-        >create_new_folder</mat-icon
-      >
-      } @if(node.level !== 0) {
-      <mat-icon (click)="onFileOperate(node, 'renaming', $event)"
-        >edit</mat-icon
-      >
-      <mat-icon (click)="onFileOperate(node, 'deleting', $event)"
-        >delete</mat-icon
-      >
-      }
-    </div>
-  </mat-tree-node>
-  <!-- file node -->
-  <mat-tree-node
-    *matTreeNodeDef="let node"
-    [ngClass]="{
-      editing: editingNode()?.filePath === node.filePath,
-      creatingFile: editingOperation() === 'creatingFile',
-      creatingFolder: editingOperation() === 'creatingFolder',
-      renaming: editingOperation() === 'renaming',
+      creatingFile: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFile',
+      creatingFolder: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFolder',
+      renaming: editingNode()?.filePath === node.filePath && editingOperation() === 'renaming',
     }"
     [ngStyle]="{
       'padding-left': (node.level + 1) * 18 + 'px'
@@ -91,61 +16,117 @@
     (click)="onNodeClick(node)"
     [ngClass]="{ active: isActive(node) }"
   >
-    <div
-      [ngClass]="{
-        'mat-tree-node-content': true
-      }"
-    >
+    <div class="node-wrapper">
+      <mat-icon class="toggle-icon">{{
+        treeControl.isExpanded(node) ? "expand_more" : "chevron_right"
+      }}</mat-icon>
+      <div
+        [ngClass]="{
+          'mat-tree-node-content': true
+        }"
+      >
+        @if(node.level !== 0) {
+        <mat-icon>{{
+          node.type === "directory" ? "folder" : "insert_drive_file"
+        }}</mat-icon>
+        }
+        {{ node.name }}
+      </div>
+
+      <!-- editingBox -->
+      <div class="editing-box" (click)="onEditingBoxClick(node, $event)">
+        @if(editingOperation() === 'creatingFile') {
+        <mat-icon class="edit-icon">note_add</mat-icon>
+        } @if(editingOperation() === 'creatingFolder') {
+        <mat-icon class="edit-icon">create_new_folder</mat-icon>
+        }
+        <input
+          #editingInputBox
+          type="text"
+          class="edit-input"
+          (keyup.enter)="onEnter(node)"
+          (blur)="onBlur($event)"
+        />
+      </div>
+      <!-- action-icons -->
+      <div class="node-actions">
+        @if( node.type === 'directory') {
+        <mat-icon (click)="onFileOperate(node, 'creatingFile', $event)"
+          >note_add</mat-icon
+        >
+        <mat-icon (click)="onFileOperate(node, 'creatingFolder', $event)"
+          >create_new_folder</mat-icon
+        >
+        } @if(node.level !== 0) {
+        <mat-icon (click)="onFileOperate(node, 'renaming', $event)"
+          >edit</mat-icon
+        >
+        <mat-icon (click)="onFileOperate(node, 'deleting', $event)"
+          >delete</mat-icon
+        >
+        }
+      </div>
+    </div>
+  </mat-tree-node>
+  <!-- file node -->
+  <mat-tree-node
+    [attr.id]="node.id"
+    *matTreeNodeDef="let node"
+    [ngClass]="{
+      editing: editingNode()?.filePath === node.filePath,
+      creatingFile: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFile',
+      creatingFolder: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFolder',
+      renaming: editingNode()?.filePath === node.filePath && editingOperation() === 'renaming',
+    }"
+    [ngStyle]="{
+      'padding-left': (node.level + 1) * 18 + 'px',
+    }"
+    (click)="onNodeClick(node)"
+    [ngClass]="{ active: isActive(node) }"
+  >
+    <div class="node-wrapper">
       @if(node.level !== 0) {
       <mat-icon>{{
         node.type === "directory" ? "folder" : "insert_drive_file"
       }}</mat-icon>
       }
       {{ node.name }}
-    </div>
 
-    <!-- editingBox -->
-    <div
-      class="editing-box"
-      (click)="onEditingBoxClick(node, $event)"
-      [ngStyle]="{
-        'padding-left':
-          (node.level + 1) * 18 +
-          (editingOperation() === 'renaming' ? 18 : 0) +
-          'px'
-      }"
-    >
-      @if(editingOperation() === 'creatingFile') {
-      <mat-icon class="edit-icon">note_add</mat-icon>
-      } @if(editingOperation() === 'creatingFolder') {
-      <mat-icon class="edit-icon">create_new_folder</mat-icon>
-      }
+      <!-- editingBox -->
+      <div class="editing-box" (click)="onEditingBoxClick(node, $event)">
+        @if(editingOperation() === 'creatingFile') {
+        <mat-icon class="edit-icon">note_add</mat-icon>
+        } @if(editingOperation() === 'creatingFolder') {
+        <mat-icon class="edit-icon">create_new_folder</mat-icon>
+        }
 
-      <input
-        #editingInputBox
-        type="text"
-        class="edit-input"
-        (keyup.enter)="onEnter(node)"
-      />
-    </div>
+        <input
+          id="edit-input"
+          type="text"
+          class="edit-input"
+          (keyup.enter)="onEnter(node)"
+          (blur)="onBlur($event)"
+        />
+      </div>
 
-    <!-- action-icons -->
-    <div class="node-actions">
-      @if( node.type === 'directory') {
-      <mat-icon (click)="onFileOperate(node, 'creatingFile', $event)"
-        >note_add</mat-icon
-      >
-      <mat-icon (click)="onFileOperate(node, 'creatingFolder', $event)"
-        >create_new_folder</mat-icon
-      >
-      } @if(node.level !== 0) {
-      <mat-icon (click)="onFileOperate(node, 'renaming', $event)"
-        >edit</mat-icon
-      >
-      <mat-icon (click)="onFileOperate(node, 'deleting', $event)"
-        >delete</mat-icon
-      >
-      }
+      <!-- action-icons -->
+      <div class="node-actions">
+        @if( node.type === 'directory') {
+        <mat-icon (click)="onFileOperate(node, 'creatingFile', $event)"
+          >note_add</mat-icon
+        >
+        <mat-icon (click)="onFileOperate(node, 'creatingFolder', $event)"
+          >create_new_folder</mat-icon
+        >
+        } @if(node.level !== 0) {
+        <mat-icon (click)="onFileOperate(node, 'renaming', $event)"
+          >edit</mat-icon
+        >
+        <mat-icon (click)="onFileOperate(node, 'deleting', $event)"
+          >delete</mat-icon
+        >
+        }
+      </div>
     </div>
   </mat-tree-node>
 </mat-tree>
