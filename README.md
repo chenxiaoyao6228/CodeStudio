@@ -1,23 +1,26 @@
-# code-studio
+<p align="center">
+  <a href="#">
+    <img width="200" src="./public/logo.jpg" alt="Code Studio Logo">
+  </a>
+</p>
 
-A web code runner
+<h1 align="center">Code Studio</h1>
+<h3 align="center">Web code runner for JS and NodeJS</h3>
 
 ## Features
 
-- Create project from existing template
-- Import folder as template from github
-- Support passing github (sub)Folder path directly
+- Create project from existing templates
+- Import folder as template from GitHub by passing (sub)folder path directly
 
-### Import folder as template from github
+### Passing GitHub repo URL
 
-try 👉: https://code-studio-pied.vercel.app/edit?terminal=dev&source=https://code-studio-pied.vercel.app/tempaltes/vue3.zip
-
-### Passing github repo url
-
+- source: a GitHub folder path or a zip file path
 - terminal: npm execute command after installation, default value: `dev`
-- source: a github folder path
 
-try 👉: https://code-studio-pied.vercel.app/edit?terminal=dev&source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app
+Examples:
+
+- [Passing a zip file path](https://code-studio-pied.vercel.app/edit?terminal=dev&source=https://code-studio-pied.vercel.app/templates/vue3.zip)
+- [Passing a GitHub folder](https://code-studio-pied.vercel.app/edit?terminal=dev&source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app)
 
 ## Development
 
@@ -28,8 +31,8 @@ yarn start
 
 ## Reference
 
-- https://www.youtube.com/watch?v=ePhLo_VofFg&ab_channel=LearnWithJason
+- https://www.youtube.com/watch?v=ePhLo_VofFg
 - https://webcontainers.io
 - https://github.com/xtermjs/xterm.js
 - https://angular.dev/
-- https://material.angular.io/guide/theming-your-components
+- https://material.angular.io/
