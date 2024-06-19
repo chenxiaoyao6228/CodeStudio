@@ -6,9 +6,37 @@
   border-bottom: 1px solid #fff;
   .left {
     margin-left: 10px;
+    display: flex;
+    align-items: center;
+    .logo {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .name {
+      font-weight: 500;
+    }
   }
   .middle {
   }
   .right {
+    display: flex;
+    align-items: center;
+    .github {
+      display: flex;
+      align-items: center;
+      .logo {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        margin-right: 20px;
+
+        border: none;
+        &:hover {
+          cursor: pointer;
+        }
+      }
+    }
   }
 }
