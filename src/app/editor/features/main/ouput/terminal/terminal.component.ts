@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -20,7 +21,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TerminalComponent {
+export class TerminalComponent implements AfterViewInit {
   @ViewChild('terminal') terminalEleRef: ElementRef<HTMLElement> | undefined;
   private terminalService = inject(TerminalService);
   private readonly destroyRef = inject(DestroyRef);
@@ -29,7 +30,6 @@ export class TerminalComponent {
     if (this.terminalEleRef) {
       this.terminalService.open(this.terminalEleRef.nativeElement);
     }
-
     fromEvent(window, 'resize')
       .pipe(debounceTime(50), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {

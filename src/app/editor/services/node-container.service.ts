@@ -42,6 +42,10 @@ export class NodeContainerService {
     await this.bootOrGetContainer();
     // mount files
     await this.mountFiles();
+
+    // set initialPath
+    this.editorStateService.setCurrentFilePath('package.json');
+
     // install deps
     await this.installDeps();
     // start devServer

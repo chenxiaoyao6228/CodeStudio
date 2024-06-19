@@ -8,8 +8,6 @@ import {
   ChangeDetectorRef,
   effect,
   computed,
-  OnInit,
-  AfterViewInit,
 } from '@angular/core';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -118,8 +116,6 @@ export class FileTreeComponent {
 
       if (currentFilePath) {
         this.jumpToNode(currentFilePath);
-      } else {
-        this.expandNode(this.dataSource.data[0]);
       }
     });
   }
@@ -204,7 +200,6 @@ export class FileTreeComponent {
     let currentPath = '';
     try {
       this.expandNode(this.dataSource.data[0]);
-
       for (const segment of pathSegments) {
         currentPath += currentPath === '' ? `${segment}` : `/${segment}`;
         const currentNode = this.findNodeByFilePath(

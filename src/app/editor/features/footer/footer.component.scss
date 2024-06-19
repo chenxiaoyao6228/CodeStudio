@@ -1,6 +1,10 @@
+:host {
+  height: 1px;
+  background-color: #fff;
+}
 .footer-wrap {
-  height: 30px;
-  display: flex;
+  display: none; // remove footer
+  // display: flex;
   align-items: center;
   overflow: hidden;
   border-top: 1px solid #fff;

@@ -3,21 +3,21 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Signal,
   ViewChild,
   computed,
-  effect,
   inject,
-  signal,
 } from '@angular/core';
-import { MatCheckbox } from '@angular/material/checkbox';
+import {
+  MAT_CHECKBOX_DEFAULT_OPTIONS,
+  MatCheckbox,
+  MatCheckboxDefaultOptions,
+} from '@angular/material/checkbox';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { StartupPhase } from '@app/editor/constants';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { MatIconModule } from '@angular/material/icon';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, map } from 'rxjs';
+import { map } from 'rxjs';
 
 interface IPhaseItem {
   key: StartupPhase;
@@ -28,13 +28,6 @@ interface IPhaseItem {
 }
 
 const DEFAULT_PHASE_LIST = [
-  // {
-  //   key: StartupPhase.NOT_STARTED,
-  //   message: 'Waiting',
-  //   completed: false,
-  //   loading: false,
-  // },
-
   {
     key: StartupPhase.LOADING_FILES,
     message: 'Loading files',
@@ -72,6 +65,12 @@ const DEFAULT_PHASE_LIST = [
   selector: 'app-preview',
   standalone: true,
   imports: [MatCheckbox, MatProgressBar, MatIconModule],
+  providers: [
+    {
+      provide: MAT_CHECKBOX_DEFAULT_OPTIONS,
+      useValue: { clickAction: 'noop' } as MatCheckboxDefaultOptions,
+    },
+  ],
   templateUrl: './preview.component.html',
   styleUrl: './preview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -117,12 +116,7 @@ export class PreviewComponent {
     return (phaseIndex / (DEFAULT_PHASE_LIST.length - 1)) * 100;
   });
 
-  constructor() {
-    //@ts-ignore for testing
-    // window.updateProgress = () => {
-    //   this.editorStateService.setPhase(DEFAULT_PHASE_LIST[index++].key);
-    // };
-  }
+  constructor() {}
 
   trackByPhaseKey(index: number, phase: IPhaseItem): StartupPhase {
     return phase.key;

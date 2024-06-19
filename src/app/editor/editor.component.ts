@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject } from '@angular/core';
 import { HeaderComponent } from './features/header/header.component';
 import { FooterComponent } from './features/footer/footer.component';
 import { MainComponent } from './features/main/main.component';
@@ -42,7 +42,7 @@ export interface IRouteParams {
     `,
   ],
 })
-export class EditorComponent {
+export class EditorComponent implements OnInit, AfterViewInit {
   routeParams: IRouteParams = {
     terminal: 'dev',
   };
