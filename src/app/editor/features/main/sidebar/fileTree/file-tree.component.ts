@@ -9,6 +9,7 @@ import {
   effect,
   computed,
   OnInit,
+  AfterViewInit,
 } from '@angular/core';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,6 +21,11 @@ import {
 } from '@angular/material/tree';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CommonModule } from '@angular/common';
+import { getFileOrFolderName } from '@app/editor/utils/file';
+
+function generateFileId(filePath: string) {
+  return filePath.split('/').join('_').replace('.', '_');
+}
 
 type FileType = 'file' | 'directory';
 export interface FileNode {
@@ -46,7 +52,7 @@ type fileOperation =
   styleUrls: ['./file-tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FileTreeComponent implements OnInit {
+export class FileTreeComponent {
   /*
    * The Mat tree control use tree node reference to expand/collapse node
    * so we have to use a map to keep tack of the node, see the _transformer method
@@ -103,23 +109,19 @@ export class FileTreeComponent implements OnInit {
   constructor() {
     effect(() => {
       const currentFilePath = this.editorState.geCurrentFilePath();
+      const fileTree = this.editorState.getFileTree();
+
+      if (fileTree) {
+        const builtTree = this.buildFileTree(fileTree);
+        this.dataSource.data = builtTree;
+      }
+
       if (currentFilePath) {
         this.jumpToNode(currentFilePath);
+      } else {
+        this.expandNode(this.dataSource.data[0]);
       }
     });
-  }
-
-  ngOnInit(): void {
-    const fileTree = this.editorState.getFileTree();
-
-    if (fileTree) {
-      const builtTree = this.buildFileTree(fileTree);
-      this.dataSource.data = builtTree;
-      this.expandNode(this.dataSource.data[0]);
-      this.cdr.markForCheck();
-      // reset
-      this.editorState.setFileTree({});
-    }
   }
 
   buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
@@ -147,7 +149,7 @@ export class FileTreeComponent implements OnInit {
           level: level,
           expandable: false,
           filePath: filePath,
-          id: level === 0 ? 'ROOT' : filePath.split('/').join('_'),
+          id: level === 0 ? 'ROOT' : generateFileId(filePath),
         };
 
         if (Object.prototype.hasOwnProperty.call(value, 'directory')) {
@@ -220,6 +222,9 @@ export class FileTreeComponent implements OnInit {
   }
 
   expandNode(node: FileNode) {
+    if (!node) {
+      return;
+    }
     const _node = this.trackingNodeMap.get(node.id);
     if (_node) {
       this.treeControl.expand(_node);
@@ -252,12 +257,26 @@ export class FileTreeComponent implements OnInit {
     this.editingOperation.set(op);
 
     setTimeout(() => {
-      this.getCurrentActiveInput()?.focus();
+      const input = this.getCurrentActiveInput();
+      if (input) {
+        // pre-select some chars for renaming
+        if (op === 'renaming') {
+          const name = getFileOrFolderName(node.filePath);
+          input.value = name;
+          const lastIndex = name.lastIndexOf('.');
+          input.setSelectionRange(0, lastIndex);
+        }
+        input.focus();
+      }
     }, 0);
   }
 
   onBlur(event: Event) {
-    // this.editingNode.set(null);
+    const input = this.getCurrentActiveInput();
+    if (input) {
+      input.value = '';
+    }
+    this.editingNode.set(null);
   }
 
   stopEditing(): void {
@@ -286,19 +305,13 @@ export class FileTreeComponent implements OnInit {
     if (!value) {
       return;
     }
-
     const op = this.editingOperation();
-    const currentNodeType = node.type;
     if (op === 'creatingFile') {
       this.createFile(node, value);
     } else if (op === 'creatingFolder') {
       this.createFolder(node, value);
     } else if (op === 'renaming') {
-      if (currentNodeType === 'directory') {
-        this.renameFolder(node, value);
-      } else {
-        this.renameFile(node, value);
-      }
+      this.renameFileOrFolder(node, value);
     }
 
     if (this.getCurrentActiveInput()) {
@@ -327,18 +340,12 @@ export class FileTreeComponent implements OnInit {
 
   async createFile(parentNode: FileNode, name: string) {
     try {
-      const path =
+      const newFilePath =
         parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
 
-      await this.nodeContainerService.createFile(path);
+      await this.nodeContainerService.createFile(newFilePath);
 
-      const ft = await this.getFsTreeWithoutNodeModules();
-
-      const builtTree = this.buildFileTree(ft);
-      this.dataSource.data = builtTree;
-
-      this.stopEditing();
-      this.editorState.setCurrentFilePath(path);
+      this.afterFileUpdate(newFilePath);
     } catch (error) {
       console.log('createFile Error:', error);
     }
@@ -346,28 +353,49 @@ export class FileTreeComponent implements OnInit {
 
   async createFolder(parentNode: FileNode, name: string) {
     try {
-      const path =
+      const newFilePath =
         parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
 
-      await this.nodeContainerService.createFolder(path);
+      await this.nodeContainerService.createFolder(newFilePath);
 
-      const ft = await this.getFsTreeWithoutNodeModules();
-
-      const builtTree = this.buildFileTree(ft);
-      this.dataSource.data = builtTree;
-
-      this.stopEditing();
-      this.editorState.setCurrentFilePath(path);
+      this.afterFileUpdate();
     } catch (error) {
       console.log('createFolder Error:', error);
     }
   }
 
-  async renameFile(node: FileNode, name: string) {}
+  async renameFileOrFolder(node: FileNode, name: string) {
+    try {
+      const oldPath = node.filePath;
+      const basePath = oldPath.substring(0, oldPath.lastIndexOf('/'));
+      const newFilePath = basePath + '/' + name;
+      await this.nodeContainerService.renameFileOrFolder(oldPath, newFilePath);
 
-  async renameFolder(node: FileNode, name: string) {}
+      this.afterFileUpdate(newFilePath);
+    } catch (error) {
+      console.log('renameFileOrFolder error: ', error);
+    }
+  }
 
-  async deleteNode(node: FileNode) {}
+  async deleteNode(node: FileNode) {
+    try {
+      await this.nodeContainerService.deleteFileOrFolder(node.filePath);
+      const oldPath = node.filePath;
+      const basePath = oldPath.substring(0, oldPath.lastIndexOf('/'));
+      this.afterFileUpdate(basePath);
+    } catch (error) {
+      console.log('deleteNode error:', error);
+    }
+  }
 
-  async removeFromTree(tree: FileSystemTree, path: string) {}
+  async afterFileUpdate(newFilePath?: string) {
+    const ft = await this.getFsTreeWithoutNodeModules();
+
+    this.editorState.setFileTree(ft);
+
+    this.stopEditing();
+    if (newFilePath) {
+      this.editorState.setCurrentFilePath(newFilePath);
+    }
+  }
 }

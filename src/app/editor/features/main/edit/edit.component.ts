@@ -12,6 +12,7 @@ import { AppEditorComponent } from './code-editor/code-editor.component';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CodeEditorService } from './code-editor/code-editor.service';
 import { Subject, takeUntil } from 'rxjs';
+import { isFile } from '@app/editor/utils/file';
 
 interface ITabItem {
   filePath: string;
@@ -62,7 +63,8 @@ export class EditComponent {
   constructor() {
     effect(async () => {
       const currentFilePath = this.editorStateService.geCurrentFilePath();
-      if (currentFilePath) {
+      const fileTree = this.editorStateService.getFileTree();
+      if (currentFilePath && fileTree && isFile(fileTree, currentFilePath)) {
         try {
           const content = await this.nodeContainerService.readFile(
             currentFilePath

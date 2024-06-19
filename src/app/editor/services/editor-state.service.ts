@@ -13,7 +13,7 @@ export interface IFileItem {
 export class EditorStateService {
   private _phase = signal(StartupPhase.NOT_STARTED);
   // only for initial loading state
-  private _loadedFileTree: FileSystemTree = {};
+  private _loadedFileTree: WritableSignal<FileSystemTree | null> = signal(null);
   private _currentFilePath: WritableSignal<string | null> = signal(null);
 
   constructor() {}
@@ -32,11 +32,11 @@ export class EditorStateService {
   }
 
   getFileTree(): FileSystemTree | null {
-    return this._loadedFileTree;
+    return this._loadedFileTree();
   }
 
   setFileTree(fileTree: FileSystemTree) {
-    this._loadedFileTree = fileTree;
+    this._loadedFileTree.set(fileTree);
   }
 
   setCurrentFilePath(filePath: string) {
