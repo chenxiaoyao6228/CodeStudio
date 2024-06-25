@@ -20,6 +20,7 @@ import {
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CommonModule } from '@angular/common';
 import { getFileOrFolderName } from '@app/editor/utils/file';
+import { EditService } from '../../edit/edit.service';
 
 function generateFileId(filePath: string) {
   return filePath.split('/').join('_').replace('.', '_');
@@ -62,6 +63,7 @@ export class FileTreeComponent {
   cdr = inject(ChangeDetectorRef);
   nodeContainerService = inject(NodeContainerService);
   editorState = inject(EditorStateService);
+  editService = inject(EditService);
   editingOperation: WritableSignal<fileOperation | null> = signal(null);
   editingNode: WritableSignal<FileNode | null> = signal(null);
 
@@ -361,6 +363,9 @@ export class FileTreeComponent {
 
   async renameFileOrFolder(node: FileNode, name: string) {
     try {
+      // close existing tab before renaming
+      this.editService.closeTab(node.filePath);
+
       const oldPath = node.filePath;
       const basePath = oldPath.substring(0, oldPath.lastIndexOf('/'));
       const newFilePath = basePath + '/' + name;
@@ -375,6 +380,10 @@ export class FileTreeComponent {
   async deleteNode(node: FileNode) {
     try {
       await this.nodeContainerService.deleteFileOrFolder(node.filePath);
+
+      // close existing tab before renaming
+      this.editService.closeTab(node.filePath);
+
       const oldPath = node.filePath;
       const basePath = oldPath.substring(0, oldPath.lastIndexOf('/'));
       this.afterFileUpdate(basePath);

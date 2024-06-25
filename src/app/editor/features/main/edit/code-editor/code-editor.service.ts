@@ -87,6 +87,14 @@ export class CodeEditorService {
     this.editor.focus();
   }
 
+  closeFile(filePath: string) {
+    const uri = monaco.Uri.parse(filePath);
+    const model = monaco.editor.getModel(uri);
+    if (model) {
+      model.dispose();
+    }
+  }
+
   getCurrentFileContent() {
     const model = this.editor.getModel();
     const content = model.getValue();

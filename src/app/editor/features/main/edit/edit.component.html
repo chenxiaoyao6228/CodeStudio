@@ -1,6 +1,6 @@
 <div class="top">
   <div class="tabs">
-    @for(tab of openedTabs(); track tab.filePath) {
+    @for(tab of editService.openedTabs(); track tab.filePath) {
     <div class="tab-item" (click)="selectTab(tab)" [class.active]="tab.active">
       <div class="text">
         {{ tab.name }}

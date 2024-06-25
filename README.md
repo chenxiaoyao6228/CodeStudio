@@ -19,8 +19,8 @@
 
 Examples:
 
-- [Passing a zip file path](https://code-studio-pied.vercel.app/edit?terminal=dev&source=https://code-studio-pied.vercel.app/templates/vue3.zip)
-- [Passing a GitHub folder](https://code-studio-pied.vercel.app/edit?terminal=dev&source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app)
+- [Passing a zip file path](https://code-studio.chenxiaoyao.cn/edit?terminal=dev&source=https://code-studio.chenxiaoyao.cn/templates/vue3.zip)
+- [Passing a GitHub folder](https://code-studio.chenxiaoyao.cn/edit?terminal=dev&source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app)
 
 ## Development
 
@@ -31,7 +31,6 @@ yarn start
 
 ## Reference
 
-- https://www.youtube.com/watch?v=ePhLo_VofFg
 - https://webcontainers.io
 - https://github.com/xtermjs/xterm.js
 - https://angular.dev/

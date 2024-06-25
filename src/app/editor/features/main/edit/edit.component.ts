@@ -1,56 +1,30 @@
+// edit.component.ts
+
 import {
   ChangeDetectionStrategy,
   Component,
   ViewChild,
-  WritableSignal,
-  effect,
+  OnInit,
+  OnDestroy,
   inject,
-  signal,
 } from '@angular/core';
-import { NodeContainerService } from '@app/editor/services/node-container.service';
 import { AppEditorComponent } from './code-editor/code-editor.component';
-import { EditorStateService } from '@app/editor/services/editor-state.service';
-import { CodeEditorService } from './code-editor/code-editor.service';
-import { Subject, takeUntil } from 'rxjs';
-import { isFile } from '@app/editor/utils/file';
-
-interface ITabItem {
-  filePath: string;
-  name: string;
-  active: boolean;
-  isPendingWrite: boolean;
-}
+import { EditService, ITabItem } from './edit.service';
 
 @Component({
   standalone: true,
   selector: 'app-edit',
   imports: [AppEditorComponent],
   templateUrl: './edit.component.html',
-  styleUrl: './edit.component.scss',
+  styleUrls: ['./edit.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditComponent {
+export class EditComponent implements OnInit, OnDestroy {
   @ViewChild(AppEditorComponent) editorComponent:
     | AppEditorComponent
     | undefined;
 
-  private readonly nodeContainerService = inject(NodeContainerService);
-  private readonly editorStateService = inject(EditorStateService);
-  private readonly codeEditorService = inject(CodeEditorService);
-
-  private destroyRef$: Subject<void> = new Subject<void>();
-
-  openedTabs: WritableSignal<ITabItem[]> = signal([]);
-  // openedTabs: WritableSignal<ITabItem[]> = signal(
-  //   ['README.md', 'vite.config.js', 'package.json', '.gitignore'].map(
-  //     (i, index) => ({
-  //       filePath: i,
-  //       name: i,
-  //       active: index === 1,
-  //       isPendingWrite: false,
-  //     })
-  //   )
-  // );
+  editService = inject(EditService);
 
   options = {
     theme: 'vs-dark',
@@ -60,157 +34,35 @@ export class EditComponent {
     automaticLayout: true,
   };
 
-  constructor() {
-    effect(async () => {
-      const currentFilePath = this.editorStateService.geCurrentFilePath();
-      const fileTree = this.editorStateService.getFileTree();
-      if (currentFilePath && fileTree && isFile(fileTree, currentFilePath)) {
-        try {
-          const content = await this.nodeContainerService.readFile(
-            currentFilePath
-          );
-          this.updateTabs(currentFilePath);
-          if (content !== undefined) {
-            this.codeEditorService.openOrCreateFile({
-              content,
-              language: this.getLanguageByFilePath(currentFilePath),
-              filePath: currentFilePath,
-            });
-          }
-          // console.log('content', content);
-        } catch (error) {
-          console.log('error', error);
-        }
-      }
-    });
-  }
+  constructor() {}
 
   ngOnInit() {
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
 
-    this.codeEditorService.on('contentChanged', ({ content, filePath }) => {
-      this.openedTabs.update((tabs) =>
-        tabs.map((t) => ({
-          ...t,
-          isPendingWrite: t.filePath === filePath ? true : t.isPendingWrite,
-        }))
-      );
-    });
+    this.editService.initEvents();
   }
 
   ngOnDestroy() {
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
-  updateTabs(filePath: string) {
-    const isTabExist = this.openedTabs().find((t) => t.filePath === filePath);
-    if (!isTabExist) {
-      const newTab = {
-        filePath: filePath,
-        name: this.extractFileName(filePath),
-        isPendingWrite: false,
-        active: true,
-      };
-      this.openedTabs.update((tabs) => [
-        ...tabs.map((t) => ({
-          ...t,
-          active: false,
-        })),
-        newTab,
-      ]);
-    } else {
-      this.openedTabs.update((tabs) =>
-        tabs.map((t) => ({
-          ...t,
-          active: t.filePath === filePath,
-        }))
-      );
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      await this.editService.saveFile();
     }
   }
 
+  updateTabs(filePath: string) {
+    this.editService.updateTabs(filePath);
+  }
+
   selectTab(tab: ITabItem) {
-    this.editorStateService.setCurrentFilePath(tab.filePath);
+    this.editService.selectTab(tab);
   }
 
   closeTab(tabItem: ITabItem, event: Event) {
     event.stopPropagation();
-
-    const openedTabs = this.openedTabs().slice();
-    const findIndex = openedTabs.findIndex(
-      (t) => t.filePath === tabItem.filePath
-    );
-
-    if (findIndex === -1) {
-      // If the specified tab is not found, return directly
-      return;
-    }
-
-    const newTabs = openedTabs.filter((t) => t.filePath !== tabItem.filePath);
-    this.openedTabs.set(newTabs);
-
-    if (newTabs.length === 0) {
-      // If there are no open tabs, set the current file path to an empty string
-      this.editorStateService.setCurrentFilePath('');
-    } else {
-      // Calculate the new active tab index, focusing on the previous tab if possible
-      const newActiveIndex = findIndex > 0 ? findIndex - 1 : 0;
-      this.editorStateService.setCurrentFilePath(
-        newTabs[newActiveIndex].filePath
-      );
-    }
-  }
-
-  async handleKeyDown(event: KeyboardEvent) {
-    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-      event.preventDefault();
-      await this.saveFile();
-    }
-  }
-
-  async saveFile() {
-    const filePath = this.editorStateService.geCurrentFilePath();
-    if (filePath) {
-      const content = this.codeEditorService.getCurrentFileContent();
-      if (content) {
-        this.nodeContainerService.writeFile(filePath, content);
-
-        this.openedTabs.update((tabs) =>
-          tabs.map((t) => ({
-            ...t,
-            isPendingWrite: t.filePath === filePath ? false : t.isPendingWrite,
-          }))
-        );
-      }
-    }
-  }
-
-  getLanguageByFilePath(filePath: string) {
-    const suffix = filePath.split('.').pop() || 'default';
-
-    const languageMap: { [key: string]: string } = {
-      js: 'javascript',
-      mjs: 'javascript',
-      css: 'css',
-      ts: 'typescript',
-      tsx: 'typescript',
-      html: 'html',
-      json: 'json',
-      md: 'markdown',
-      yaml: 'yaml',
-      prettierrc: 'json',
-      default: 'json',
-    };
-
-    return languageMap[suffix] || 'json';
-  }
-
-  extractFileName(filePath: string): string {
-    const match = filePath.match(/[^/\\]+$/);
-
-    if (match) {
-      return match[0];
-    }
-
-    return '';
+    this.editService.closeTab(tabItem.filePath);
   }
 }
