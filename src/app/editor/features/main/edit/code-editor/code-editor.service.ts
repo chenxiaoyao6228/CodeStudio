@@ -1,6 +1,7 @@
 import { Injectable, Inject, InjectionToken, Optional } from '@angular/core';
 import { EventEmitter } from '@app/_shared/service/Emitter';
-import { AsyncSubject, Observable } from 'rxjs';
+import { AsyncSubject } from 'rxjs';
+
 export interface CodeEditorEvents {
   contentChanged: { content: string; filePath: string };
 }
@@ -64,12 +65,16 @@ export class CodeEditorService {
     return this.editor;
   }
 
-  openOrCreateFile(params: {
-    filePath: string;
-    content?: string;
-    language?: string;
-  }) {
-    const { content, language, filePath } = params;
+  async setLanguage(language: string) {
+    const model = this.editor.getModel();
+    monaco.editor.setModelLanguage(model, language);
+  }
+
+  async openOrCreateFile(params: { filePath: string; content?: string }) {
+    const { content, filePath } = params;
+    const language = this.getLanguageByFilePath(filePath);
+    await this.setLanguage(language);
+
     const uri = monaco.Uri.parse(filePath);
     let model = monaco.editor.getModel(uri);
     if (!model) {
@@ -126,6 +131,27 @@ export class CodeEditorService {
     const model = this.editor.getModel();
     const content = model.getValue();
     return content;
+  }
+
+  getLanguageByFilePath(filePath: string) {
+    const suffix = filePath.split('.').pop() || 'default';
+
+    const languageMap: Record<string, string> = {
+      js: 'javascript',
+      mjs: 'javascript',
+      css: 'css',
+      ts: 'typescript',
+      tsx: 'typescript',
+      html: 'html',
+      json: 'json',
+      md: 'markdown',
+      yaml: 'yaml',
+      vue: 'vue',
+      prettierrc: 'json',
+      default: 'json',
+    };
+
+    return languageMap[suffix] || 'json';
   }
 
   on<K extends keyof CodeEditorEvents>(

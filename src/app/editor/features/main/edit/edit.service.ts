@@ -37,7 +37,6 @@ export class EditService {
           if (content !== undefined) {
             this.codeEditorService.openOrCreateFile({
               content,
-              language: this.getLanguageByFilePath(currentFilePath),
               filePath: currentFilePath,
             });
           }
@@ -131,26 +130,6 @@ export class EditService {
         );
       }
     }
-  }
-
-  getLanguageByFilePath(filePath: string) {
-    const suffix = filePath.split('.').pop() || 'default';
-
-    const languageMap: { [key: string]: string } = {
-      js: 'javascript',
-      mjs: 'javascript',
-      css: 'css',
-      ts: 'typescript',
-      tsx: 'typescript',
-      html: 'html',
-      json: 'json',
-      md: 'markdown',
-      yaml: 'yaml',
-      prettierrc: 'json',
-      default: 'json',
-    };
-
-    return languageMap[suffix] || 'json';
   }
 
   extractFileName(filePath: string): string {

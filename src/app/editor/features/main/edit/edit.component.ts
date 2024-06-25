@@ -1,5 +1,3 @@
-// edit.component.ts
-
 import {
   ChangeDetectionStrategy,
   Component,
