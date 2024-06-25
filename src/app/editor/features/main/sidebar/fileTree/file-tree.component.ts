@@ -123,12 +123,36 @@ export class FileTreeComponent {
   }
 
   buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
+    const expandedNodesIds: string[] = [];
+
+    // Save the expanded state
+    if (this.treeControl.dataNodes) {
+      this.treeControl.dataNodes.forEach((node) => {
+        if (
+          this.treeControl.isExpandable(node) &&
+          this.treeControl.isExpanded(node)
+        ) {
+          expandedNodesIds.push(node.id);
+        }
+      });
+    }
+
     const _obj = {
       FILES: {
         directory: obj,
       },
     };
     const realTree = _buildFileTree(_obj, level, basePath);
+
+    // Restore the expanded state
+    if (expandedNodesIds.length) {
+      this.treeControl.dataNodes
+        .filter((node) => expandedNodesIds.includes(node.id))
+        .forEach((node) => {
+          this.treeControl.expand(node);
+        });
+    }
+
     return realTree;
 
     // https://stackoverflow.com/questions/53280079/tree-how-to-keep-opened-states-when-tree-updated

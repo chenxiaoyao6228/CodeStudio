@@ -28,5 +28,5 @@ function zipFolder(sourceFolder, targetZip) {
     zip.writeZip(targetZip);
 }
 
-const name = 'preact'
-zipFolder(`/home/york/CodeStudio/public/${name}`, `/home/york/CodeStudio/public/templates/${name}.zip`);
+const name = 'react-google-map-1'
+zipFolder(`/home/york/projects/CodeStudio/public/${name}`, `/home/york/projects/CodeStudio/public/templates/${name}.zip`);
