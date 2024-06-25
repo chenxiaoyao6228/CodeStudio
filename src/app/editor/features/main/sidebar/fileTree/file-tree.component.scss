@@ -6,9 +6,11 @@ $normal-icon-size: 16px;
   height: 100%;
   user-select: none;
   font-size: 16px;
+  cursor: pointer;
+
   .mat-tree-node {
     position: relative;
-    cursor: pointer;
+
     display: flex;
     align-items: center;
     border-radius: 4px;
@@ -41,6 +43,23 @@ $normal-icon-size: 16px;
         }
       }
     }
+
+    &.drop-above {
+      border-top: 2px solid #007acc;
+      background-color: rgba(0, 122, 204, 0.2);
+      margin-top: -1px;
+    }
+
+    &.drop-below {
+      border-bottom: 2px solid #007acc;
+      background-color: rgba(0, 122, 204, 0.2);
+      margin-bottom: -1px;
+    }
+
+    &.drop-center {
+      background-color: rgba(0, 122, 204, 0.4);
+    }
+
     .mat-tree-node-content {
       display: flex;
       align-items: center;
@@ -70,7 +89,6 @@ $normal-icon-size: 16px;
     }
     &:hover {
       opacity: 0.8;
-      cursor: pointer !important;
     }
 
     &.active {

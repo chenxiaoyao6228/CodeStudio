@@ -4,11 +4,28 @@
     [attr.id]="node.id"
     *matTreeNodeDef="let node; when: hasChild"
     matTreeNodeToggle
+    draggable="true"
+    (dragstart)="handleDragStart($event, node)"
+    (dragover)="handleDragOver($event, node)"
+    (drop)="handleDrop($event, node)"
+    (dragend)="handleDragEnd($event)"
     [ngClass]="{
       editing: editingNode()?.filePath === node.filePath,
-      creatingFile: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFile',
-      creatingFolder: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFolder',
-      renaming: editingNode()?.filePath === node.filePath && editingOperation() === 'renaming',
+      creatingFile:
+        editingNode()?.filePath === node.filePath &&
+        editingOperation() === 'creatingFile',
+      creatingFolder:
+        editingNode()?.filePath === node.filePath &&
+        editingOperation() === 'creatingFolder',
+      renaming:
+        editingNode()?.filePath === node.filePath &&
+        editingOperation() === 'renaming',
+      'drop-above':
+        dragNodeExpandOverArea === 'above' && dragNodeExpandOverNode === node,
+      'drop-below':
+        dragNodeExpandOverArea === 'below' && dragNodeExpandOverNode === node,
+      'drop-center':
+        dragNodeExpandOverArea === 'center' && dragNodeExpandOverNode === node
     }"
     [ngStyle]="{
       'padding-left': (node.level + 1) * 18 + 'px'
@@ -72,11 +89,28 @@
   <mat-tree-node
     [attr.id]="node.id"
     *matTreeNodeDef="let node"
+    draggable="true"
+    (dragstart)="handleDragStart($event, node)"
+    (dragover)="handleDragOver($event, node)"
+    (drop)="handleDrop($event, node)"
+    (dragend)="handleDragEnd($event)"
     [ngClass]="{
       editing: editingNode()?.filePath === node.filePath,
-      creatingFile: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFile',
-      creatingFolder: editingNode()?.filePath === node.filePath &&  editingOperation() === 'creatingFolder',
-      renaming: editingNode()?.filePath === node.filePath && editingOperation() === 'renaming',
+      creatingFile:
+        editingNode()?.filePath === node.filePath &&
+        editingOperation() === 'creatingFile',
+      creatingFolder:
+        editingNode()?.filePath === node.filePath &&
+        editingOperation() === 'creatingFolder',
+      renaming:
+        editingNode()?.filePath === node.filePath &&
+        editingOperation() === 'renaming',
+      'drop-above':
+        dragNodeExpandOverArea === 'above' && dragNodeExpandOverNode === node,
+      'drop-below':
+        dragNodeExpandOverArea === 'below' && dragNodeExpandOverNode === node,
+      'drop-center':
+        dragNodeExpandOverArea === 'center' && dragNodeExpandOverNode === node
     }"
     [ngStyle]="{
       'padding-left': (node.level + 1) * 18 + 'px',

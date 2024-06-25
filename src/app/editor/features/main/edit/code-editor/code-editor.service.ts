@@ -95,6 +95,33 @@ export class CodeEditorService {
     }
   }
 
+  async moveFileOrFolder(oldPath: string, newPath: string): Promise<void> {
+    const oldUri = monaco.Uri.parse(oldPath);
+    const newUri = monaco.Uri.parse(newPath);
+    const model = monaco.editor.getModel(oldUri);
+
+    if (model) {
+      // Get the content from the old model
+      const content = model.getValue();
+
+      // Create a new model with the same content at the new URI
+      const newModel = monaco.editor.createModel(
+        content,
+        model.getModeId(),
+        newUri
+      );
+
+      // Dispose of the old model
+      model.dispose();
+
+      // If the old model was currently open, set the new model in the editor
+      if (this.editor.getModel() === model) {
+        this.editor.setModel(newModel);
+        this.editor.focus();
+      }
+    }
+  }
+
   getCurrentFileContent() {
     const model = this.editor.getModel();
     const content = model.getValue();

@@ -21,6 +21,7 @@ import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CommonModule } from '@angular/common';
 import { getFileOrFolderName } from '@app/editor/utils/file';
 import { EditService } from '../../edit/edit.service';
+import { CodeEditorService } from '../../edit/code-editor/code-editor.service';
 
 function generateFileId(filePath: string) {
   return filePath.split('/').join('_').replace('.', '_');
@@ -34,6 +35,7 @@ export interface FileNode {
   level: number;
   filePath: string;
   id: string;
+  parentPath: string | null;
   children?: FileNode[];
 }
 
@@ -64,8 +66,15 @@ export class FileTreeComponent {
   nodeContainerService = inject(NodeContainerService);
   editorState = inject(EditorStateService);
   editService = inject(EditService);
+  codeEditorService = inject(CodeEditorService);
   editingOperation: WritableSignal<fileOperation | null> = signal(null);
   editingNode: WritableSignal<FileNode | null> = signal(null);
+
+  dragNode: FileNode | null = null;
+  dragNodeExpandOverNode: FileNode | null = null;
+  dragNodeExpandOverArea = '';
+  dragNodeExpandOverTime = 0;
+  dragNodeExpandOverWaitTimeMs = 300;
 
   private _transformer = (node: FileNode, level: number) => {
     const _node = {
@@ -75,6 +84,7 @@ export class FileTreeComponent {
       type: node.type,
       filePath: node.filePath,
       id: node.id,
+      parentPath: node.parentPath,
     };
 
     this.trackingNodeMap.set(_node.id, _node);
@@ -112,8 +122,10 @@ export class FileTreeComponent {
       const fileTree = this.editorState.getFileTree();
 
       if (fileTree) {
+        const expandedNodesIds = this.saveExpandedState();
         const builtTree = this.buildFileTree(fileTree);
         this.dataSource.data = builtTree;
+        this.restoreExpandedState(expandedNodesIds);
       }
 
       if (currentFilePath) {
@@ -123,35 +135,12 @@ export class FileTreeComponent {
   }
 
   buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
-    const expandedNodesIds: string[] = [];
-
-    // Save the expanded state
-    if (this.treeControl.dataNodes) {
-      this.treeControl.dataNodes.forEach((node) => {
-        if (
-          this.treeControl.isExpandable(node) &&
-          this.treeControl.isExpanded(node)
-        ) {
-          expandedNodesIds.push(node.id);
-        }
-      });
-    }
-
     const _obj = {
       FILES: {
         directory: obj,
       },
     };
     const realTree = _buildFileTree(_obj, level, basePath);
-
-    // Restore the expanded state
-    if (expandedNodesIds.length) {
-      this.treeControl.dataNodes
-        .filter((node) => expandedNodesIds.includes(node.id))
-        .forEach((node) => {
-          this.treeControl.expand(node);
-        });
-    }
 
     return realTree;
 
@@ -171,6 +160,7 @@ export class FileTreeComponent {
           level: level,
           expandable: false,
           filePath: filePath,
+          parentPath: basePath,
           id: level === 0 ? 'ROOT' : generateFileId(filePath),
         };
 
@@ -194,6 +184,136 @@ export class FileTreeComponent {
       return nodes || [];
     }
   }
+
+  // Save expanded state before rebuilding the tree
+  saveExpandedState() {
+    if (this.treeControl.dataNodes) {
+      const expandedNodesIds: string[] = [];
+      this.treeControl.dataNodes.forEach((node) => {
+        if (
+          this.treeControl.isExpandable(node) &&
+          this.treeControl.isExpanded(node)
+        ) {
+          expandedNodesIds.push(node.id);
+        }
+      });
+      return expandedNodesIds;
+    }
+    return [];
+  }
+
+  // Restore expanded state after rebuilding the tree
+  restoreExpandedState(expandedNodesIds: string[]) {
+    if (expandedNodesIds.length) {
+      this.treeControl.dataNodes
+        .filter((node) => expandedNodesIds.includes(node.id))
+        .forEach((node) => {
+          this.treeControl.expand(node);
+        });
+    }
+  }
+
+  // --------------- drag-and-drop start -------------------------
+  handleDragStart(event: DragEvent, node: FileNode) {
+    event.dataTransfer?.setData('text', JSON.stringify(node));
+    this.dragNode = node;
+    this.treeControl.collapse(node);
+  }
+
+  handleDragOver(event: DragEvent, node: FileNode) {
+    event.preventDefault();
+    if (node === this.dragNodeExpandOverNode) {
+      if (this.dragNode !== node && !this.treeControl.isExpanded(node)) {
+        if (
+          new Date().getTime() - this.dragNodeExpandOverTime >
+          this.dragNodeExpandOverWaitTimeMs
+        ) {
+          this.treeControl.expand(node);
+        }
+      }
+    } else {
+      this.dragNodeExpandOverNode = node;
+      this.dragNodeExpandOverTime = new Date().getTime();
+    }
+
+    const target = event.target as HTMLElement;
+    const percentageY = event.offsetY / target.clientHeight;
+
+    if (percentageY < 0.25) {
+      this.dragNodeExpandOverArea = 'above';
+    } else if (percentageY > 0.75) {
+      this.dragNodeExpandOverArea = 'below';
+    } else {
+      this.dragNodeExpandOverArea = 'center';
+    }
+  }
+
+  handleDragEnd(event: DragEvent) {
+    this.dragNode = null;
+    this.dragNodeExpandOverNode = null;
+    this.dragNodeExpandOverTime = 0;
+  }
+
+  async handleDrop(event: DragEvent, toPlaceNode: FileNode) {
+    event.preventDefault();
+    const movedNode = JSON.parse(event.dataTransfer?.getData('text') || '{}');
+
+    // only allow to drag and drop into a folder
+    if (
+      toPlaceNode.type === 'file' &&
+      movedNode.parentPath === toPlaceNode.parentPath
+    ) {
+      return;
+    }
+
+    if (toPlaceNode === movedNode) {
+      return;
+    }
+
+    const oldFilePath = movedNode.filePath;
+    const newParentPath =
+      toPlaceNode.type === 'directory'
+        ? toPlaceNode.filePath
+        : toPlaceNode.parentPath;
+    const newFilePath =
+      newParentPath === '' // rootPath
+        ? movedNode.name
+        : `${newParentPath}/${movedNode.name}`;
+
+    await this.nodeContainerService.renameFileOrFolder(
+      oldFilePath,
+      newFilePath
+    );
+
+    // update monaco editor
+    this.codeEditorService.moveFileOrFolder(oldFilePath, newFilePath);
+
+    // handle tabs
+    if (movedNode.type === 'directory') {
+      const node = this.findNodeByFilePath(
+        movedNode.filePath,
+        this.dataSource.data
+      );
+      // close all opened tabs of moved folder
+      if (node?.children) {
+        node.children.forEach((n) => {
+          this.editService.closeTab(n.filePath);
+        });
+      }
+    } else {
+      this.editService.closeTab(oldFilePath);
+      this.editService.updateTabs(newFilePath);
+    }
+
+    // update tree nodes
+    const updatedFileTree = await this.getFsTreeWithoutNodeModules();
+    this.editorState.setFileTree(updatedFileTree);
+
+    this.dragNode = null;
+    this.dragNodeExpandOverNode = null;
+    this.dragNodeExpandOverTime = 0;
+  }
+  // --------------- drag-and-drop end -------------------------
 
   private findNodeByFilePath(
     filePath: string,
