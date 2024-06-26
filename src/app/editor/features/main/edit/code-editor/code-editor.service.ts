@@ -1,6 +1,14 @@
-import { Injectable, Inject, InjectionToken, Optional } from '@angular/core';
+import { NodeContainerService } from '@app/editor/services/node-container.service';
+import {
+  Injectable,
+  Inject,
+  InjectionToken,
+  Optional,
+  inject,
+} from '@angular/core';
 import { EventEmitter } from '@app/_shared/service/Emitter';
 import { AsyncSubject } from 'rxjs';
+import { TypeDefinition } from './type-loader.service';
 
 export interface CodeEditorEvents {
   contentChanged: { content: string; filePath: string };
@@ -15,6 +23,7 @@ export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
   providedIn: 'root',
 })
 export class CodeEditorService {
+  nodeContainerService = inject(NodeContainerService);
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
   private editor: monaco.editor.IStandaloneCodeEditor | undefined;
@@ -57,100 +66,145 @@ export class CodeEditorService {
     }
   }
 
+  async ensureMonacoLoaded(): Promise<void> {
+    if (!this.isScriptLoaded) {
+      await this.afterScriptLoad$.toPromise();
+    }
+  }
+
   initEditor(
     editorWrapper: HTMLElement,
     options: monaco.editor.IStandaloneEditorConstructionOptions
   ): monaco.editor.IStandaloneCodeEditor {
     if (!this.editor) {
-      // Configure TypeScript defaults
-      monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-        target: monaco.languages.typescript.ScriptTarget.ESNext,
-        moduleResolution:
-          monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-        baseUrl: '.',
-        paths: {
-          '*': ['src/*'],
-        },
-        allowJs: true,
-        checkJs: true,
-        jsx: monaco.languages.typescript.JsxEmit.React,
-        jsxFactory: 'React.createElement',
-        reactNamespace: 'React',
-        allowSyntheticDefaultImports: true,
-        module: monaco.languages.typescript.ModuleKind.ESNext,
-        noEmit: true,
-        typeRoots: ['node_modules/@types'],
-      });
-
       this.editor = monaco.editor.create(editorWrapper, options);
 
-      this.setupPathIntellisense(this.editor);
+      this.listenToGoToDefinition(this.editor!);
     }
     return this.editor;
   }
 
-  setupPathIntellisense(editor: monaco.editor.IStandaloneCodeEditor) {
+  async setupPathIntellisense(
+    typeDefinitions: TypeDefinition[],
+    pathMappings: any
+  ) {
+    await this.ensureMonacoLoaded();
+
     /*
-     * https://stackoverflow.com/questions/57146485/monaco-editor-intellisense-from-multiple-files
+     * https://github.com/microsoft/monaco-editor/issues/2030
+     * https://github.com/microsoft/monaco-editor/issues/3355
      * https://github.com/microsoft/monaco-editor/discussions/3718
+     * https://stackoverflow.com/questions/57146485/monaco-editor-intellisense-from-multiple-files
+     * https://stackoverflow.com/questions/73936684/performant-way-to-load-2000-ts-models-into-monaco-editor-for-intellisense
      */
+
     monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: true,
+      noSuggestionDiagnostics: true,
+    });
+
+    monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: true,
+      noSuggestionDiagnostics: true,
+    });
+
+    // load external ts files
+    typeDefinitions.forEach((def) => {
+      const path = 'file://' + def.path.slice(1);
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(
+        def.content,
+        path
+      );
+    });
+
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ESNext,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      baseUrl: '.',
+      paths: {
+        '*': ['src/*'],
+        ...pathMappings,
+      },
+      allowJs: true,
+      checkJs: true,
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      jsxFactory: 'React.createElement',
+      reactNamespace: 'React',
+      allowSyntheticDefaultImports: true,
+      module: monaco.languages.typescript.ModuleKind.ESNext,
+      noEmit: true,
+      typeRoots: ['node_modules/@types'],
+    });
+  }
+
+  private listenToGoToDefinition(editor: monaco.editor.IStandaloneCodeEditor) {
     editor.addCommand(monaco.KeyCode.F12, async () => {
-      const position = editor.getPosition();
-      const model = editor.getModel();
-      if (model && position) {
-        const word = model.getWordAtPosition(position);
-        if (word) {
-          const definition =
-            await monaco.languages.typescript.getTypeScriptWorker();
-          const client = await definition(model.uri);
+      try {
+        const position = editor.getPosition();
+        const model = editor.getModel();
+        if (model && position) {
+          const word = model.getWordAtPosition(position);
+          if (word) {
+            const definition =
+              await monaco.languages.typescript.getTypeScriptWorker();
+            const client = await definition(model.uri);
 
-          const defs = await client.getDefinitionAtPosition(
-            model.uri.toString(),
-            model.getOffsetAt(position)
-          );
+            const defs = await client.getDefinitionAtPosition(
+              model.uri.toString(),
+              model.getOffsetAt(position)
+            );
 
-          if (defs && defs.length > 0) {
-            const def = defs[0];
-            const resource = monaco.Uri.parse(def.fileName);
-            let targetModel = monaco.editor.getModel(resource);
+            if (defs && defs.length > 0) {
+              const def = defs[0];
+              const resource = monaco.Uri.parse(def.fileName);
+              let targetModel = monaco.editor.getModel(resource);
 
-            if (!targetModel) {
-              // Load the target file if not already opened in the editor
-              const response = await fetch(def.fileName);
-              const content = await response.text();
-              const newModel = monaco.editor.createModel(
-                content,
-                'typescript',
-                resource
+              if (!targetModel) {
+                // Load the target file if not already opened in the editor
+                const content = await this.nodeContainerService.readFile(
+                  resource.path.slice(1)
+                );
+                const newModel = monaco.editor.createModel(
+                  content,
+                  'typescript',
+                  resource
+                );
+                monaco.editor.setModelLanguage(newModel, 'typescript');
+                targetModel = newModel;
+              }
+
+              this.emit('goToDefinition', {
+                filePath: resource.path.slice(1),
+              });
+
+              // Move the cursor to the correct position
+              const startPosition = targetModel.getPositionAt(
+                def.textSpan.start
               );
-              monaco.editor.setModelLanguage(newModel, 'typescript');
-              targetModel = newModel;
+              const endPosition = targetModel.getPositionAt(
+                def.textSpan.start + def.textSpan.length
+              );
+
+              editor.setModel(targetModel);
+              editor.setSelection(
+                new monaco.Range(
+                  startPosition.lineNumber,
+                  startPosition.column,
+                  endPosition.lineNumber,
+                  endPosition.column
+                )
+              );
+              editor.revealLineInCenter(startPosition.lineNumber);
             }
-
-            this.emit('goToDefinition', {
-              filePath: resource.path.slice(1),
-            });
-
-            // Move the cursor to the correct position
-            const startPosition = targetModel.getPositionAt(def.textSpan.start);
-            const endPosition = targetModel.getPositionAt(
-              def.textSpan.start + def.textSpan.length
-            );
-
-            editor.setModel(targetModel);
-            editor.setSelection(
-              new monaco.Range(
-                startPosition.lineNumber,
-                startPosition.column,
-                endPosition.lineNumber,
-                endPosition.column
-              )
-            );
-            editor.revealLineInCenter(startPosition.lineNumber);
           }
         }
+      } catch (error) {
+        console.log('F12 error: ', error);
       }
     });
   }

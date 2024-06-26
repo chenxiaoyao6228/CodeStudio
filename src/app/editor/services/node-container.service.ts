@@ -48,6 +48,7 @@ export class NodeContainerService {
 
     // install deps
     await this.installDeps();
+
     // start devServer
     await this.startDevServer();
   }
@@ -277,4 +278,10 @@ export class NodeContainerService {
       throw error;
     }
   };
+
+  async getDirectoryFiles(directory: string): Promise<string[]> {
+    const webContainer = await this.bootOrGetContainer();
+    const files = await webContainer.fs.readdir(directory);
+    return files;
+  }
 }

@@ -45,18 +45,23 @@ export class EditService {
     });
   }
 
-  updateFileModels(filePaths: string[]) {
+  async updateFileModels(filePaths: string[]) {
+    await this.codeEditorService.ensureMonacoLoaded();
+
     filePaths.forEach(async (filePath) => {
-      // 检查model是否存在, 不存在则新建,setModel
       if (!this.codeEditorService.isModelExist(filePath)) {
-        const content = await this.nodeContainerService.readFile(filePath);
-        if (content) {
-          this.codeEditorService.openOrCreateFile({
-            filePath,
-            content,
-          });
-        } else {
-          console.log(`error: content of ${filePath} not exists`);
+        try {
+          const content = await this.nodeContainerService.readFile(filePath);
+          if (content) {
+            this.codeEditorService.openOrCreateFile({
+              filePath,
+              content,
+            });
+          } else {
+            console.log(`error: content of ${filePath} not exists`);
+          }
+        } catch (error) {
+          console.log('updateFileModels error:', error);
         }
       }
     });

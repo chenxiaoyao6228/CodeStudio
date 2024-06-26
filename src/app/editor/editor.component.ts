@@ -9,6 +9,8 @@ import { ActivatedRoute } from '@angular/router';
 import { FileLoaderFactory } from './services/file-loader/loader-factory.service';
 import { EditorStateService } from './services/editor-state.service';
 import { StartupPhase } from './constants';
+import { CodeEditorService } from './features/main/edit/code-editor/code-editor.service';
+import { TypeLoaderService } from './features/main/edit/code-editor/type-loader.service';
 
 export interface IRouteParams {
   terminal: string;
@@ -42,7 +44,7 @@ export interface IRouteParams {
     `,
   ],
 })
-export class EditorComponent implements OnInit, AfterViewInit {
+export class EditorComponent implements AfterViewInit {
   routeParams: IRouteParams = {
     terminal: 'dev',
   };
@@ -50,13 +52,15 @@ export class EditorComponent implements OnInit, AfterViewInit {
   nodeContainerService = inject(NodeContainerService);
   fileLoaderService = inject(FileLoaderFactory);
   editorStateService = inject(EditorStateService);
-  ngOnInit(): void {
+  typeLoadingService = inject(TypeLoaderService);
+  codeEditorService = inject(CodeEditorService);
+
+  async ngAfterViewInit() {
     // support direct access from route params
     this.route.queryParams.subscribe((params: any) => {
       this.routeParams = params;
     });
-  }
-  async ngAfterViewInit() {
+
     // local files have already been loaded by user picker
     if (!(this.routeParams.source === 'local')) {
       this.editorStateService.setPhase(StartupPhase.LOADING_FILES);
@@ -72,5 +76,16 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
 
     await this.nodeContainerService.init(this.routeParams);
+
+    // Load types
+    const result = await this.typeLoadingService.loadTypeDefinitions();
+
+    if (result) {
+      const { typeDefinitions, pathMappings } = result;
+      this.codeEditorService.setupPathIntellisense(
+        typeDefinitions,
+        pathMappings
+      );
+    }
   }
 }
