@@ -6,8 +6,6 @@ export interface CodeEditorEvents {
   contentChanged: { content: string; filePath: string };
 }
 
-declare const monaco: any;
-
 export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
   'appMonacoBaseHref'
 );
@@ -18,7 +16,7 @@ export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
 export class CodeEditorService {
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
-  private editor: any = undefined;
+  private editor: monaco.editor.IStandaloneCodeEditor | undefined;
   private eventEmitter = new EventEmitter<CodeEditorEvents>();
 
   constructor(@Optional() @Inject(APP_MONACO_BASE_HREF) private base: string) {
@@ -58,16 +56,21 @@ export class CodeEditorService {
     }
   }
 
-  initEditor(editorWrapper: HTMLElement, options: any): void {
+  initEditor(
+    editorWrapper: HTMLElement,
+    options: monaco.editor.IStandaloneEditorConstructionOptions
+  ): monaco.editor.IStandaloneCodeEditor {
     if (!this.editor) {
+
       this.editor = monaco.editor.create(editorWrapper, options);
+
     }
     return this.editor;
   }
 
   async setLanguage(language: string) {
-    const model = this.editor.getModel();
-    monaco.editor.setModelLanguage(model, language);
+    const model = this.editor!.getModel();
+    monaco.editor.setModelLanguage(model!, language);
   }
 
   async openOrCreateFile(params: { filePath: string; content?: string }) {
@@ -77,19 +80,19 @@ export class CodeEditorService {
 
     const uri = monaco.Uri.parse(filePath);
     let model = monaco.editor.getModel(uri);
-    if (!model) {
+    if (!model && content) {
       model = monaco.editor.createModel(content, language, uri);
       // listen to model change event
       model.onDidChangeContent(() => {
-        const content = model.getValue();
+        const content = model!.getValue();
         this.emit('contentChanged', {
           content,
-          filePath: model.uri.path.slice(1), // remove '/' at the front
+          filePath: model!.uri.path.slice(1), // remove '/' at the front
         });
       });
     }
-    this.editor.setModel(model);
-    this.editor.focus();
+    this.editor!.setModel(model);
+    this.editor!.focus();
   }
 
   closeFile(filePath: string) {
@@ -112,7 +115,7 @@ export class CodeEditorService {
       // Create a new model with the same content at the new URI
       const newModel = monaco.editor.createModel(
         content,
-        model.getModeId(),
+        model.getLanguageId(),
         newUri
       );
 
@@ -120,16 +123,16 @@ export class CodeEditorService {
       model.dispose();
 
       // If the old model was currently open, set the new model in the editor
-      if (this.editor.getModel() === model) {
-        this.editor.setModel(newModel);
-        this.editor.focus();
+      if (this.editor!.getModel() === model) {
+        this.editor!.setModel(newModel);
+        this.editor!.focus();
       }
     }
   }
 
   getCurrentFileContent() {
-    const model = this.editor.getModel();
-    const content = model.getValue();
+    const model = this.editor!.getModel();
+    const content = model!.getValue();
     return content;
   }
 

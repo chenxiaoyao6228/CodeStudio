@@ -30,6 +30,7 @@ module.exports = tseslint.config(
           style: "kebab-case",
         },
       ],
+    "@typescript-eslint/triple-slash-reference": "off"
     },
   },
   {

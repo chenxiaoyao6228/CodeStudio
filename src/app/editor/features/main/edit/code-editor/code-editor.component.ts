@@ -17,12 +17,10 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
 import { CodeEditorService } from './code-editor.service';
 
-declare const monaco: any;
-
 export interface EditorModel {
   content: string;
   language?: string;
-  uri?: any;
+  uri?: string;
 }
 
 @Component({
@@ -42,13 +40,13 @@ export interface EditorModel {
 })
 export class AppEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer') editorContentRef!: ElementRef;
-  @Input() @HostBinding('style.height') height: string = '100%';
+  @Input() @HostBinding('style.height') height = '100%';
   @Input() options: any; // initialize options
 
   @Output() modelChange = new EventEmitter<EditorModel>();
 
   private destroyRef$: Subject<void> = new Subject<void>();
-  private editor: any = undefined;
+  private editor: monaco.editor.IStandaloneCodeEditor | undefined;
 
   private disposables: any[] = [];
 
