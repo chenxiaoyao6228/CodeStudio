@@ -1,5 +1,3 @@
-// edit.service.ts
-
 import { Injectable, inject } from '@angular/core';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
@@ -47,6 +45,23 @@ export class EditService {
     });
   }
 
+  updateFileModels(filePaths: string[]) {
+    filePaths.forEach(async (filePath) => {
+      // 检查model是否存在, 不存在则新建,setModel
+      if (!this.codeEditorService.isModelExist(filePath)) {
+        const content = await this.nodeContainerService.readFile(filePath);
+        if (content) {
+          this.codeEditorService.openOrCreateFile({
+            filePath,
+            content,
+          });
+        } else {
+          console.log(`error: content of ${filePath} not exists`);
+        }
+      }
+    });
+  }
+
   initEvents() {
     this.codeEditorService.on('contentChanged', ({ content, filePath }) => {
       this.openedTabs.update((tabs) =>
@@ -55,6 +70,9 @@ export class EditService {
           isPendingWrite: t.filePath === filePath ? true : t.isPendingWrite,
         }))
       );
+    });
+    this.codeEditorService.on('goToDefinition', ({ filePath }) => {
+      this.editorStateService.setCurrentFilePath(filePath);
     });
   }
 
@@ -88,7 +106,7 @@ export class EditService {
     this.editorStateService.setCurrentFilePath(tab.filePath);
   }
 
-  closeTab(filePath: string) {
+  closeTab(filePath: string, preserveModel = false) {
     const openedTabs = this.openedTabs().slice();
     const findIndex = openedTabs.findIndex((t) => t.filePath === filePath);
 
@@ -97,8 +115,10 @@ export class EditService {
       return;
     }
 
-    // editor close model to release memory
-    this.codeEditorService.closeFile(filePath);
+    // editor close model to release memory, update this when rename or delete file
+    if (!preserveModel) {
+      this.codeEditorService.closeFile(filePath);
+    }
 
     const newTabs = openedTabs.filter((t) => t.filePath !== filePath);
     this.openedTabs.set(newTabs);

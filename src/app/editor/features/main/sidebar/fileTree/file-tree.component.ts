@@ -123,9 +123,12 @@ export class FileTreeComponent {
 
       if (fileTree) {
         const expandedNodesIds = this.saveExpandedState();
-        const builtTree = this.buildFileTree(fileTree);
+        const [builtTree, filePaths] = this.buildFileTree(fileTree);
         this.dataSource.data = builtTree;
         this.restoreExpandedState(expandedNodesIds);
+
+        // update all file models in advance to facilitate path intellisense, got to definition
+        this.editService.updateFileModels(filePaths);
       }
 
       if (currentFilePath) {
@@ -134,7 +137,12 @@ export class FileTreeComponent {
     });
   }
 
-  buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
+  buildFileTree(
+    obj: FileSystemTree,
+    level = 0,
+    basePath = ''
+  ): [FileNode[], string[]] {
+    const filePaths: string[] = [];
     const _obj = {
       FILES: {
         directory: obj,
@@ -142,7 +150,7 @@ export class FileTreeComponent {
     };
     const realTree = _buildFileTree(_obj, level, basePath);
 
-    return realTree;
+    return [realTree, filePaths];
 
     // https://stackoverflow.com/questions/53280079/tree-how-to-keep-opened-states-when-tree-updated
     function _buildFileTree(
@@ -154,6 +162,7 @@ export class FileTreeComponent {
         const value = obj[key];
         const filePath =
           level === 0 ? '' : level === 1 ? key : basePath + '/' + key;
+
         const node: FileNode = {
           name: key,
           type: 'file',
@@ -176,6 +185,8 @@ export class FileTreeComponent {
               : basePath + '/' + node.name
           ).sort((a, b) => (b.type === 'directory' ? 1 : -1)); // directory shows first
           node.expandable = node.children?.length > 0;
+        } else {
+          filePaths.push(filePath);
         }
 
         return node;

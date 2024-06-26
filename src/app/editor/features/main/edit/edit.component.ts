@@ -61,6 +61,6 @@ export class EditComponent implements OnInit, OnDestroy {
 
   closeTab(tabItem: ITabItem, event: Event) {
     event.stopPropagation();
-    this.editService.closeTab(tabItem.filePath);
+    this.editService.closeTab(tabItem.filePath, true);
   }
 }
