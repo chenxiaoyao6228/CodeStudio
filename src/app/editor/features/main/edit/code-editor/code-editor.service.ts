@@ -8,7 +8,9 @@ import {
 } from '@angular/core';
 import { EventEmitter } from '@app/_shared/service/Emitter';
 import { AsyncSubject } from 'rxjs';
-import { TypeDefinition } from './type-loader.service';
+import { TypeDefinition, TypeLoaderService } from './type-loader.service';
+import { IDisposable } from '@xterm/xterm';
+import debounce from 'lodash/debounce';
 
 export interface CodeEditorEvents {
   contentChanged: { content: string; filePath: string };
@@ -22,15 +24,22 @@ export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
 @Injectable({
   providedIn: 'root',
 })
-export class CodeEditorService {
+export class CodeEditorService implements IDisposable {
+  typeLoaderService = inject(TypeLoaderService);
   nodeContainerService = inject(NodeContainerService);
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
   private editor: monaco.editor.IStandaloneCodeEditor | undefined;
   private eventEmitter = new EventEmitter<CodeEditorEvents>();
+  private disposables: monaco.IDisposable[] = [];
+  debouncedResolveContents: () => void;
 
   constructor(@Optional() @Inject(APP_MONACO_BASE_HREF) private base: string) {
     this.loadMonacoScript();
+    this.debouncedResolveContents = debounce(
+      this.resolveContent.bind(this),
+      3000
+    );
   }
 
   public getScriptLoadSubject(): AsyncSubject<boolean> {
@@ -79,39 +88,109 @@ export class CodeEditorService {
     if (!this.editor) {
       this.editor = monaco.editor.create(editorWrapper, options);
 
+      // javascript
+      monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+
+      monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+        noSemanticValidation: true,
+        noSyntaxValidation: true,
+        noSuggestionDiagnostics: true,
+      });
+
+      // typescript
+      monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
+      monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+        noSemanticValidation: true,
+        noSyntaxValidation: true,
+        noSuggestionDiagnostics: true,
+      });
+
+      monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+        target: monaco.languages.typescript.ScriptTarget.ESNext,
+        moduleResolution:
+          monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+        module: monaco.languages.typescript.ModuleKind.ESNext,
+        baseUrl: '.',
+        paths: {
+          '*': ['src/*'],
+        },
+        allowJs: true,
+        checkJs: true,
+        jsx: monaco.languages.typescript.JsxEmit.React,
+        jsxFactory: 'React.createElement',
+        reactNamespace: 'React',
+        allowSyntheticDefaultImports: true,
+        noEmit: true,
+        typeRoots: ['node_modules/@types'],
+      });
+
+      this.setUpPathIntellisenseListeners();
+
       this.listenToGoToDefinition(this.editor!);
     }
     return this.editor;
   }
 
-  async setupPathIntellisense(
+  private setUpPathIntellisenseListeners() {
+    if (!this.editor) {
+      throw Error('No editor');
+    }
+
+    const changeModelDisposable = this.editor.onDidChangeModel(
+      ({ newModelUrl }) => {
+        console.log('newModelUrl', newModelUrl);
+        this.resolveContent();
+      }
+    );
+
+    this.disposables.push(changeModelDisposable);
+
+    const changeModelContentDisposable = this.editor.onDidChangeModelContent(
+      (e) => {
+        this.debouncedResolveContents();
+      }
+    );
+
+    this.disposables.push(changeModelContentDisposable);
+
+    // resolve first content if exist
+    this.resolveContent();
+  }
+
+  async resolveContent() {
+    const model = this.editor!.getModel();
+    if (!model) {
+      throw Error('No model');
+    }
+
+    const content = model.getLinesContent().join('\n');
+
+    const res = await this.typeLoaderService.loadCurrentFileTypeDefinitions(
+      model.uri.path,
+      content
+    );
+
+    if (res) {
+      const { typeDefinitions, pathMappings } = res;
+      this.setupLibPathIntellisense(typeDefinitions, pathMappings);
+    }
+  }
+
+  async setupLibPathIntellisense(
     typeDefinitions: TypeDefinition[],
     pathMappings: any
   ) {
     await this.ensureMonacoLoaded();
 
     /*
+     * https://stackoverflow.com/questions/77342362/monaco-editor-typescript-how-to-add-global-types
+     * https://stackoverflow.com/questions/52290727/adding-typescript-type-declarations-to-monaco-editor
      * https://github.com/microsoft/monaco-editor/issues/2030
      * https://github.com/microsoft/monaco-editor/issues/3355
      * https://github.com/microsoft/monaco-editor/discussions/3718
      * https://stackoverflow.com/questions/57146485/monaco-editor-intellisense-from-multiple-files
      * https://stackoverflow.com/questions/73936684/performant-way-to-load-2000-ts-models-into-monaco-editor-for-intellisense
      */
-
-    monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
-
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: true,
-      noSyntaxValidation: true,
-      noSuggestionDiagnostics: true,
-    });
-
-    monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: true,
-      noSyntaxValidation: true,
-      noSuggestionDiagnostics: true,
-    });
 
     // load external ts files
     typeDefinitions.forEach((def) => {
@@ -122,23 +201,14 @@ export class CodeEditorService {
       );
     });
 
+    const oldOptions =
+      monaco.languages.typescript.typescriptDefaults.getCompilerOptions();
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      target: monaco.languages.typescript.ScriptTarget.ESNext,
-      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-      baseUrl: '.',
+      ...oldOptions,
       paths: {
-        '*': ['src/*'],
+        ...oldOptions?.paths,
         ...pathMappings,
       },
-      allowJs: true,
-      checkJs: true,
-      jsx: monaco.languages.typescript.JsxEmit.React,
-      jsxFactory: 'React.createElement',
-      reactNamespace: 'React',
-      allowSyntheticDefaultImports: true,
-      module: monaco.languages.typescript.ModuleKind.ESNext,
-      noEmit: true,
-      typeRoots: ['node_modules/@types'],
     });
   }
 
@@ -150,9 +220,9 @@ export class CodeEditorService {
         if (model && position) {
           const word = model.getWordAtPosition(position);
           if (word) {
-            const definition =
+            const tsWorker =
               await monaco.languages.typescript.getTypeScriptWorker();
-            const client = await definition(model.uri);
+            const client = await tsWorker(model.uri);
 
             const defs = await client.getDefinitionAtPosition(
               model.uri.toString(),
@@ -178,6 +248,8 @@ export class CodeEditorService {
                 targetModel = newModel;
               }
 
+              editor.setModel(targetModel);
+
               this.emit('goToDefinition', {
                 filePath: resource.path.slice(1),
               });
@@ -189,17 +261,18 @@ export class CodeEditorService {
               const endPosition = targetModel.getPositionAt(
                 def.textSpan.start + def.textSpan.length
               );
-
-              editor.setModel(targetModel);
-              editor.setSelection(
-                new monaco.Range(
-                  startPosition.lineNumber,
-                  startPosition.column,
-                  endPosition.lineNumber,
-                  endPosition.column
-                )
-              );
-              editor.revealLineInCenter(startPosition.lineNumber);
+              // might jump to ref file
+              if (startPosition && endPosition) {
+                editor.setSelection(
+                  new monaco.Range(
+                    startPosition.lineNumber,
+                    startPosition.column,
+                    endPosition.lineNumber,
+                    endPosition.column
+                  )
+                );
+                editor.revealLineInCenter(startPosition.lineNumber);
+              }
             }
           }
         }
@@ -304,6 +377,10 @@ export class CodeEditorService {
     };
 
     return languageMap[suffix] || 'json';
+  }
+
+  dispose() {
+    this.disposables.forEach((d) => d.dispose());
   }
 
   on<K extends keyof CodeEditorEvents>(

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ImportKind, ImportResult, parseImports } from './deps-parsre.service';
 
 export interface TypeDefinition {
   path: string;
@@ -11,7 +12,7 @@ export interface TypeDefinition {
   providedIn: 'root',
 })
 export class TypeLoaderService {
-  private nodeService = inject(NodeContainerService);
+  private nodeContainerService = inject(NodeContainerService);
   private typeDefsSubject = new BehaviorSubject<TypeDefinition[]>([]);
   public readonly typeDefs$: Observable<TypeDefinition[]> =
     this.typeDefsSubject.asObservable();
@@ -19,20 +20,26 @@ export class TypeLoaderService {
   constructor() {}
 
   // load type definitions from dependencies
-  async loadTypeDefinitions(): Promise<
+  async loadCurrentFileTypeDefinitions(
+    parentPath: string,
+    content: string
+  ): Promise<
     { typeDefinitions: TypeDefinition[]; pathMappings: any } | undefined
   > {
     const typeDefs: TypeDefinition[] = [];
     const pathMaps: any = {};
 
-    try {
-      const deps = await this.getDependencies();
-      if (deps.length === 0) return;
+    const imports = parseImports(content);
 
-      const files = await this.collectFilesToRead(deps);
+    try {
+      if (imports.length === 0) return;
+
+      const files = await this.collectFilesToRead(imports);
+
       if (files.length === 0) return;
 
       await this.readFilesAndPopulateDefinitions(files, typeDefs, pathMaps);
+
       return { typeDefinitions: typeDefs, pathMappings: pathMaps };
     } catch (err) {
       console.error('Error loading type definitions:', err);
@@ -40,32 +47,52 @@ export class TypeLoaderService {
     }
   }
 
-  // retrieve dependencies from package.json
-  private async getDependencies(): Promise<string[]> {
-    try {
-      const content = await this.nodeService.readFile('./package.json');
-      const pkgJson = JSON.parse(content);
-      return Object.keys(pkgJson.dependencies || {});
-    } catch (err) {
-      console.error('Failed to read dependencies:', err);
-      return [];
-    }
-  }
-
-  // collect files to read for type definitions
-  private async collectFilesToRead(deps: string[]): Promise<string[]> {
+  // extend collectFilesToRead to include @types packages
+  private async collectFilesToRead(imports: ImportResult[]): Promise<string[]> {
     const fileList: string[] = [];
     const dirList: string[] = [];
 
     await Promise.all(
-      deps.map(async (lib) => {
-        const pkgContent = await this.readPackageJson(lib);
-        if (!pkgContent) return;
-
-        const pkgJson = JSON.parse(pkgContent);
-        if (!pkgJson.exports) return;
-
-        this.extractFilesFromExports(pkgJson.exports, lib, fileList, dirList);
+      imports.map(async (i) => {
+        switch (i.kind) {
+          case ImportKind.Package: {
+            const pkgContent = await this.readPackageJson(i.path);
+            if (pkgContent) {
+              const pkgJson = JSON.parse(pkgContent);
+              if (pkgJson.exports) {
+                this.extractFilesFromExports(
+                  pkgJson.exports,
+                  i.path,
+                  fileList,
+                  dirList
+                );
+              }
+            }
+            const typesPath = await this.checkForTypesPackage(i.path);
+            if (typesPath) {
+              const path = `./node_modules/@types/${i.path
+                .replace(/^@/, '')
+                .replace(/\//, '__')}/${this.normalize(typesPath)}`;
+              if (path.includes('*')) {
+                dirList.push(path.substring(0, path.lastIndexOf('/')));
+              } else {
+                fileList.push(path);
+              }
+            }
+            break;
+          }
+          case ImportKind.Relative:
+            // TODO:
+            break;
+          case ImportKind.Alias:
+            // TODO:
+            break;
+          case ImportKind.Reference:
+            // TODO:
+            break;
+          default:
+            break;
+        }
       })
     );
 
@@ -76,7 +103,7 @@ export class TypeLoaderService {
   // read package.json file for a dependency
   private async readPackageJson(lib: string): Promise<string | undefined> {
     try {
-      return await this.nodeService.readFile(
+      return await this.nodeContainerService.readFile(
         `./node_modules/${lib}/package.json`
       );
     } catch (err: any) {
@@ -118,7 +145,7 @@ export class TypeLoaderService {
 
   // read type definition files from a directory
   private async readTypeFilesFromDir(dir: string): Promise<string[]> {
-    const files = await this.nodeService.getDirectoryFiles(dir);
+    const files = await this.nodeContainerService.getDirectoryFiles(dir);
     return files
       .filter((file) => file.endsWith('.d.ts'))
       .map((file) => `${dir}/${file}`);
@@ -132,7 +159,7 @@ export class TypeLoaderService {
   ) {
     await Promise.all(
       files.map(async (file) => {
-        const content = await this.nodeService.readFile(file);
+        const content = await this.nodeContainerService.readFile(file);
         typeDefs.push({ path: file, content });
         const moduleName = this.extractModuleName(file);
         pathMaps[moduleName] = [`./node_modules/${moduleName}`];
@@ -151,5 +178,20 @@ export class TypeLoaderService {
   private extractModuleName(path: string): string {
     const parts = path.split('/');
     return parts[2]; // Assuming path like './node_modules/{module}/...'
+  }
+
+  // check for @types package
+  private async checkForTypesPackage(lib: string): Promise<string | undefined> {
+    const typesPackage = `@types/${lib.replace(/^@/, '').replace(/\//, '__')}`;
+    try {
+      const content = await this.nodeContainerService.readFile(
+        `./node_modules/${typesPackage}/package.json`
+      );
+      const pkgJson = JSON.parse(content);
+      return pkgJson.typings ?? pkgJson.types;
+    } catch (err: any) {
+      if (err.message.startsWith('ENOENT')) return;
+      throw err;
+    }
   }
 }

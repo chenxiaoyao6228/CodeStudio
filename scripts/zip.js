@@ -2,6 +2,24 @@ const fs = require('fs');
 const path = require('path');
 const AdmZip = require('adm-zip');
 
+function deleteNodeModules(folderPath) {
+    const files = fs.readdirSync(folderPath);
+
+    files.forEach(file => {
+        const filePath = path.join(folderPath, file);
+        const stats = fs.statSync(filePath);
+
+        if (stats.isDirectory()) {
+            if (file === 'node_modules') {
+                fs.rmSync(filePath, { recursive: true, force: true });
+                console.log(`Deleted ${filePath}`);
+            } else {
+                deleteNodeModules(filePath);
+            }
+        }
+    });
+}
+
 function zipFolderRecursive(folderPath, zip, baseFolder) {
     const files = fs.readdirSync(folderPath);
 
@@ -11,17 +29,18 @@ function zipFolderRecursive(folderPath, zip, baseFolder) {
 
         const stats = fs.statSync(filePath);
         if (stats.isDirectory()) {
-            zip.addFile(relativePath + '/', Buffer.alloc(0), '', 0o755); 
+            zip.addFile(relativePath + '/', Buffer.alloc(0), '', 0o755);
             zipFolderRecursive(filePath, zip, baseFolder);
         } else {
             const fileData = fs.readFileSync(filePath);
-            zip.addFile(relativePath, fileData, '', 0o644); 
+            zip.addFile(relativePath, fileData, '', 0o644);
         }
     });
 }
 
 function zipFolder(sourceFolder, targetZip) {
     const zip = new AdmZip();
+    deleteNodeModules(sourceFolder);
     zipFolderRecursive(sourceFolder, zip, sourceFolder);
     zip.writeZip(targetZip);
 }
@@ -37,6 +56,7 @@ const targetZip = `${sourceFolder}.zip`;
 const sourceZip = targetZip;
 const targetFolder = sourceFolder;
 
-zipFolder(sourceFolder, targetZip);
 
-// unzipFolder(sourceZip, targetFolder);
+// zipFolder(sourceFolder, targetZip);
+
+unzipFolder(sourceZip, targetFolder);

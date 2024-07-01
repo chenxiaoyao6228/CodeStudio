@@ -48,7 +48,7 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
   private destroyRef$: Subject<void> = new Subject<void>();
   private editor: monaco.editor.IStandaloneCodeEditor | undefined;
 
-  private disposables: any[] = [];
+  private disposables: monaco.IDisposable[] = [];
 
   codeEditorService = inject(CodeEditorService);
   renderer = inject(Renderer2);

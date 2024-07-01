@@ -126,9 +126,6 @@ export class FileTreeComponent {
         const [builtTree, filePaths] = this.buildFileTree(fileTree);
         this.dataSource.data = builtTree;
         this.restoreExpandedState(expandedNodesIds);
-
-        // update all file models in advance to facilitate path intellisense, got to definition
-        this.editService.updateFileModels(filePaths);
       }
 
       if (currentFilePath) {

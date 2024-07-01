@@ -76,16 +76,5 @@ export class EditorComponent implements AfterViewInit {
     }
 
     await this.nodeContainerService.init(this.routeParams);
-
-    // Load types
-    const result = await this.typeLoadingService.loadTypeDefinitions();
-
-    if (result) {
-      const { typeDefinitions, pathMappings } = result;
-      this.codeEditorService.setupPathIntellisense(
-        typeDefinitions,
-        pathMappings
-      );
-    }
   }
 }
