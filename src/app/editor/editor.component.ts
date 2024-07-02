@@ -11,6 +11,7 @@ import { EditorStateService } from './services/editor-state.service';
 import { StartupPhase } from './constants';
 import { CodeEditorService } from './features/main/edit/code-editor/code-editor.service';
 import { TypeLoaderService } from './features/main/edit/code-editor/type-loader.service';
+import { TemplateModalComponent } from '@app/_shared/components/template-modal/template-modal.component';
 
 export interface IRouteParams {
   terminal: string;
@@ -27,6 +28,7 @@ export interface IRouteParams {
     FooterComponent,
     MainComponent,
     MatCheckbox,
+    TemplateModalComponent,
   ],
   template: `
     <app-editor-header></app-editor-header>
@@ -59,8 +61,12 @@ export class EditorComponent implements AfterViewInit {
     // support direct access from route params
     this.route.queryParams.subscribe((params: any) => {
       this.routeParams = params;
+      this.handleQueryParamsChange(this.routeParams);
     });
 
+  }
+
+  async handleQueryParamsChange(params: IRouteParams) {
     // local files have already been loaded by user picker
     if (!(this.routeParams.source === 'local')) {
       this.editorStateService.setPhase(StartupPhase.LOADING_FILES);
@@ -74,7 +80,6 @@ export class EditorComponent implements AfterViewInit {
         throw error;
       }
     }
-
-    await this.nodeContainerService.init(this.routeParams);
+    await this.nodeContainerService.init(params);
   }
 }

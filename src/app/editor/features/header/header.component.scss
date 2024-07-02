@@ -23,6 +23,18 @@
   .right {
     display: flex;
     align-items: center;
+    .template {
+      display: flex;
+      align-items: center;
+      margin-right: 6px;
+      height: 26px;
+      &:hover {
+        cursor: pointer;
+      }
+      .icon {
+        margin-right: 4px;
+      }
+    }
     .github {
       display: flex;
       align-items: center;

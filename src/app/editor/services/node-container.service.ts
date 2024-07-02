@@ -31,8 +31,9 @@ export class NodeContainerService {
   };
   devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
+  packageJson: Record<string, any> | null = null;
 
-  constructor() {}
+  constructor() { }
 
   async init(options: IRouteParams) {
     Object.assign(this.options, options);
@@ -46,11 +47,16 @@ export class NodeContainerService {
     // set initialPath
     this.editorStateService.setCurrentFilePath('package.json');
 
-    // install deps
-    await this.installDeps();
+    const shouldSkipInstall = await this.checkPackageJson()
 
-    // start devServer
-    await this.startDevServer();
+    if (!shouldSkipInstall) {
+      // install deps
+      await this.installDeps();
+
+      // start devServer
+      await this.startDevServer();
+    }
+
   }
 
   private async bootOrGetContainer() {
@@ -66,7 +72,32 @@ export class NodeContainerService {
     return this.webContainer;
   }
 
+  private async checkPackageJson() {
+    try {
+      const pkgString = await this.readFile('package.json');
+      const pkgContent = JSON.parse(pkgString);
+
+      this.packageJson = pkgContent;
+
+      const deps = pkgContent.dependencies;
+      const devDeps = pkgContent.devDependencies;
+
+      if (!deps && !devDeps) {
+        this.editorStateService.setPhase(StartupPhase.READY)
+        return true
+      }
+      return false
+
+    } catch (error) {
+      console.log("parse error in package.json", error);
+      return false
+    }
+  }
+
   private async installDeps() {
+
+
+
     this.editorStateService.setPhase(StartupPhase.INSTALLING);
 
     const installProcess = await this.spawnProcess(this.options.pkgManager, [
