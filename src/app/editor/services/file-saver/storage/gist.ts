@@ -25,6 +25,7 @@ export class GistStorage implements IStorage {
                 body: JSON.stringify(data),
             });
 
+            // TODO: 处理token过期等问题
             if (!response.ok) {
                 throw new Error(`Failed to upload gist: ${response.statusText}`);
             }

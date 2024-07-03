@@ -14,12 +14,12 @@ export class FileSaverService {
 
 
     async downloadProject(name = 'project') {
+
         const localStorage = new LocalStorage();
         await this.saveProject(localStorage, `${name}.zip`);
     }
 
-    async uploadToGist(name = 'project') {
-        const token = 'YOUR_TOKEN_HERE';
+    async uploadToGist(token: string, name = 'project') {
         const gistStorage = new GistStorage(token);
         await this.saveProject(gistStorage, `${name}.zip`);
     }
@@ -41,12 +41,13 @@ export class FileSaverService {
 
     private attachMetaData(fileSystemTree: FileSystemTree) {
         const KEY = 'codestudio.json'
+        const now = new Date();
         const meta = {
             "description": "meta data description for code-studio",
             "title": "untitled",
-            "created_at": "2021-01-01 00:00:00",
-            "updated_at": "2021-01-01 00:00:00",
-        }
+            "created_at": now.toISOString().replace('T', ' ').split('.')[0],
+            "updated_at": now.toISOString().replace('T', ' ').split('.')[0]
+        };
         fileSystemTree[KEY] = {
             file: {
                 contents: JSON.stringify(meta, null, 2),

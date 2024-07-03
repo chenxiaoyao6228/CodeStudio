@@ -1,0 +1,22 @@
+<h1 mat-dialog-title>Enter Your GitHub Token</h1>
+<div mat-dialog-content>
+  <mat-form-field appearance="fill">
+    <mat-label>GitHub Token</mat-label>
+    <input matInput [(ngModel)]="token" placeholder="Enter your GitHub token" />
+  </mat-form-field>
+  <p>
+    Code Studio use <b>Gist</b> as storage service. If you don't have a Github
+    token yet, you can create a new one
+    <a
+      class="custom-link"
+      href="https://github.com/settings/tokens/new?scopes=repo"
+      target="_blank"
+      >here</a
+    >
+    . Make sure to select the <strong>gist</strong> scope in the scopes section.
+  </p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="onSave()" cdkFocusInitial>Save</button>
+</div>
