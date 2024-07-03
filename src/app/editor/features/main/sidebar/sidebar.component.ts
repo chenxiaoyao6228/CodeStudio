@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FileSaverService } from './../../../services/file-saver/file-saver.service';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FileTreeComponent } from './fileTree/file-tree.component';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
@@ -11,4 +12,9 @@ import { CommonModule } from '@angular/common';
   styleUrl: './sidebar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SidebarComponent {}
+export class SidebarComponent {
+  fileSaverService = inject(FileSaverService);
+  download() {
+    this.fileSaverService.downloadProject()
+  }
+}
