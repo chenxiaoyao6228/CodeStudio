@@ -5,10 +5,17 @@
   </div>
   <div class="middle"></div>
   <div class="right">
-    <button class="template" (click)="openTemplateModal()">
+    <button mat-button class="template" (click)="openTemplateModal()">
       <mat-icon class="icon">add</mat-icon>
-      <span> Template </span>
+      <div class="text">Template</div>
     </button>
+    <div class="save" [class]="{ loading: isSaving() }">
+      <mat-spinner diameter="20" class="spinner"></mat-spinner>
+      <button mat-button (click)="saveToGist()" class="save-btn">
+        <mat-icon class="icon">save</mat-icon>
+        <div class="text">Save</div>
+      </button>
+    </div>
     <a
       target="_blank"
       href="https://github.com/chenxiaoyao6228/CodeStudio"

@@ -18,11 +18,10 @@
       margin-bottom: 20px;
       cursor: pointer;
       transition: all 0.3s;
-      border: 1px solid #fff;
       border-radius: 4px;
-
       &:hover {
         background-color: rgba(36, 36, 36, 0.1);
+        border: 1px solid #fff;
       }
 
       .icon {

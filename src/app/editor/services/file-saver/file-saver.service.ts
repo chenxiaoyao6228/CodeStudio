@@ -19,7 +19,7 @@ export class FileSaverService {
     }
 
     async uploadToGist(name = 'project') {
-        const token = 'YOUR_GITHUB_TOKEN';
+        const token = 'YOUR_TOKEN_HERE';
         const gistStorage = new GistStorage(token);
         await this.saveProject(gistStorage, `${name}.zip`);
     }
@@ -31,9 +31,27 @@ export class FileSaverService {
             '/',
             (path) => !path?.includes('node_modules')
         );
+
+        this.attachMetaData(fileSystemTree)
+
         await this.addFilesToZip(zip, fileSystemTree, '');
         const content = await zip.generateAsync({ type: 'blob' });
         await storage.save(content, filename);
+    }
+
+    private attachMetaData(fileSystemTree: FileSystemTree) {
+        const KEY = 'codestudio.json'
+        const meta = {
+            "description": "meta data description for code-studio",
+            "title": "untitled",
+            "created_at": "2021-01-01 00:00:00",
+            "updated_at": "2021-01-01 00:00:00",
+        }
+        fileSystemTree[KEY] = {
+            file: {
+                contents: JSON.stringify(meta, null, 2),
+            }
+        }
     }
 
     private async addFilesToZip(

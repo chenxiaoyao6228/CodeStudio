@@ -26,13 +26,37 @@
     .template {
       display: flex;
       align-items: center;
-      margin-right: 6px;
-      height: 26px;
+      margin-right: 10px;
+      // height: 24px;
       &:hover {
         cursor: pointer;
       }
       .icon {
-        margin-right: 4px;
+        // margin-right: 0px;
+      }
+      .text {
+        // line-height: 24px;
+      }
+    }
+    .save {
+      margin-right: 10px;
+      position: relative;
+      .spinner {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        visibility: hidden;
+      }
+      &.loading {
+        .spinner {
+          visibility: visible;
+        }
+        .save-btn {
+          opacity: 0.5;
+        }
       }
     }
     .github {
