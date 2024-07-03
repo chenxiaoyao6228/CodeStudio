@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GitHubTokenDialogComponent } from '@src/app/_shared/components/github-token-dialog/github-token-dialog.component';
 import { LocalStorageService } from '@src/app/_shared/service/local-storage.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-editor-header',
@@ -25,11 +26,16 @@ export class HeaderComponent {
   isSaving = signal(false)
   fileSaverService = inject(FileSaverService)
   localStorageService = inject(LocalStorageService);
+  router = inject(Router);
 
+  goHome() {
+    this.router.navigate(['/']); // Navigates to the home page
+  }
 
   openTemplateModal() {
     this.dialog.open(TemplateModalComponent)
   }
+
 
   async saveToGist() {
     let token = this.localStorageService.getItem('githubToken');

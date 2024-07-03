@@ -3,16 +3,12 @@
   align-items: center;
   justify-content: space-between;
   height: 40px;
-  border-bottom: 1px solid #fff;
   background-color: var(--activityBar-background);
   box-shadow: 0 1px 3px #0000001a, 0 1px 2px #0000000f;
   .left {
     margin-left: 10px;
     display: flex;
     align-items: center;
-    &:hover {
-      cursor: pointer;
-    }
     .logo {
       width: 20px;
       height: 20px;
@@ -28,42 +24,7 @@
   .right {
     display: flex;
     align-items: center;
-    .template {
-      display: flex;
-      align-items: center;
-      margin-right: 10px;
-      // height: 24px;
-      &:hover {
-        cursor: pointer;
-      }
-      .icon {
-        // margin-right: 0px;
-      }
-      .text {
-        // line-height: 24px;
-      }
-    }
-    .save {
-      margin-right: 10px;
-      position: relative;
-      .spinner {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-        visibility: hidden;
-      }
-      &.loading {
-        .spinner {
-          visibility: visible;
-        }
-        .save-btn {
-          opacity: 0.5;
-        }
-      }
-    }
+
     .github {
       display: flex;
       align-items: center;

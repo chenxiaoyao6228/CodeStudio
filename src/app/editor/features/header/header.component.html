@@ -1,14 +1,14 @@
 <header class="header-wrap">
-  <div class="left">
+  <div class="left" (click)="goHome()">
     <img class="logo" [src]="logoPath" alt="logo" />
     <span class="name"> Code Studio </span>
   </div>
   <div class="middle"></div>
   <div class="right">
-    <button mat-button class="template" (click)="openTemplateModal()">
+    <!-- <button mat-button class="template" (click)="openTemplateModal()">
       <mat-icon class="icon">add</mat-icon>
       <div class="text">Template</div>
-    </button>
+    </button> -->
     <div class="save" [class]="{ loading: isSaving() }">
       <mat-spinner diameter="20" class="spinner"></mat-spinner>
       <button mat-button (click)="saveToGist()" class="save-btn">

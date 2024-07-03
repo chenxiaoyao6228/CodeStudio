@@ -24,9 +24,8 @@ export class TemplateModalComponent {
   templateList = signal(TEMPLATES_CONFIG);
 
   selectTemplate(item: ITemplateItem) {
-    // this.router.navigate([], { queryParams: { source: item.url, terminal: item.terminal } });
     const queryString = `source=${encodeURIComponent(item.url)}&terminal=${encodeURIComponent(item.terminal)}`;
-    window.location.href = `${window.location.pathname}?${queryString}`;
+    window.location.href = `${window.location.origin}/edit/?${queryString}`;
     this.closeModal();  // Close the modal after selection
   }
 
