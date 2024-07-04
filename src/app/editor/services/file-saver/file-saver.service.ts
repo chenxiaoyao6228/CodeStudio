@@ -19,32 +19,40 @@ export class FileSaverService {
         await this.saveProject(localStorage, `${name}.zip`);
     }
 
-    async uploadToGist(token: string, name = 'project') {
+    async uploadToGist(token: string, name = 'project', extraParams?: Record<string, any>) {
         const gistStorage = new GistStorage(token);
-        await this.saveProject(gistStorage, `${name}.zip`);
+        await this.saveProject(gistStorage, `${name}`, {
+            ...extraParams,
+            description: this.createDescription()
+        });
     }
 
 
-    async saveProject(storage: IStorage, filename: string) {
+    async saveProject(storage: IStorage, filename: string, extraParams?: Record<string, any>) {
         const zip = new JSZip();
         const fileSystemTree = await this.nodeContainerService.getFileSystemTree(
             '/',
             (path) => !path?.includes('node_modules')
         );
 
-        this.attachMetaData(fileSystemTree)
+        // this.attachMetaData(fileSystemTree)
 
         await this.addFilesToZip(zip, fileSystemTree, '');
         const content = await zip.generateAsync({ type: 'blob' });
-        await storage.save(content, filename);
+        await storage.save(content, filename, extraParams);
+    }
+
+
+    createDescription() {
+        return 'meta data description for code-studio'
     }
 
     private attachMetaData(fileSystemTree: FileSystemTree) {
         const KEY = 'codestudio.json'
         const now = new Date();
         const meta = {
-            "description": "meta data description for code-studio",
             "title": "untitled",
+            "description": this.createDescription(),
             "created_at": now.toISOString().replace('T', ' ').split('.')[0],
             "updated_at": now.toISOString().replace('T', ' ').split('.')[0]
         };
@@ -65,13 +73,19 @@ export class FileSaverService {
                 const item = fileSystemTree[key];
                 const fullPath = parentPath ? `${parentPath}/${key}` : key;
 
+                console.log(`Adding path: ${fullPath}`);
+
                 if ('file' in item) {
                     zip.file(fullPath, item.file.contents);
                 } else if ('directory' in item) {
-                    const folder = zip.folder(fullPath);
-                    await this.addFilesToZip(folder!, item.directory, fullPath);
+                    // Create the folder in the existing zip instance
+                    zip.folder(fullPath);
+                    // Add files to the created folder
+                    await this.addFilesToZip(zip, item.directory, fullPath);
                 }
             }
         }
     }
+
+
 }

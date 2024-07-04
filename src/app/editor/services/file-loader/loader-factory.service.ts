@@ -4,6 +4,7 @@ import { GithubFileLoader } from './loaders/github-file-loader.service';
 import { ZipFileLoader } from './loaders/zip-file-loader.service';
 import { LocalFileLoader } from './loaders/local-filer-loader';
 import { mockFileLoader } from './loaders/mock-filer-loader';
+import { GistFileLoader } from './loaders/gist-file-loader.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,9 @@ export class FileLoaderFactory {
   }
 
   private createFileLoader(config: IFileLoaderConfig): IFileLoader {
-    if (config.source.endsWith('.zip')) {
+    if (GistFileLoader.validatePath(config.source)) {
+      return new GistFileLoader();
+    } else if (config.source.endsWith('.zip')) {
       return new ZipFileLoader();
     } else if (GithubFileLoader.validatePath(config.source)) {
       return new GithubFileLoader();
