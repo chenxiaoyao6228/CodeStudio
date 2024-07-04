@@ -17,6 +17,43 @@ body {
   box-sizing: border-box;
 }
 
+app-root {
+  display: block;
+  height: 100vh;
+}
+
+// ================= component ===========================
+
+/* Set the width of the scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+/* Style the scrollbar track */
+::-webkit-scrollbar-track {
+  background: #2f2f2f; /* Background color of the scrollbar track */
+  border-radius: 10px; /* Rounded corners of the track */
+}
+
+/* Style the scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background-color: #555; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners of the thumb */
+  border: 3px solid #2f2f2f; /* Padding and background color of the thumb */
+}
+
+/* Style the scrollbar thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #888; /* Color of the thumb when hovered */
+}
+
+/* Style the scrollbar thumb when active (clicked) */
+::-webkit-scrollbar-thumb:active {
+  background: #555; /* Color of the thumb when active */
+}
+
+// ================= variables ===========================
+
 /// theme variables from: https://stackblitz.com/
 :root {
   --sb-ui-font-family: system-ui, -apple-system, Segoe UI, Roboto, Cantarell,

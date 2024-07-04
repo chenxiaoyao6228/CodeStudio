@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,8 @@ import {
 import { formatTime } from '../_shared/utils';
 import { PROJECT_KEY } from '../_shared/constant';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 export interface Project {
   id: string;
@@ -37,16 +39,43 @@ export interface Project {
     MatIconModule,
     MatPaginatorModule,
     HeaderComponent,
+    MatProgressSpinnerModule,
   ],
 })
 export class HomeComponent implements OnInit {
+  readonly dialog = inject(MatDialog);
+  readonly snackBar = inject(MatSnackBar);
   homeService = inject(HomeService);
   gistService = inject(GistService);
-  readonly dialog = inject(MatDialog);
   router = inject(Router);
+  loading = signal(false);
 
   displayedColumns: string[] = ['title', 'description', 'updated', 'operation'];
   dataSource = new MatTableDataSource<Project>([]);
+
+  operations = [
+    {
+      title: 'Create Project',
+      desc: 'from starter templates',
+      icon: 'add',
+      imgClass: 'template',
+      action: this.openTemplateModal.bind(this),
+    },
+    {
+      title: 'Import Project',
+      desc: 'from GitHub repo folder',
+      icon: 'add',
+      imgClass: 'github',
+      action: this.importProject.bind(this),
+    },
+    {
+      title: 'Open local folder',
+      desc: 'from your computer',
+      icon: 'add',
+      imgClass: 'local',
+      action: this.openLocalFolder.bind(this),
+    },
+  ];
 
   @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
 
@@ -56,47 +85,60 @@ export class HomeComponent implements OnInit {
     this.getList();
   }
 
-  getList() {
-    this.homeService.getList().then((res) => {
+  async getList() {
+    try {
+      this.loading.set(true);
+      const res = await this.homeService.getList();
       if (res.success) {
-        try {
-          const isCodeStudioProject = (item: IGistItem) => {
-            return item && item.files && item.files[`${PROJECT_KEY}.json`];
-          };
-          //@ts-ignore
-          const _data = res.data
-            .filter(isCodeStudioProject)
-            .map((item: IGistItem) => transformData(item));
-          this.dataSource.data = _data;
-        } catch (error) {
-          console.log('error', error);
+        const isCodeStudioProject = (item: IGistItem) => {
+          return item && item.files && item.files[`${PROJECT_KEY}.json`];
+        };
+
+        //@ts-ignore
+        const _data = res.data
+          .filter(isCodeStudioProject)
+          .map((item: IGistItem) => transformData(item));
+
+        this.dataSource.data = _data;
+
+        this.loading.set(false);
+
+        function transformData(item: IGistItem) {
+          const descriptionObj = item.description
+            ? parseDescription(item.description)
+            : {};
+          return {
+            id: item.id,
+            title: descriptionObj['title'],
+            description: descriptionObj['description'],
+            updated: formatTime(item.updated_at),
+            gistUrl: item.url,
+            metaUrl: item.files['codestudio.json']
+              ? item.files['codestudio.json'].raw_url
+              : '',
+            // FIXME:
+            projectZipUrl: item.files['project']
+              ? item.files['project'].raw_url
+              : '',
+          } as Project;
         }
       }
-    });
-
-    function transformData(item: IGistItem) {
-      const descriptionObj = item.description
-        ? parseDescription(item.description)
-        : {};
-      return {
-        id: item.id,
-        title: descriptionObj['title'],
-        description: descriptionObj['description'],
-        updated: formatTime(item.updated_at),
-        gistUrl: item.url,
-        metaUrl: item.files['codestudio.json']
-          ? item.files['codestudio.json'].raw_url
-          : '',
-        // FIXME:
-        projectZipUrl: item.files['project']
-          ? item.files['project'].raw_url
-          : '',
-      } as Project;
+    } catch (error) {
+      this.loading.set(false);
+      console.log('error', error);
     }
   }
 
   openTemplateModal() {
     this.dialog.open(TemplateModalComponent);
+  }
+
+  importProject() {
+    // TODO:
+  }
+
+  openLocalFolder() {
+    // TODO:
   }
 
   editProject(project: Project) {
@@ -107,14 +149,25 @@ export class HomeComponent implements OnInit {
     window.location.href = `${window.location.origin}/edit/?${queryString}`;
   }
 
-  deleteProject(project: Project) {
-    this.gistService
-      .deleteGist({
+  async deleteProject(project: Project) {
+    try {
+      this.loading.set(true);
+      await this.gistService.deleteGist({
         gistId: project.id,
-      })
-      .then(() => {
-        this.getList();
       });
-    console.log('Delete project:', project);
+      this.snackBar.open('Project deleted successfully', 'Close', {
+        duration: 3000,
+      });
+      console.log('Delete project:', project);
+      this.getList().then(() => {
+        this.loading.set(false);
+      });
+    } catch (error) {
+      console.log('error', error);
+      this.loading.set(false);
+      this.snackBar.open('Failed to delete project', 'Close', {
+        duration: 3000,
+      });
+    }
   }
 }

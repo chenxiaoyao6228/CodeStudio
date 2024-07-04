@@ -1,15 +1,15 @@
+$table-height: calc(100vh - 40px - 30px - 96px - 30px - 20px - 20px);
+
 :host {
-  .header {
-  }
-
+  display: block;
+  height: 100vh;
+  overflow: hidden;
   .create-project {
-    margin-top: 2rem;
+    margin-top: 70px;
     padding: 0 5%;
-
     display: flex;
     flex-wrap: wrap;
     justify-content: stretch;
-    margin-block-end: 32px;
     gap: 16px;
 
     .item-wrap {
@@ -56,7 +56,7 @@
               font-size: 11.5px;
               font-weight: 400;
               line-height: 1.3913;
-              margin-block-start: 4px;
+              margin-block-start: 6px;
               text-align: left;
             }
           }
@@ -93,19 +93,38 @@
   }
 
   .recent-projects {
+    margin-top: 30px;
     padding: 0 5%;
-    margin-top: 2rem;
+
     h2 {
       font-size: 1.2rem;
-      margin-bottom: 1rem;
+      line-height: 20px;
+      margin-bottom: 20px;
     }
 
-    table {
-      width: 100%;
-    }
+    .table-wrap {
+      position: relative;
+      height: $table-height;
+      overflow-y: scroll;
+      table {
+        width: 100%;
+        min-height: 260px;
+      }
 
-    mat-paginator {
-      margin-top: 1rem;
+      mat-paginator {
+        margin-top: 1rem;
+      }
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+      }
     }
   }
 }

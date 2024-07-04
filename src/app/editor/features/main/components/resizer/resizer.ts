@@ -94,7 +94,7 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
       y: clientY,
     };
 
-    console.log('delta', delta);
+    // console.log('delta', delta);
     if (delta === 0) return;
 
     this.resizeService.calculateNewSize({
