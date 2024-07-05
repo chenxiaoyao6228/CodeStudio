@@ -1,6 +1,6 @@
 <app-home-header></app-home-header>
 <div class="create-project">
-  @for(operation of operations; track operation.title) {
+  @for(operation of operations; let i = $index; track operation.title) {
   <div
     class="item-wrap"
     (click)="operation.action()"
@@ -19,6 +19,12 @@
       <div class="img-wrap">
         <div class="img {{ operation.imgClass }}"></div>
       </div>
+      @if(loadingIndex() === i) {
+      <div class="loading">
+        <mat-progress-spinner color="primary" mode="indeterminate">
+        </mat-progress-spinner>
+      </div>
+      }
     </div>
   </div>
   }

@@ -30,6 +30,9 @@ $table-height: calc(100vh - 40px - 30px - 96px - 30px - 20px - 20px);
         border: 1px solid var(--platform-luminosity-bg-z0);
         border-radius: 4px;
         background-color: var(--platform-luminosity-bg-z0);
+        .loading {
+          opacity: 0.5;
+        }
 
         .content-wrap {
           display: flex;
@@ -114,17 +117,17 @@ $table-height: calc(100vh - 40px - 30px - 96px - 30px - 20px - 20px);
       mat-paginator {
         margin-top: 1rem;
       }
-      .loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 1;
-      }
     }
+  }
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
   }
 }

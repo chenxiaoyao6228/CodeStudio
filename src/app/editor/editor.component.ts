@@ -63,7 +63,6 @@ export class EditorComponent implements AfterViewInit {
       this.routeParams = params;
       this.handleQueryParamsChange(this.routeParams);
     });
-
   }
 
   async handleQueryParamsChange(params: IRouteParams) {
@@ -80,6 +79,10 @@ export class EditorComponent implements AfterViewInit {
         throw error;
       }
     }
-    await this.nodeContainerService.init(params);
+    try {
+      await this.nodeContainerService.init(params);
+    } catch (error) {
+      console.log('Failed to init webcontainer', error);
+    }
   }
 }

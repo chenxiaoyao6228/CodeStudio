@@ -54,6 +54,7 @@ export class HomeComponent implements OnInit {
   editorStateService = inject(EditorStateService);
   router = inject(Router);
   loading = signal(false);
+  loadingIndex = signal(-1);
 
   displayedColumns: string[] = ['title', 'description', 'updated', 'operation'];
   dataSource = new MatTableDataSource<Project>([]);
@@ -139,6 +140,7 @@ export class HomeComponent implements OnInit {
   }
 
   importProject() {
+    this.loadingIndex.set(1);
     const dialogRef = this.dialog.open(GithubUrlDialogComponent, {
       width: '400px',
       data: {},
@@ -146,6 +148,7 @@ export class HomeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        this.loadingIndex.set(-1);
         this.openEdit({
           source: result,
           terminal: 'dev', // TODO:
@@ -162,13 +165,18 @@ export class HomeComponent implements OnInit {
   }
 
   async openLocalFolder() {
+    this.loadingIndex.set(2);
     const fileTree = await this.fileLoaderService.loadFiles({
       source: 'local',
     });
+    this.loadingIndex.set(-1);
     this.editorStateService.setFileTree(fileTree);
 
     // TODO: 检测命令
-    window.location.href = `${window.location.origin}/edit/?source=local&terminal=dev`;
+    // window.location.href = `${window.location.origin}/edit/?source=local&terminal=dev`;
+    this.router.navigate(['/edit'], {
+      queryParams: { source: 'local', terminal: 'dev' },
+    });
   }
 
   editProject(project: Project) {

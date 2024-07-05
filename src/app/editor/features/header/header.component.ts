@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -23,19 +28,18 @@ export class HeaderComponent {
   readonly snackBar = inject(MatSnackBar);
   logoPath = 'assets/imgs/header-logo.png';
   githubLogoPath = 'assets/imgs/github.png';
-  isSaving = signal(false)
-  fileSaverService = inject(FileSaverService)
+  isSaving = signal(false);
+  fileSaverService = inject(FileSaverService);
   localStorageService = inject(LocalStorageService);
   router = inject(Router);
 
   goHome() {
-    this.router.navigate(['/']); // Navigates to the home page
+    window.location.href = '/'; // force reload to release resources
   }
 
   openTemplateModal() {
-    this.dialog.open(TemplateModalComponent)
+    this.dialog.open(TemplateModalComponent);
   }
-
 
   async saveToGist() {
     let token = this.localStorageService.getItem('githubToken');
@@ -44,7 +48,7 @@ export class HeaderComponent {
         width: '400px',
       });
 
-      dialogRef.afterClosed().subscribe(async result => {
+      dialogRef.afterClosed().subscribe(async (result) => {
         if (result) {
           token = result;
           this.localStorageService.setItem('githubToken', token);
@@ -72,6 +76,4 @@ export class HeaderComponent {
       console.log('error', error);
     }
   }
-
-
 }
