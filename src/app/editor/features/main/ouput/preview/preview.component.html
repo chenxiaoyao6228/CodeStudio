@@ -14,7 +14,9 @@
       {{ previewUrl() }}
     </div>
 
-    <mat-icon class="close-preview">keyboard_tab</mat-icon>
+    <mat-icon class="close-preview" (click)="collapsePreview()"
+      >keyboard_tab</mat-icon
+    >
     <!-- <mat-icon class="external-link">open_in_new</mat-icon> -->
     }
   </div>

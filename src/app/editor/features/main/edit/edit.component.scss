@@ -6,6 +6,9 @@
 .top {
   border: 1px solid #fff;
   border-top: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   .tabs {
     display: flex;
     height: 30px;
@@ -59,6 +62,14 @@
         }
       }
     }
+  }
+  .open-preview {
+    cursor: pointer;
+    margin-left: 4px;
+    width: 26px;
+    transform: rotate(180deg);
+    flex-grow: 0;
+    flex-shrink: 0;
   }
 }
 .bottom {

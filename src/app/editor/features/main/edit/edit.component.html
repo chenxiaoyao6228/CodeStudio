@@ -16,5 +16,8 @@
     </div>
     }
   </div>
+  @if(!isPreviewOpen()){
+  <mat-icon class="open-preview" (click)="openPreview()">keyboard_tab</mat-icon>
+  }
 </div>
 <app-monaco-editor class="bottom"></app-monaco-editor>

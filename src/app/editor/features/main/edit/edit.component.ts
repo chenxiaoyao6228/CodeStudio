@@ -5,14 +5,17 @@ import {
   OnInit,
   OnDestroy,
   inject,
+  computed,
 } from '@angular/core';
 import { AppEditorComponent } from './code-editor/code-editor.component';
 import { EditService, ITabItem } from './edit.service';
+import { MatIcon } from '@angular/material/icon';
+import { MainService } from '../main.service';
 
 @Component({
   standalone: true,
   selector: 'app-edit',
-  imports: [AppEditorComponent],
+  imports: [AppEditorComponent, MatIcon],
   templateUrl: './edit.component.html',
   styleUrls: ['./edit.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +26,9 @@ export class EditComponent implements OnInit, OnDestroy {
     | undefined;
 
   editService = inject(EditService);
+  private mainService = inject(MainService);
+
+  isPreviewOpen = computed(() => this.mainService.isPreviewOpen());
 
   constructor() {}
 
@@ -54,5 +60,8 @@ export class EditComponent implements OnInit, OnDestroy {
   closeTab(tabItem: ITabItem, event: Event) {
     event.stopPropagation();
     this.editService.closeTab(tabItem.filePath, true);
+  }
+  openPreview() {
+    this.mainService.openPreview();
   }
 }

@@ -19,6 +19,7 @@ import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { MatIconModule } from '@angular/material/icon';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
 import { map } from 'rxjs';
+import { MainService } from '../../main.service';
 
 interface IPhaseItem {
   key: StartupPhase;
@@ -83,10 +84,11 @@ export class PreviewComponent {
   private readonly destroyRef = inject(DestroyRef);
   private editorStateService = inject(EditorStateService);
   private nodeContainerService = inject(NodeContainerService);
+  private mainService = inject(MainService);
 
   previewUrl = signal('');
   isRefreshing = signal(false);
-
+  isPreviewOpen = computed(() => this.mainService.isPreviewOpen());
   phases = computed<IPhaseItem[]>(() => {
     const currentPhase = this.editorStateService.getPhase();
     const curIndex = DEFAULT_PHASE_LIST.findIndex(
@@ -144,5 +146,8 @@ export class PreviewComponent {
 
   onIframeLoad() {
     this.isRefreshing.set(false);
+  }
+  collapsePreview() {
+    this.mainService.collapsePreview();
   }
 }

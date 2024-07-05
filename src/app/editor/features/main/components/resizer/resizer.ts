@@ -9,7 +9,6 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { ResizeManagerService } from './resize-manager.service';
-import { NgIf } from '@angular/common';
 
 interface IPosition {
   x: number;
@@ -20,20 +19,21 @@ interface IPosition {
   selector: 'resizer',
   standalone: true,
   template: `
+    @if(!isFirstElement){
     <div
-      *ngIf="!isFirstElement"
       class="resizer-bar"
       [class.row]="resizeService.direction === 'row'"
       [class.col]="resizeService.direction === 'col'"
     ></div>
+    }
     <ng-content></ng-content>
   `,
   styleUrls: ['./resizer.scss'],
-  imports: [NgIf],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResizerComponent implements AfterViewInit, OnDestroy {
-  @Input() minSize = 100;
+  @Input() minSize = 0;
   @Input() maxSize = Infinity;
   @Input() isFirstElement = false;
   @Input() percentage = 0;
