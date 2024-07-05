@@ -14,10 +14,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GitHubTokenDialogComponent } from '@src/app/_shared/components/github-token-dialog/github-token-dialog.component';
 import { LocalStorageService } from '@src/app/_shared/service/local-storage.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CodeEditorService } from '../main/edit/code-editor/code-editor.service';
 import { ConfirmDialogComponent } from '@src/app/_shared/components/confirm-dialog/confirm-dialog';
 import { NodeContainerService } from '../../services/node-container.service';
+
+const UNTITLED_NAME = 'untitled_project';
 
 @Component({
   selector: 'app-editor-header',
@@ -38,20 +40,25 @@ export class HeaderComponent implements OnInit {
   logoPath = 'assets/imgs/header-logo.png';
   githubLogoPath = 'assets/imgs/github.png';
   isSaving = signal(false);
-  projectName = signal('untitled_project');
+  projectName = signal(UNTITLED_NAME);
   nodeContainerService = inject(NodeContainerService);
   codeEditorService = inject(CodeEditorService);
   fileSaverService = inject(FileSaverService);
   localStorageService = inject(LocalStorageService);
   router = inject(Router);
-
+  activatedRoute = inject(ActivatedRoute);
+  editId: string | null = null;
   ngOnInit() {
+    this.activatedRoute.queryParamMap.subscribe((params) => {
+      this.editId = params.get('editId');
+    });
+
     this.nodeContainerService.fileMounted$.subscribe(async (fileMounted) => {
       if (fileMounted) {
         const pkgContent = await this.nodeContainerService.readFile(
           'package.json'
         );
-        const name = JSON.parse(pkgContent).name || 'untitled';
+        const name = JSON.parse(pkgContent).name || UNTITLED_NAME;
         if (name) {
           this.projectName.set(name);
         }
@@ -68,11 +75,12 @@ export class HeaderComponent implements OnInit {
         },
       });
 
-      dialogRef.afterClosed().subscribe((result) => {
+      dialogRef.afterClosed().subscribe(async (result) => {
         if (result) {
           this._goHome();
         } else {
-          this.saveToGist();
+          await this.saveToGist();
+          this.codeEditorService.hasEdit = false;
         }
       });
     } else {
@@ -98,22 +106,28 @@ export class HeaderComponent implements OnInit {
         if (result) {
           token = result;
           this.localStorageService.setItem('githubToken', token);
-          this.performSave(token);
+          this.performSave();
         }
       });
     } else {
-      this.performSave(token);
+      this.performSave();
     }
   }
 
-  async performSave(token: string) {
+  async performSave() {
     try {
       this.isSaving.set(true);
-      await this.fileSaverService.uploadToGist(token, this.projectName());
-      this.isSaving.set(false);
-      this.snackBar.open('File uploaded successfully!', 'Close', {
-        duration: 3000,
+      await this.fileSaverService.uploadToGist(this.projectName(), {
+        editId: this.editId,
       });
+      this.snackBar.open(
+        'File uploaded ! Please note that this is a async operation. It may take Gist some time to return the newest list.',
+        'Close',
+        {
+          duration: 8000,
+        }
+      );
+      this.isSaving.set(false);
     } catch (error) {
       this.isSaving.set(false);
       this.snackBar.open('File upload failed. Please try again.', 'Close', {

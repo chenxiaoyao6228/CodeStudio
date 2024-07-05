@@ -1,8 +1,17 @@
-import { stringifyDescription } from '@src/app/_shared/service/gist.service';
+import {
+  GistService,
+  stringifyDescription,
+} from '@src/app/_shared/service/gist.service';
 import { IStorage } from '../type';
+import { inject, Injectable } from '@angular/core';
 
+export const META_DATA__KEY = 'codestudio.json';
+export const PROJECT_CODE_KEY = 'project_code';
+
+@Injectable({ providedIn: 'root' })
 export class GistStorage implements IStorage {
-  constructor(private token: string) {}
+  gistService = inject(GistService);
+  constructor() {}
 
   async save(
     content: Blob,
@@ -10,6 +19,7 @@ export class GistStorage implements IStorage {
     extraParams?: Record<string, any>
   ): Promise<void> {
     return new Promise((resolve, reject) => {
+      const gistId = extraParams ? extraParams['editId'] : '';
       const description = extraParams ? extraParams['description'] : '';
       const fullDescription = stringifyDescription({
         ...extraParams,
@@ -20,37 +30,30 @@ export class GistStorage implements IStorage {
       reader.readAsDataURL(content);
       reader.onload = async () => {
         try {
-          const data = {
+          const mata = {
+            title: filename,
             description: fullDescription,
-            files: {
-              [filename]: {
-                content: reader.result as string,
-                encoding: 'base64',
-              },
-              'codestudio.json': {
-                content: JSON.stringify(this.genMetaData()),
-              },
+          };
+          const files = {
+            [PROJECT_CODE_KEY]: {
+              content: reader.result as string,
+              encoding: 'base64',
             },
-            public: true,
+            [META_DATA__KEY]: {
+              content: JSON.stringify(this.genMetaData()),
+            },
           };
 
-          const response = await fetch('https://api.github.com/gists', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `token ${this.token}`,
-            },
-            body: JSON.stringify(data),
-          });
-
-          // TODO: 处理token过期等问题
-          if (!response.ok) {
-            throw new Error(`Failed to upload gist: ${response.statusText}`);
+          // edit
+          let result;
+          if (gistId) {
+            result = await this.gistService.updateGist(gistId, mata, files);
+          } else {
+            // add
+            result = await this.gistService.addGist(mata, files);
           }
 
-          const result = await response.json();
-          console.log('Gist created:', result.html_url);
-          resolve(result);
+          resolve(result as any);
         } catch (error) {
           reject(error);
         }

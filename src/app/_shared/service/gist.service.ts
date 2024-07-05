@@ -79,15 +79,17 @@ export class GistService {
     }
   }
 
-  async updateGist(params: {
-    gistId: string;
-    files: Record<string, { content: string }>;
-  }) {
+  async updateGist(
+    gistId: string,
+    params: { title: string; description: string; [key: string]: any },
+    files: Record<string, { content: string }>
+  ) {
     const octokit = this.createOctokitInstance();
     try {
       const response = await octokit.gists.update({
-        gist_id: params.gistId,
-        files: params.files,
+        description: stringifyDescription(params),
+        gist_id: gistId,
+        files: files,
       });
       return { success: true, data: response.data };
     } catch (error) {

@@ -22,6 +22,10 @@ import { EditorStateService } from '../editor/services/editor-state.service';
 import { GithubUrlDialogComponent } from '../_shared/components/github-url-dialog/github-url-dialog.component';
 import { LocalStorageService } from '../_shared/service/local-storage.service';
 import { GitHubTokenDialogComponent } from '../_shared/components/github-token-dialog/github-token-dialog.component';
+import {
+  META_DATA__KEY,
+  PROJECT_CODE_KEY,
+} from '../editor/services/file-saver/storage/gist';
 
 export interface Project {
   id: string;
@@ -132,12 +136,11 @@ export class HomeComponent implements OnInit {
             description: descriptionObj['description'],
             updated: formatTime(item.updated_at),
             gistUrl: item.url,
-            metaUrl: item.files['codestudio.json']
-              ? item.files['codestudio.json'].raw_url
+            metaUrl: item.files[META_DATA__KEY]
+              ? item.files[META_DATA__KEY].raw_url
               : '',
-            // FIXME:
-            projectZipUrl: item.files['project']
-              ? item.files['project'].raw_url
+            projectZipUrl: item.files[PROJECT_CODE_KEY]
+              ? item.files[PROJECT_CODE_KEY].raw_url
               : '',
           } as Project;
         }
@@ -185,10 +188,13 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  openEdit(params: { source: string; terminal?: string }) {
+  openEdit(params: { source: string; terminal?: string; editId?: string }) {
     let queryString = `source=${encodeURIComponent(params.source)}`;
     if (params.terminal) {
       queryString += `&terminal=${encodeURIComponent(params.terminal)}`;
+    }
+    if (params.editId) {
+      queryString += `&editId=${encodeURIComponent(params.editId)}`;
     }
     window.location.href = `${window.location.origin}/edit/?${queryString}`;
   }
@@ -208,6 +214,7 @@ export class HomeComponent implements OnInit {
   editProject(project: Project) {
     this.openEdit({
       source: project.projectZipUrl,
+      editId: project.id,
     });
   }
 
