@@ -1,12 +1,16 @@
+$project-name-height: 30px;
 $normal-icon-size: 16px;
 
 :host {
   --mat-tree-node-min-height: 22px;
   --mat-tree-container-background-color: var(--sb-page-background);
-  height: 100%;
+  height: calc(100% - $project-name-height);
+  width: 100%;
   user-select: none;
   font-size: 16px;
   cursor: pointer;
+  position: absolute;
+  overflow-y: auto;
 
   .mat-tree-node {
     position: relative;
@@ -20,9 +24,19 @@ $normal-icon-size: 16px;
       flex: 1;
       position: relative;
       height: var(--mat-tree-node-min-height);
-      // white-space: nowrap;
-      // overflow: hidden;
-      // text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      .file-icon {
+      }
+      .file-text {
+        white-space: nowrap; /* 防止文字换行 */
+        overflow: hidden; /* 隐藏超出容器的内容 */
+        text-overflow: ellipsis; /* 超出部分显示省略号 */
+        flex: 1;
+        // display: inline-block; /* 确保文本在一个水平线上 */
+        // max-width: 100%; /* 设置最大宽度，确保文本不会超出容器 */
+      }
     }
     &.editing {
       .editing-box {

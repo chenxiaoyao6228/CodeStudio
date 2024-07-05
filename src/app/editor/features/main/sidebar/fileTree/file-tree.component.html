@@ -43,11 +43,11 @@
         }"
       >
         @if(node.level !== 0) {
-        <mat-icon>{{
+        <mat-icon class="file-icon">{{
           node.type === "directory" ? "folder" : "insert_drive_file"
         }}</mat-icon>
         }
-        {{ node.name }}
+        <div class="file-text">{{ node.name }}</div>
       </div>
 
       <!-- editingBox -->
@@ -120,11 +120,11 @@
   >
     <div class="node-wrapper">
       @if(node.level !== 0) {
-      <mat-icon>{{
+      <mat-icon class="file-icon">{{
         node.type === "directory" ? "folder" : "insert_drive_file"
       }}</mat-icon>
       }
-      {{ node.name }}
+      <div class="file-text">{{ node.name }}</div>
 
       <!-- editingBox -->
       <div class="editing-box" (click)="onEditingBoxClick(node, $event)">

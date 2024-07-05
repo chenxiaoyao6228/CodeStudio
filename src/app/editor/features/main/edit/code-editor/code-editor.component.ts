@@ -41,7 +41,6 @@ export interface EditorModel {
 export class AppEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer') editorContentRef!: ElementRef;
   @Input() @HostBinding('style.height') height = '100%';
-  @Input() options: any; // initialize options
 
   @Output() modelChange = new EventEmitter<EditorModel>();
 
@@ -49,6 +48,17 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
   private editor: monaco.editor.IStandaloneCodeEditor | undefined;
 
   private disposables: monaco.IDisposable[] = [];
+
+  options: monaco.editor.IStandaloneEditorConstructionOptions = {
+    theme: 'vs-dark',
+    language: 'javascript',
+    fontSize: 16,
+    wordWrap: 'on',
+    automaticLayout: true,
+    minimap: {
+      enabled: false,
+    },
+  };
 
   codeEditorService = inject(CodeEditorService);
   renderer = inject(Renderer2);

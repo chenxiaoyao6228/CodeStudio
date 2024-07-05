@@ -24,14 +24,6 @@ export class EditComponent implements OnInit, OnDestroy {
 
   editService = inject(EditService);
 
-  options = {
-    theme: 'vs-dark',
-    language: 'javascript',
-    fontSize: 16,
-    wordWrap: 'on',
-    automaticLayout: true,
-  };
-
   constructor() {}
 
   ngOnInit() {

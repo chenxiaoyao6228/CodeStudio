@@ -189,14 +189,9 @@ export class HomeComponent implements OnInit {
   }
 
   openEdit(params: { source: string; terminal?: string; editId?: string }) {
-    let queryString = `source=${encodeURIComponent(params.source)}`;
-    if (params.terminal) {
-      queryString += `&terminal=${encodeURIComponent(params.terminal)}`;
-    }
-    if (params.editId) {
-      queryString += `&editId=${encodeURIComponent(params.editId)}`;
-    }
-    window.location.href = `${window.location.origin}/edit/?${queryString}`;
+    this.router.navigate(['/edit'], {
+      queryParams: params,
+    });
   }
 
   async openLocalFolder() {

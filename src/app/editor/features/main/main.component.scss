@@ -1,5 +1,6 @@
+$header-height: 40px;
 :host {
-  height: 100%;
+  height: calc(100vh - $header-height);
   flex: 1;
   display: flex;
   position: relative;
@@ -25,5 +26,6 @@
     flex: 1;
     height: 100%;
     position: relative;
+    overflow: hidden;
   }
 }

@@ -29,11 +29,21 @@ export class TerminalComponent implements AfterViewInit {
   ngAfterViewInit() {
     if (this.terminalEleRef) {
       this.terminalService.open(this.terminalEleRef.nativeElement);
+      this.observeTerminalResize();
     }
     fromEvent(window, 'resize')
       .pipe(debounceTime(50), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.terminalService.resizeToFit();
       });
+  }
+  private observeTerminalResize() {
+    if (this.terminalEleRef) {
+      const resizeObserver = new ResizeObserver(() => {
+        this.terminalService.resizeToFit();
+      });
+      resizeObserver.observe(this.terminalEleRef.nativeElement);
+      this.destroyRef.onDestroy(() => resizeObserver.disconnect());
+    }
   }
 }
