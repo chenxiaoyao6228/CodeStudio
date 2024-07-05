@@ -3,18 +3,18 @@
     <app-sidebar id="sidebar">sidebar</app-sidebar>
   </resizer>
   <resizer [percentage]="40">
-    <app-edit id="edit"></app-edit>
+    <resizer-container class="col" direction="col">
+      <resizer [isFirstElement]="true" [percentage]="85">
+        <app-edit id="edit"></app-edit>
+      </resizer>
+      <resizer [percentage]="15">
+        <app-terminal class="console"></app-terminal>
+      </resizer>
+    </resizer-container>
   </resizer>
   <resizer [percentage]="40">
     <div id="output">
-      <resizer-container class="col" direction="col">
-        <resizer [isFirstElement]="true" [percentage]="70">
-          <app-preview class="preview"></app-preview>
-        </resizer>
-        <resizer [percentage]="30">
-          <app-terminal class="console"></app-terminal>
-        </resizer>
-      </resizer-container>
+      <app-preview class="preview"></app-preview>
     </div>
   </resizer>
 </resizer-container>

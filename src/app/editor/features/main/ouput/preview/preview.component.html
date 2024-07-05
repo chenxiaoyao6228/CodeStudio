@@ -1,10 +1,29 @@
 <div id="preview-panel">
   <!-- TODO: display error message and let the user retry maybe -->
+  <div class="nav">
+    @if(isReady()) {
+    <div class="refresh-icon">
+      <mat-icon
+        class="icon"
+        [class.loading]="isRefreshing()"
+        (click)="refreshIframe()"
+        >refresh</mat-icon
+      >
+    </div>
+    <div class="url-bar">
+      {{ previewUrl() }}
+    </div>
+
+    <mat-icon class="close-preview">keyboard_tab</mat-icon>
+    <!-- <mat-icon class="external-link">open_in_new</mat-icon> -->
+    }
+  </div>
   <iframe
     #previewIframe
     allow="cross-origin-isolated"
     class="preview-iframe"
     [hidden]="!isReady()"
+    (load)="onIframeLoad()"
   ></iframe>
   <div class="loading-container" [hidden]="isReady()">
     <div class="loading-container-inner">

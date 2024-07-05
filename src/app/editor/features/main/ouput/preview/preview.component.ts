@@ -6,6 +6,7 @@ import {
   ViewChild,
   computed,
   inject,
+  signal,
 } from '@angular/core';
 import {
   MAT_CHECKBOX_DEFAULT_OPTIONS,
@@ -83,6 +84,9 @@ export class PreviewComponent {
   private editorStateService = inject(EditorStateService);
   private nodeContainerService = inject(NodeContainerService);
 
+  previewUrl = signal('');
+  isRefreshing = signal(false);
+
   phases = computed<IPhaseItem[]>(() => {
     const currentPhase = this.editorStateService.getPhase();
     const curIndex = DEFAULT_PHASE_LIST.findIndex(
@@ -127,7 +131,18 @@ export class PreviewComponent {
       .subscribe(({ url }) => {
         if (url) {
           this.previewIframe!.nativeElement.src = url ?? '';
+          this.previewUrl.set(url);
         }
       });
+  }
+  refreshIframe() {
+    if (this.previewUrl()) {
+      this.isRefreshing.set(true);
+      this.previewIframe!.nativeElement.src = this.previewUrl();
+    }
+  }
+
+  onIframeLoad() {
+    this.isRefreshing.set(false);
   }
 }
