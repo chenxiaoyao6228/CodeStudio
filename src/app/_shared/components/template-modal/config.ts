@@ -40,7 +40,7 @@ export const TEMPLATES_CONFIG = [
   },
   {
     name: 'Vanilla',
-    desc: 'Javascript',
+    desc: 'Typescript',
     url: `${BASE_URL}/templates/vanilla.zip`,
     icon: '/assets/imgs/template/vanilla.svg',
     terminal: 'dev',

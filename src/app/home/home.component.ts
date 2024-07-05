@@ -224,9 +224,13 @@ export class HomeComponent implements OnInit {
       await this.gistService.deleteGist({
         gistId: project.id,
       });
-      this.snackBar.open('Project deleted successfully', 'Close', {
-        duration: 3000,
-      });
+      this.snackBar.open(
+        'Project deleted successfully! Please note that this is a async operation. It may take Gist some time to return the newest list.',
+        'Close',
+        {
+          duration: 3000,
+        }
+      );
       console.log('Delete project:', project);
       this.getList().then(() => {
         this.loading.set(false);
