@@ -11,7 +11,7 @@ import { TerminalService } from '../features/main/ouput/terminal/terminal.servic
 import { IRouteParams } from '../editor.component';
 
 interface IOptions {
-  terminal: string;
+  terminal?: string;
   pkgManager: 'npm' | 'yarn' | 'pnpm';
 }
 
@@ -26,14 +26,14 @@ export class NodeContainerService {
   previewUrl$ = new BehaviorSubject('');
   // #state
   options: IOptions = {
-    terminal: 'dev',
+    terminal: '',
     pkgManager: 'npm', // TODO: should have a 'codestudio' item in package.json for setting
   };
   devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
   packageJson: Record<string, any> | null = null;
 
-  constructor() { }
+  constructor() {}
 
   async init(options: IRouteParams) {
     Object.assign(this.options, options);
@@ -44,10 +44,13 @@ export class NodeContainerService {
     // mount files
     await this.mountFiles();
 
+    // detect cmd command from package.json when not specified
+    await this.detectTerminalCmd();
+
     // set initialPath
     this.editorStateService.setCurrentFilePath('package.json');
 
-    const shouldSkipInstall = await this.checkPackageJson()
+    const shouldSkipInstall = await this.checkPackageJson();
 
     if (!shouldSkipInstall) {
       // install deps
@@ -56,7 +59,6 @@ export class NodeContainerService {
       // start devServer
       await this.startDevServer();
     }
-
   }
 
   private async bootOrGetContainer() {
@@ -83,21 +85,17 @@ export class NodeContainerService {
       const devDeps = pkgContent.devDependencies;
 
       if (!deps && !devDeps) {
-        this.editorStateService.setPhase(StartupPhase.READY)
-        return true
+        this.editorStateService.setPhase(StartupPhase.READY);
+        return true;
       }
-      return false
-
+      return false;
     } catch (error) {
-      console.log("parse error in package.json", error);
-      return false
+      console.log('parse error in package.json', error);
+      return false;
     }
   }
 
   private async installDeps() {
-
-
-
     this.editorStateService.setPhase(StartupPhase.INSTALLING);
 
     const installProcess = await this.spawnProcess(this.options.pkgManager, [
@@ -127,7 +125,7 @@ export class NodeContainerService {
     const webContainer = await this.bootOrGetContainer();
     const devServerProcess = await webContainer.spawn(
       this.options!.pkgManager,
-      ['run', this.options!.terminal]
+      ['run', this.options!.terminal || 'dev']
     );
 
     devServerProcess.output.pipeTo(
@@ -146,6 +144,20 @@ export class NodeContainerService {
     });
 
     return devServerProcess;
+  }
+
+  private async detectTerminalCmd() {
+    if (!this.options.terminal) {
+      const pkgString = await this.readFile('package.json');
+      const pkgContent = JSON.parse(pkgString);
+      const scripts = pkgContent.scripts;
+      // simple detection
+      ['dev', 'start'].forEach((cmd) => {
+        if (scripts[cmd]) {
+          this.options.terminal = cmd;
+        }
+      });
+    }
   }
 
   async handleError() {

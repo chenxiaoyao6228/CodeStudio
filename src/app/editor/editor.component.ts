@@ -14,9 +14,9 @@ import { TypeLoaderService } from './features/main/edit/code-editor/type-loader.
 import { TemplateModalComponent } from '@app/_shared/components/template-modal/template-modal.component';
 
 export interface IRouteParams {
-  terminal: string;
+  source: string; // mock, local, template name, github folder , zip url
+  terminal?: string;
   pkgManager?: 'npm' | 'yarn' | 'pnpm';
-  source?: string; // mock, local, template name, github folder , zip url
 }
 
 @Component({
@@ -48,7 +48,7 @@ export interface IRouteParams {
 })
 export class EditorComponent implements AfterViewInit {
   routeParams: IRouteParams = {
-    terminal: 'dev',
+    source: 'local',
   };
   route = inject(ActivatedRoute);
   nodeContainerService = inject(NodeContainerService);
@@ -66,6 +66,9 @@ export class EditorComponent implements AfterViewInit {
   }
 
   async handleQueryParamsChange(params: IRouteParams) {
+    if (!params.source) {
+      throw new Error('Source is required');
+    }
     // local files have already been loaded by user picker
     if (!(this.routeParams.source === 'local')) {
       this.editorStateService.setPhase(StartupPhase.LOADING_FILES);

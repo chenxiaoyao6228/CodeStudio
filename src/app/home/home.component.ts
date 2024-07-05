@@ -148,19 +148,19 @@ export class HomeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.loadingIndex.set(-1);
         this.openEdit({
           source: result,
-          terminal: 'dev', // TODO:
         });
       }
+      this.loadingIndex.set(-1);
     });
   }
 
-  openEdit(params: { source: string; terminal: string }) {
-    const queryString = `source=${encodeURIComponent(
-      params.source
-    )}&terminal=${encodeURIComponent(params.terminal)}`;
+  openEdit(params: { source: string; terminal?: string }) {
+    let queryString = `source=${encodeURIComponent(params.source)}`;
+    if (params.terminal) {
+      queryString += `&terminal=${encodeURIComponent(params.terminal)}`;
+    }
     window.location.href = `${window.location.origin}/edit/?${queryString}`;
   }
 
@@ -171,20 +171,15 @@ export class HomeComponent implements OnInit {
     });
     this.loadingIndex.set(-1);
     this.editorStateService.setFileTree(fileTree);
-
-    // TODO: 检测命令
-    // window.location.href = `${window.location.origin}/edit/?source=local&terminal=dev`;
-    this.router.navigate(['/edit'], {
-      queryParams: { source: 'local', terminal: 'dev' },
+    this.openEdit({
+      source: 'local',
     });
   }
 
   editProject(project: Project) {
-    const queryString = `source=${encodeURIComponent(
-      project.projectZipUrl
-    )}&terminal=${encodeURIComponent('dev')}`;
-    // FIXME: router.navigate has some issue, will fix it later ?
-    window.location.href = `${window.location.origin}/edit/?${queryString}`;
+    this.openEdit({
+      source: project.projectZipUrl,
+    });
   }
 
   async deleteProject(project: Project) {
