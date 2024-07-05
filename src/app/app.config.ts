@@ -10,9 +10,10 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
+import { RedirectGuard } from './_shared/service/redirect-guard';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', component: HomeComponent, canActivate: [RedirectGuard] },
   {
     path: 'edit',
     component: EditorComponent,
@@ -27,5 +28,6 @@ export const appConfig: ApplicationConfig = {
     FormsModule,
     provideAnimationsAsync(),
     provideHttpClient(withFetch()),
+    RedirectGuard,
   ],
 };
