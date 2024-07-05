@@ -56,7 +56,12 @@ export class HomeComponent implements OnInit {
   loading = signal(false);
   loadingIndex = signal(-1);
 
-  displayedColumns: string[] = ['title', 'description', 'updated', 'operation'];
+  displayedColumns: string[] = [
+    'title',
+    // 'description',
+    'updated',
+    'operation',
+  ];
   dataSource = new MatTableDataSource<Project>([]);
 
   operations = [

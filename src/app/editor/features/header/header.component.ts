@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { MatButton } from '@angular/material/button';
@@ -16,6 +17,7 @@ import { LocalStorageService } from '@src/app/_shared/service/local-storage.serv
 import { Router } from '@angular/router';
 import { CodeEditorService } from '../main/edit/code-editor/code-editor.service';
 import { ConfirmDialogComponent } from '@src/app/_shared/components/confirm-dialog/confirm-dialog';
+import { NodeContainerService } from '../../services/node-container.service';
 
 @Component({
   selector: 'app-editor-header',
@@ -30,16 +32,32 @@ import { ConfirmDialogComponent } from '@src/app/_shared/components/confirm-dial
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   readonly dialog = inject(MatDialog);
   readonly snackBar = inject(MatSnackBar);
   logoPath = 'assets/imgs/header-logo.png';
   githubLogoPath = 'assets/imgs/github.png';
   isSaving = signal(false);
+  projectName = signal('untitled_project');
+  nodeContainerService = inject(NodeContainerService);
   codeEditorService = inject(CodeEditorService);
   fileSaverService = inject(FileSaverService);
   localStorageService = inject(LocalStorageService);
   router = inject(Router);
+
+  ngOnInit() {
+    this.nodeContainerService.fileMounted$.subscribe(async (fileMounted) => {
+      if (fileMounted) {
+        const pkgContent = await this.nodeContainerService.readFile(
+          'package.json'
+        );
+        const name = JSON.parse(pkgContent).name || 'untitled';
+        if (name) {
+          this.projectName.set(name);
+        }
+      }
+    });
+  }
 
   goHome() {
     if (this.codeEditorService.hasEdit) {
@@ -91,7 +109,7 @@ export class HeaderComponent {
   async performSave(token: string) {
     try {
       this.isSaving.set(true);
-      await this.fileSaverService.uploadToGist(token);
+      await this.fileSaverService.uploadToGist(token, this.projectName());
       this.isSaving.set(false);
       this.snackBar.open('File uploaded successfully!', 'Close', {
         duration: 3000,
@@ -103,5 +121,10 @@ export class HeaderComponent {
       });
       console.log('error', error);
     }
+  }
+
+  handleProjectNameInput($event: Event) {
+    const target = $event.target as HTMLInputElement;
+    this.projectName.set(target.value);
   }
 }

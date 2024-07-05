@@ -24,6 +24,7 @@ export class NodeContainerService {
   editorStateService = inject(EditorStateService);
   // #event
   previewUrl$ = new BehaviorSubject('');
+  fileMounted$ = new BehaviorSubject(false);
   // #state
   options: IOptions = {
     terminal: '',
@@ -219,6 +220,8 @@ export class NodeContainerService {
     const webContainer = await this.webContainer!;
 
     await webContainer.mount(fileSystemTree);
+
+    this.fileMounted$.next(true);
   }
 
   async readFile(filePath: string): Promise<string> {

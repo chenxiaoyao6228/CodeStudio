@@ -3,7 +3,14 @@
     <img class="logo" [src]="logoPath" alt="logo" />
     <span class="name"> Code Studio </span>
   </div>
-  <div class="middle"></div>
+  <div class="middle">
+    <input
+      class="project-name"
+      [value]="projectName()"
+      (input)="(handleProjectNameInput)"
+      placeholder="Enter Project Name"
+    />
+  </div>
   <div class="right">
     <!-- <button mat-button class="template" (click)="openTemplateModal()">
       <mat-icon class="icon">add</mat-icon>
