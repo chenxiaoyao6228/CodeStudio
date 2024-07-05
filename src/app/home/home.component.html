@@ -33,6 +33,7 @@
 <div class="recent-projects">
   <h2>Recent projects</h2>
   <div class="table-wrap">
+    @if(dataSource.data.length > 0) {
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <!-- Title Column -->
       <ng-container matColumnDef="title">
@@ -68,12 +69,24 @@
 
     <mat-paginator
       [length]="dataSource.data.length"
-      [pageSize]="20"
-      [pageSizeOptions]="[5, 10, 20]"
+      [pageSize]="100"
       showFirstLastButtons
     ></mat-paginator>
-
-    @if(loading()) {
+    }@else {
+    <div class="empty">
+      <div class="wrap">
+        <div class="img"></div>
+        <div class="title">No data from Gist found</div>
+        <div class="desc">
+          if you haven't setup Gist Storage yet, please
+          <button class="link-btn" (click)="openTokenModal()">
+            click here
+          </button>
+          and provide token
+        </div>
+      </div>
+    </div>
+    } @if(loading()) {
     <div class="loading">
       <mat-progress-spinner color="primary" mode="indeterminate">
       </mat-progress-spinner>

@@ -20,6 +20,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FileLoaderFactory } from '../editor/services/file-loader/loader-factory.service';
 import { EditorStateService } from '../editor/services/editor-state.service';
 import { GithubUrlDialogComponent } from '../_shared/components/github-url-dialog/github-url-dialog.component';
+import { LocalStorageService } from '../_shared/service/local-storage.service';
+import { GitHubTokenDialogComponent } from '../_shared/components/github-token-dialog/github-token-dialog.component';
 
 export interface Project {
   id: string;
@@ -52,6 +54,7 @@ export class HomeComponent implements OnInit {
   gistService = inject(GistService);
   fileLoaderService = inject(FileLoaderFactory);
   editorStateService = inject(EditorStateService);
+  localStorageService = inject(LocalStorageService);
   router = inject(Router);
   loading = signal(false);
   loadingIndex = signal(-1);
@@ -97,6 +100,11 @@ export class HomeComponent implements OnInit {
   }
 
   async getList() {
+    const token = await this.localStorageService.getItem('githubToken');
+    if (!token) {
+      this.dataSource.data = [];
+      return;
+    }
     try {
       this.loading.set(true);
       const res = await this.homeService.getList();
@@ -145,6 +153,18 @@ export class HomeComponent implements OnInit {
       width: 'min(95vw - 48px, 980px)',
       minHeight: '382px',
       maxWidth: '60vw',
+    });
+  }
+
+  openTokenModal() {
+    const tokenDialogRef = this.dialog.open(GitHubTokenDialogComponent, {
+      width: '400px',
+    });
+    tokenDialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.localStorageService.setItem('githubToken', result);
+        this.getList();
+      }
     });
   }
 

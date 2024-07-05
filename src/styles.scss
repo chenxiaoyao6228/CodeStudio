@@ -24,6 +24,20 @@ app-root {
 
 // ================= component ===========================
 
+// -------------- button --------------
+.link-btn {
+  text-decoration: underline;
+  border: none;
+  background-color: transparent;
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+// -------------- scrollbar --------------
+
 /* Set the width of the scrollbar */
 ::-webkit-scrollbar {
   width: 12px;

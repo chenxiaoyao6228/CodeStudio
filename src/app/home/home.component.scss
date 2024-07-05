@@ -108,7 +108,7 @@ $table-height: calc(100vh - 40px - 30px - 96px - 30px - 20px - 20px);
     .table-wrap {
       position: relative;
       height: $table-height;
-      overflow-y: scroll;
+      overflow-y: auto;
       table {
         width: 100%;
         min-height: 260px;
@@ -116,6 +116,40 @@ $table-height: calc(100vh - 40px - 30px - 96px - 30px - 20px - 20px);
 
       mat-paginator {
         margin-top: 1rem;
+      }
+
+      .empty {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        flex-wrap: wrap;
+        .wrap {
+        }
+        // .img {
+        //   width: 100px;
+        //   height: 100px;
+        //   background-image: url("../../assets/imgs/empty.png");
+        //   background-size: cover;
+        // }
+        .title {
+          font-size: 30px;
+          text-align: center;
+        }
+        .desc {
+          font-size: 16px;
+          margin-top: 30px;
+          text-align: center;
+          color: #fff;
+          span {
+            text-decoration: underline;
+            color: #fff;
+            font-weight: strong;
+            cursor: pointer;
+          }
+        }
       }
     }
   }
