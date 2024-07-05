@@ -17,6 +17,9 @@ import { PROJECT_KEY } from '../_shared/constant';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FileLoaderFactory } from '../editor/services/file-loader/loader-factory.service';
+import { EditorStateService } from '../editor/services/editor-state.service';
+import { GithubUrlDialogComponent } from '../_shared/components/github-url-dialog/github-url-dialog.component';
 
 export interface Project {
   id: string;
@@ -47,6 +50,8 @@ export class HomeComponent implements OnInit {
   readonly snackBar = inject(MatSnackBar);
   homeService = inject(HomeService);
   gistService = inject(GistService);
+  fileLoaderService = inject(FileLoaderFactory);
+  editorStateService = inject(EditorStateService);
   router = inject(Router);
   loading = signal(false);
 
@@ -134,11 +139,36 @@ export class HomeComponent implements OnInit {
   }
 
   importProject() {
-    // TODO:
+    const dialogRef = this.dialog.open(GithubUrlDialogComponent, {
+      width: '400px',
+      data: {},
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.openEdit({
+          source: result,
+          terminal: 'dev', // TODO:
+        });
+      }
+    });
   }
 
-  openLocalFolder() {
-    // TODO:
+  openEdit(params: { source: string; terminal: string }) {
+    const queryString = `source=${encodeURIComponent(
+      params.source
+    )}&terminal=${encodeURIComponent(params.terminal)}`;
+    window.location.href = `${window.location.origin}/edit/?${queryString}`;
+  }
+
+  async openLocalFolder() {
+    const fileTree = await this.fileLoaderService.loadFiles({
+      source: 'local',
+    });
+    this.editorStateService.setFileTree(fileTree);
+
+    // TODO: 检测命令
+    window.location.href = `${window.location.origin}/edit/?source=local&terminal=dev`;
   }
 
   editProject(project: Project) {

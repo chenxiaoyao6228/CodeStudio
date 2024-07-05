@@ -1,0 +1,17 @@
+mat-form-field {
+  width: 100%;
+}
+
+.mat-mdc-dialog-content {
+  padding-bottom: 16px;
+  .custom-link {
+    text-decoration: underline;
+    color: #fff;
+    font-weight: strong;
+  }
+}
+
+.mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+}
