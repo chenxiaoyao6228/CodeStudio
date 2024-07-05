@@ -27,6 +27,7 @@ export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
 export class CodeEditorService implements IDisposable {
   typeLoaderService = inject(TypeLoaderService);
   nodeContainerService = inject(NodeContainerService);
+  hasEdit = false;
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
   private editor: monaco.editor.IStandaloneCodeEditor | undefined;
@@ -147,6 +148,7 @@ export class CodeEditorService implements IDisposable {
 
     const changeModelContentDisposable = this.editor.onDidChangeModelContent(
       (e) => {
+        this.hasEdit = true; // mark as dirty
         this.debouncedResolveContents();
       }
     );

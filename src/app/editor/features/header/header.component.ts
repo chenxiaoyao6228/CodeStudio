@@ -14,11 +14,18 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { GitHubTokenDialogComponent } from '@src/app/_shared/components/github-token-dialog/github-token-dialog.component';
 import { LocalStorageService } from '@src/app/_shared/service/local-storage.service';
 import { Router } from '@angular/router';
+import { CodeEditorService } from '../main/edit/code-editor/code-editor.service';
+import { ConfirmDialogComponent } from '@src/app/_shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-editor-header',
   standalone: true,
-  imports: [MatIcon, MatButton, MatProgressSpinnerModule],
+  imports: [
+    MatIcon,
+    MatButton,
+    MatProgressSpinnerModule,
+    ConfirmDialogComponent,
+  ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,11 +36,32 @@ export class HeaderComponent {
   logoPath = 'assets/imgs/header-logo.png';
   githubLogoPath = 'assets/imgs/github.png';
   isSaving = signal(false);
+  codeEditorService = inject(CodeEditorService);
   fileSaverService = inject(FileSaverService);
   localStorageService = inject(LocalStorageService);
   router = inject(Router);
 
   goHome() {
+    if (this.codeEditorService.hasEdit) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          message: 'You have unsaved changes. Do you really want to leave?',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this._goHome();
+        } else {
+          this.saveToGist();
+        }
+      });
+    } else {
+      this._goHome();
+    }
+  }
+  private _goHome() {
     window.location.href = '/'; // force reload to release resources
   }
 
