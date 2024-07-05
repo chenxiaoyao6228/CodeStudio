@@ -141,7 +141,11 @@ export class HomeComponent implements OnInit {
   }
 
   openTemplateModal() {
-    this.dialog.open(TemplateModalComponent);
+    this.dialog.open(TemplateModalComponent, {
+      width: 'min(95vw - 48px, 980px)',
+      minHeight: '382px',
+      maxWidth: '60vw',
+    });
   }
 
   importProject() {

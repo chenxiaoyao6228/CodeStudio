@@ -4,8 +4,6 @@
 }
 .mat-mdc-dialog-content {
   .template-list {
-    width: 100%;
-    height: 400px;
     overflow: auto;
 
     .template-item {
@@ -32,11 +30,21 @@
         background-position: center;
         margin-left: 10px;
       }
-
-      .name {
-        font-weight: bold;
+      .wrap {
         margin-left: 20px;
-        font-size: 18px;
+        .name {
+          overflow: hidden;
+          font-weight: bold;
+          font-size: 18px;
+        }
+        .desc {
+          overflow: hidden;
+          font-weight: 400;
+          font-size: 85%;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          opacity: 0.65;
+        }
       }
     }
   }

@@ -1,7 +1,9 @@
 <h2 mat-dialog-title class="title">
   Choose a template
   <mat-dialog-actions>
-    <button mat-button (click)="closeModal()" class="close">X</button>
+    <div mat-dialog-actions (click)="closeModal()" class="close">
+      <mat-icon>close</mat-icon>
+    </div>
   </mat-dialog-actions>
 </h2>
 <mat-dialog-content>
@@ -12,7 +14,10 @@
         class="icon"
         [style.backgroundImage]="'url(' + item.icon + ')'"
       ></div>
-      <div class="name">{{ item.name }}</div>
+      <div class="wrap">
+        <div class="name">{{ item.name }}</div>
+        <span class="desc">{{ item.desc }}</span>
+      </div>
     </div>
 
     }
