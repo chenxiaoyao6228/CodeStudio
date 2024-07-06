@@ -63,19 +63,27 @@
       }
     }
   }
-  .open-preview {
-    cursor: pointer;
-    margin-left: 4px;
-    margin-right: 4px;
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-    transform: rotate(180deg);
-    flex-grow: 0;
-    flex-shrink: 0;
+  .functions {
+    display: flex;
+    align-items: center;
+    .prettier {
+      display: block;
+      background-image: url("/assets/imgs/prettier.svg");
+      background-size: cover;
+    }
+    .open-preview {
+      cursor: pointer;
+      margin-left: 4px;
+      margin-right: 4px;
+
+      transform: rotate(180deg);
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
   }
 }
 .bottom {
   flex: 1;
   position: relative;
+  overflow: hidden;
 }

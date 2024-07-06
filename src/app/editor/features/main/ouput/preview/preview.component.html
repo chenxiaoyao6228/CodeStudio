@@ -4,7 +4,7 @@
     @if(isReady()) {
     <div class="refresh-icon">
       <mat-icon
-        class="icon"
+        class="common-icon icon"
         [class.loading]="isRefreshing()"
         (click)="refreshIframe()"
         >refresh</mat-icon
@@ -14,7 +14,7 @@
       {{ previewUrl() }}
     </div>
 
-    <mat-icon class="close-preview" (click)="collapsePreview()"
+    <mat-icon class="common-icon close-preview" (click)="collapsePreview()"
       >keyboard_tab</mat-icon
     >
     <!-- <mat-icon class="external-link">open_in_new</mat-icon> -->

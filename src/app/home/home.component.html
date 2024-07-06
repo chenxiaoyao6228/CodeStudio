@@ -72,7 +72,7 @@
       [pageSize]="100"
       showFirstLastButtons
     ></mat-paginator>
-    }@else {
+    }@else { @if(!loading()) {
     <div class="empty">
       <div class="wrap">
         <div class="img"></div>
@@ -86,7 +86,7 @@
         </div>
       </div>
     </div>
-    } @if(loading()) {
+    } } @if(loading()) {
     <div class="loading">
       <mat-progress-spinner color="primary" mode="indeterminate">
       </mat-progress-spinner>

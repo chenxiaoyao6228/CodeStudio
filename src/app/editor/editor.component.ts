@@ -12,6 +12,8 @@ import { StartupPhase } from './constants';
 import { CodeEditorService } from './features/main/edit/code-editor/code-editor.service';
 import { TypeLoaderService } from './features/main/edit/code-editor/type-loader.service';
 import { TemplateModalComponent } from '@app/_shared/components/template-modal/template-modal.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../_shared/components/confirm-dialog/confirm-dialog';
 
 export interface IRouteParams {
   source: string; // mock, local, template name, github folder , zip url
@@ -50,6 +52,7 @@ export class EditorComponent implements AfterViewInit {
   routeParams: IRouteParams = {
     source: 'local',
   };
+  readonly dialog = inject(MatDialog);
   route = inject(ActivatedRoute);
   nodeContainerService = inject(NodeContainerService);
   fileLoaderService = inject(FileLoaderFactory);
@@ -67,7 +70,14 @@ export class EditorComponent implements AfterViewInit {
 
   async handleQueryParamsChange(params: IRouteParams) {
     if (!params.source) {
-      throw new Error('Source is required');
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          message:
+            'Source is required in the query params to passed to access this page, go to the page page to choose a template or import a project.',
+        },
+      });
+      // throw new Error('Source is required');
     }
     // local files have already been loaded by user picker
     if (!(this.routeParams.source === 'local')) {
