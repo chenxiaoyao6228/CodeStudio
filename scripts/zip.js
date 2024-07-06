@@ -43,20 +43,40 @@ function zipFolder(sourceFolder, targetZip) {
     deleteNodeModules(sourceFolder);
     zipFolderRecursive(sourceFolder, zip, sourceFolder);
     zip.writeZip(targetZip);
+    console.log(`Zipped ${sourceFolder} to ${targetZip}`);
 }
 
 function unzipFolder(zipFilePath, targetFolder) {
     const zip = new AdmZip(zipFilePath);
     zip.extractAllTo(targetFolder, true);
+    console.log(`Unzipped ${zipFilePath} to ${targetFolder}`);
 }
 
-const name = 'vanilla';
-const sourceFolder = `/home/york/projects/CodeStudio/public/templates/${name}`;
-const targetZip = `${sourceFolder}.zip`;
-const sourceZip = targetZip;
-const targetFolder = sourceFolder;
+const args = process.argv.slice(2);
 
+let name = '';
+let action = '';
 
-// zipFolder(sourceFolder, targetZip);
+args.forEach((arg, index) => {
+    if (arg === '--name' && args[index + 1]) {
+        name = args[index + 1];
+    } else if (arg === '--zip') {
+        action = 'zip';
+    } else if (arg === '--unzip') {
+        action = 'unzip';
+    }
+});
 
-unzipFolder(sourceZip, targetFolder);
+if (!name) {
+    console.log('Please provide a folder name using --name argument.');
+} else if (action === 'zip') {
+    const sourceFolder = `/home/york/projects/CodeStudio/public/templates/${name}`;
+    const targetZip = `${sourceFolder}.zip`;
+    zipFolder(sourceFolder, targetZip);
+} else if (action === 'unzip') {
+    const sourceZip = `/home/york/projects/CodeStudio/public/templates/${name}.zip`;
+    const targetFolder = `/home/york/projects/CodeStudio/public/templates/${name}`;
+    unzipFolder(sourceZip, targetFolder);
+} else {
+    console.log('Please provide --zip or --unzip argument.');
+}

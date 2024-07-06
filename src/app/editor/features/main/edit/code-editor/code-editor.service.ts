@@ -7,10 +7,11 @@ import {
   inject,
 } from '@angular/core';
 import { EventEmitter } from '@app/_shared/service/Emitter';
-import { AsyncSubject } from 'rxjs';
+import { AsyncSubject, take } from 'rxjs';
 import { TypeDefinition, TypeLoaderService } from './type-loader.service';
 import { IDisposable } from '@xterm/xterm';
 import debounce from 'lodash/debounce';
+import { PrettierService } from './prettier.service';
 
 export interface CodeEditorEvents {
   contentChanged: { content: string; filePath: string };
@@ -27,6 +28,7 @@ export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
 export class CodeEditorService implements IDisposable {
   typeLoaderService = inject(TypeLoaderService);
   nodeContainerService = inject(NodeContainerService);
+  prettierService = inject(PrettierService);
   hasEdit = false;
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
@@ -126,10 +128,70 @@ export class CodeEditorService implements IDisposable {
       });
 
       this.setUpPathIntellisenseListeners();
+      this.listenToGoToDefinition(this.editor);
 
-      this.listenToGoToDefinition(this.editor!);
+      // load prettier
+      this.prettierService
+        .loadPrettier()
+        .pipe(take(1))
+        .subscribe(() => {
+          this.registerFormattingProviders();
+        });
     }
     return this.editor;
+  }
+
+  formatCurrentFile() {
+    this.prettierService
+      .loadPrettier()
+      .pipe(take(1))
+      .subscribe(() => {
+        const model = this.editor!.getModel();
+        if (model) {
+          const formattedCode = this.prettierService.format(
+            model.getValue(),
+            model.uri.path
+          );
+          model.setValue(formattedCode);
+        }
+      });
+  }
+
+  private registerFormattingProviders() {
+    const provideDocumentFormattingEdits = (
+      model: monaco.editor.ITextModel
+    ) => {
+      const text = this.prettierService.format(
+        model.getValue(),
+        model.uri.path
+      );
+      return [
+        {
+          range: model.getFullModelRange(),
+          text,
+        },
+      ];
+    };
+
+    monaco.languages.registerDocumentFormattingEditProvider('javascript', {
+      provideDocumentFormattingEdits,
+    });
+
+    monaco.languages.registerDocumentFormattingEditProvider('typescript', {
+      provideDocumentFormattingEdits,
+    });
+
+    monaco.languages.registerDocumentFormattingEditProvider('html', {
+      provideDocumentFormattingEdits,
+    });
+
+    monaco.languages.registerDocumentFormattingEditProvider('css', {
+      provideDocumentFormattingEdits,
+    });
+
+    monaco.languages.registerDocumentFormattingEditProvider('less', {
+      provideDocumentFormattingEdits,
+    });
   }
 
   private setUpPathIntellisenseListeners() {
@@ -183,7 +245,6 @@ export class CodeEditorService implements IDisposable {
     pathMappings: any
   ) {
     await this.ensureMonacoLoaded();
-
     /*
      * https://stackoverflow.com/questions/77342362/monaco-editor-typescript-how-to-add-global-types
      * https://stackoverflow.com/questions/52290727/adding-typescript-type-declarations-to-monaco-editor

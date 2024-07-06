@@ -17,7 +17,11 @@
     }
   </div>
   <div class="functions">
-    <i class="common-icon prettier"></i>
+    <mat-icon
+      svgIcon="prettier"
+      class="common-icon prettier"
+      (click)="formatCurrentFile()"
+    ></mat-icon>
     @if(!isPreviewOpen()){
     <mat-icon class="common-icon open-preview" (click)="openPreview()"
       >keyboard_tab</mat-icon

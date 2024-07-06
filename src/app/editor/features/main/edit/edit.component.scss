@@ -66,16 +66,17 @@
   .functions {
     display: flex;
     align-items: center;
+    margin-left: 4px;
+    margin-right: 4px;
     .prettier {
-      display: block;
-      background-image: url("/assets/imgs/prettier.svg");
-      background-size: cover;
+      margin-right: 4px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
     }
     .open-preview {
       cursor: pointer;
-      margin-left: 4px;
-      margin-right: 4px;
-
       transform: rotate(180deg);
       flex-grow: 0;
       flex-shrink: 0;

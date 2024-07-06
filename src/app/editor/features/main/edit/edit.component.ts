@@ -11,6 +11,7 @@ import { AppEditorComponent } from './code-editor/code-editor.component';
 import { EditService, ITabItem } from './edit.service';
 import { MatIcon } from '@angular/material/icon';
 import { MainService } from '../main.service';
+import { CodeEditorService } from './code-editor/code-editor.service';
 
 @Component({
   standalone: true,
@@ -26,6 +27,7 @@ export class EditComponent implements OnInit, OnDestroy {
     | undefined;
 
   editService = inject(EditService);
+  codeEditorService = inject(CodeEditorService);
   private mainService = inject(MainService);
 
   isPreviewOpen = computed(() => this.mainService.isPreviewOpen());
@@ -63,5 +65,8 @@ export class EditComponent implements OnInit, OnDestroy {
   }
   openPreview() {
     this.mainService.openPreview();
+  }
+  formatCurrentFile() {
+    this.codeEditorService.formatCurrentFile();
   }
 }
