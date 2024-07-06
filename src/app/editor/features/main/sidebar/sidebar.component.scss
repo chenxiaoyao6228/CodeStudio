@@ -8,15 +8,16 @@
   justify-content: space-between;
   flex: 0 0 auto;
   min-height: 30px;
-  padding: 0 8px 0 12px;
+  padding: 0 0 0 12px;
   user-select: none;
   border-bottom: 1px solid #fff;
   .title {
     font-size: 14px;
   }
   .download-icon {
-    height: 20px;
     width: 20px;
+    height: 20px;
+    font-size: 20px;
     cursor: pointer;
     &:hover {
       opacity: 0.8;

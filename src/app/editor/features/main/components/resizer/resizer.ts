@@ -44,6 +44,11 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   private el = inject(ElementRef);
   private renderer = inject(Renderer2);
 
+  interStyle = {
+    width: 100,
+    height: 100,
+  };
+
   constructor() {}
 
   ngAfterViewInit() {
@@ -122,5 +127,13 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
 
   updateSize(sizeFlag: 'width' | 'height', size: number) {
     this.renderer.setStyle(this.el.nativeElement, sizeFlag, `${size}%`);
+
+    this.interStyle[sizeFlag] = size;
+
+    if (this.interStyle.width === 0 || this.interStyle.height === 0) {
+      this.renderer.setStyle(this.el.nativeElement, 'display', 'none');
+    } else {
+      this.renderer.setStyle(this.el.nativeElement, 'display', 'flex');
+    }
   }
 }
