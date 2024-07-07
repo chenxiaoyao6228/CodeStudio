@@ -121,6 +121,7 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
       width: 0,
       height: 0,
       percentage: this.percentage,
+      originPercentage: this.percentage,
       resizer: this,
     };
   }

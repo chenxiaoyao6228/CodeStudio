@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MainService } from '../main/main.service';
 
 @Component({
   selector: 'app-editor-footer',
@@ -9,4 +10,10 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './footer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FooterComponent {}
+export class FooterComponent {
+  mainService = inject(MainService);
+
+  toggleConsole() {
+    this.mainService.toggleConsole();
+  }
+}

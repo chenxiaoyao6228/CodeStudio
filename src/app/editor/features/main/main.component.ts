@@ -14,6 +14,7 @@ import { PreviewComponent } from './ouput/preview/preview.component';
 import { TerminalComponent } from './ouput/terminal/terminal.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { MainService } from './main.service';
+import { ConsoleComponent } from './ouput/console/console.component';
 
 @Component({
   selector: 'app-editor-main',
@@ -26,18 +27,20 @@ import { MainService } from './main.service';
     PreviewComponent,
     TerminalComponent,
     SidebarComponent,
+    ConsoleComponent,
   ],
-  providers: [MainService],
+  providers: [],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements AfterViewInit {
   @ViewChild('mainResizer') mainResizer!: ResizerComponent;
+  @ViewChild('outputResizer') outputResizer!: ResizerComponent;
   mainService = inject(MainService);
 
   ngAfterViewInit() {
-    console.log(this.mainResizer.resizeService);
-    this.mainService.setResizer(this.mainResizer);
+    this.mainService.setMainResizer(this.mainResizer);
+    this.mainService.setOutputResizer(this.outputResizer);
   }
 }

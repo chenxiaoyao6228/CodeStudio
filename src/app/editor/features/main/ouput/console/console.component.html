@@ -1,0 +1,32 @@
+<div class="controls">
+  <div class="left">
+    <span class="title">Console</span>
+  </div>
+  <div class="right">
+    <mat-icon
+      class="common-icon clear-btn"
+      (click)="consoleService.clearConsole()"
+      >delete</mat-icon
+    >
+    <mat-icon class="common-icon toggle-btn" (click)="toggleConsole()">{{
+      mainService.isConsoleOpen() ? "expand_less" : "expand_more"
+    }}</mat-icon>
+  </div>
+</div>
+<div class="console-wrap">
+  <div class="console-entries short-no-scroll">
+    @for(message of consoleService.controlMessages; track message.content) {
+    <pre>
+            <span class="console-message-content">{{ message.content }}</span>
+          </pre>
+    }
+  </div>
+</div>
+<div class="command-line">
+  <mat-icon class="common-icon icon">navigate_next</mat-icon>
+  <textarea
+    class="input"
+    rows="1"
+    (keydown.enter)="consoleService.executeCommand($event)"
+  ></textarea>
+</div>
