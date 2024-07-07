@@ -160,19 +160,25 @@ export class NodeContainerService {
 
     if (!this.options.pkgManager) {
       // auto detect by checking if package.json, yarn.lock, pnpm-lock.yaml exist
-      const hasFile = async (filePath: string) => {
-        return await this.readFile(filePath);
-      };
-
-      if (await hasFile('yarn.lock')) {
+      if (await this.isFileExist('yarn.lock')) {
         this.options.pkgManager = 'yarn';
-      } else if (await hasFile('pnpm-lock.yaml')) {
+      } else if (await this.isFileExist('pnpm-lock.yaml')) {
         this.options.pkgManager = 'pnpm';
-      } else if (await hasFile('package-lock.json')) {
+      } else if (await this.isFileExist('package-lock.json')) {
         this.options.pkgManager = 'npm';
       } else {
         this.options.pkgManager = 'npm';
       }
+    }
+  }
+
+  async isFileExist(filePath: string) {
+    try {
+      await this.readFile(filePath);
+      return true;
+    } catch (error) {
+      console.log(`isFileExist: ${filePath} not exist`);
+      return false;
     }
   }
 
