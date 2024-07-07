@@ -177,7 +177,7 @@ export class NodeContainerService {
       await this.readFile(filePath);
       return true;
     } catch (error) {
-      console.log(`isFileExist: ${filePath} not exist`);
+      // console.log(`isFileExist: ${filePath} not exist`);
       return false;
     }
   }

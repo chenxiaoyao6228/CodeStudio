@@ -5,6 +5,11 @@ import { ZipFileLoader } from './loaders/zip-file-loader.service';
 import { LocalFileLoader } from './loaders/local-filer-loader';
 import { mockFileLoader } from './loaders/mock-filer-loader';
 import { GistFileLoader } from './loaders/gist-file-loader.service';
+import { FileSystemTree } from '@webcontainer/api';
+import {
+  isEntryFile,
+  injectProxyScriptToEntryHTML,
+} from '../../features/main/ouput/console/getProxyConsoleScript';
 
 @Injectable({
   providedIn: 'root',
@@ -12,9 +17,13 @@ import { GistFileLoader } from './loaders/gist-file-loader.service';
 export class FileLoaderFactory {
   constructor() {}
 
-  loadFiles(config: IFileLoaderConfig) {
+  async loadFiles(config: IFileLoaderConfig) {
     const loader = this.createFileLoader(config);
-    return loader.loadFiles(config);
+    const fileTree = await loader.loadFiles(config);
+
+    this.processFileTree(fileTree);
+
+    return fileTree;
   }
 
   private createFileLoader(config: IFileLoaderConfig): IFileLoader {
@@ -30,6 +39,24 @@ export class FileLoaderFactory {
       return new mockFileLoader();
     } else {
       throw new Error('Unsupported file source');
+    }
+  }
+
+  private processFileTree(fileTree: FileSystemTree) {
+    for (const key in fileTree) {
+      if (Object.prototype.hasOwnProperty.call(fileTree, key)) {
+        const node = fileTree[key];
+        if ('file' in node) {
+          if (isEntryFile(key)) {
+            node.file.contents = injectProxyScriptToEntryHTML(
+              node.file.contents
+            );
+            break; // break after found
+          }
+        } else if ('directory' in node) {
+          this.processFileTree(node.directory);
+        }
+      }
     }
   }
 }

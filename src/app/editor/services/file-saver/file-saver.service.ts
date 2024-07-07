@@ -5,6 +5,10 @@ import { LocalStorage } from './storage/local';
 import { IStorage } from './type';
 import { FileSystemTree } from '@webcontainer/api';
 import { GistStorage } from './storage/gist';
+import {
+  isEntryFile,
+  removeProxyScriptOfEntryHTML,
+} from '../../features/main/ouput/console/getProxyConsoleScript';
 
 @Injectable({
   providedIn: 'root',
@@ -77,7 +81,11 @@ export class FileSaverService {
         console.log(`Adding path: ${fullPath}`);
 
         if ('file' in item) {
-          zip.file(fullPath, item.file.contents);
+          let contents = item.file.contents;
+          if (isEntryFile(fullPath)) {
+            contents = removeProxyScriptOfEntryHTML(contents);
+          }
+          zip.file(fullPath, contents);
         } else if ('directory' in item) {
           // Create the folder in the existing zip instance
           zip.folder(fullPath);

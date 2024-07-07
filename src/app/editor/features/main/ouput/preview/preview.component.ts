@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
+  OnInit,
   ViewChild,
   computed,
   inject,
@@ -20,6 +22,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { NodeContainerService } from '@app/editor/services/node-container.service';
 import { map } from 'rxjs';
 import { MainService } from '../../main.service';
+import { ConsoleService } from '../console/console.service';
 
 interface IPhaseItem {
   key: StartupPhase;
@@ -77,7 +80,7 @@ const DEFAULT_PHASE_LIST = [
   styleUrl: './preview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PreviewComponent {
+export class PreviewComponent implements AfterViewInit {
   @ViewChild('previewIframe') previewIframe:
     | ElementRef<HTMLIFrameElement>
     | undefined;
@@ -85,6 +88,7 @@ export class PreviewComponent {
   private editorStateService = inject(EditorStateService);
   private nodeContainerService = inject(NodeContainerService);
   private mainService = inject(MainService);
+  private consoleService = inject(ConsoleService);
 
   previewUrl = signal('');
   isRefreshing = signal(false);
@@ -127,6 +131,7 @@ export class PreviewComponent {
   trackByPhaseKey(index: number, phase: IPhaseItem): StartupPhase {
     return phase.key;
   }
+
   ngAfterViewInit() {
     this.nodeContainerService.previewUrl$
       .pipe(map((url) => ({ url })))

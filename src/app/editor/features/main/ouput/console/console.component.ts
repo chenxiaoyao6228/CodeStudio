@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { ConsoleService } from './console.service';
 import { MainService } from '../../main.service';
@@ -10,11 +10,16 @@ import { MainService } from '../../main.service';
   templateUrl: './console.component.html',
   styleUrl: './console.component.scss',
 })
-export class ConsoleComponent {
+export class ConsoleComponent implements OnInit {
   consoleService = inject(ConsoleService);
   mainService = inject(MainService);
+  consoleMessages: { type: string; content: string }[] = [];
 
   toggleConsole() {
     this.mainService.toggleConsole();
+  }
+
+  ngOnInit() {
+    // TODO:
   }
 }
