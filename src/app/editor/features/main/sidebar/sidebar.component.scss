@@ -14,6 +14,10 @@
   .title {
     font-size: 14px;
   }
-  .download-icon {
+  .icons {
+    display: flex;
+    align-items: center;
+    .download-icon {
+    }
   }
 }

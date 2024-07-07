@@ -81,6 +81,10 @@
         <mat-icon (click)="onFileOperate(node, 'deleting', $event)"
           >delete</mat-icon
         >
+        } @else {
+        <mat-icon class="common-icon refresh-icon" (click)="refreshFiles()"
+          >refresh</mat-icon
+        >
         }
       </div>
     </div>
@@ -158,6 +162,10 @@
         >
         <mat-icon (click)="onFileOperate(node, 'deleting', $event)"
           >delete</mat-icon
+        >
+        } @else {
+        <mat-icon class="common-icon refresh-icon" (click)="refreshFiles()"
+          >refresh</mat-icon
         >
         }
       </div>

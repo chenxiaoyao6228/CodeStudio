@@ -554,4 +554,14 @@ export class FileTreeComponent {
       this.editorState.setCurrentFilePath(newFilePath);
     }
   }
+
+  async refreshFiles() {
+    const excludeFolders = ['node_modules'];
+    const ft = await this.nodeContainerService.getFileSystemTree(
+      '/',
+      (path?: string) => !!path && !excludeFolders.includes(path)
+    );
+
+    this.editorState.setFileTree(ft);
+  }
 }

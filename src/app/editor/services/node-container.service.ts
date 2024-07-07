@@ -279,11 +279,11 @@ export class NodeContainerService {
     }
   }
 
-  getFileSystemTree = async (
+  async getFileSystemTree(
     dir: string,
     filterFoldersPredicate: ((path?: string) => boolean) | undefined = () =>
       true
-  ): Promise<FileSystemTree> => {
+  ): Promise<FileSystemTree> {
     try {
       const webContainer = await this.bootOrGetContainer();
       const fs = webContainer.fs;
@@ -323,7 +323,7 @@ export class NodeContainerService {
       console.error('Error while fetching file system tree:', error);
       throw error;
     }
-  };
+  }
 
   async getDirectoryFiles(directory: string): Promise<string[]> {
     const webContainer = await this.bootOrGetContainer();
