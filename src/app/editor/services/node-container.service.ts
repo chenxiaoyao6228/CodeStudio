@@ -12,7 +12,7 @@ import { IRouteParams } from '../editor.component';
 
 interface IOptions {
   terminal?: string;
-  pkgManager: 'npm' | 'yarn' | 'pnpm';
+  pkgManager?: 'npm' | 'yarn' | 'pnpm';
 }
 
 @Injectable({
@@ -26,10 +26,8 @@ export class NodeContainerService {
   previewUrl$ = new BehaviorSubject('');
   fileMounted$ = new BehaviorSubject(false);
   // #state
-  options: IOptions = {
-    terminal: '',
-    pkgManager: 'npm', // TODO: should have a 'codestudio' item in package.json for setting
-  };
+  options: IOptions = {};
+
   devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
   packageJson: Record<string, any> | null = null;
@@ -46,7 +44,7 @@ export class NodeContainerService {
     await this.mountFiles();
 
     // detect cmd command from package.json when not specified
-    await this.detectTerminalCmd();
+    await this.detectTerminalCmdAndPkgManager();
 
     // set initialPath
     this.editorStateService.setCurrentFilePath('package.json');
@@ -99,7 +97,7 @@ export class NodeContainerService {
   private async installDeps() {
     this.editorStateService.setPhase(StartupPhase.INSTALLING);
 
-    const installProcess = await this.spawnProcess(this.options.pkgManager, [
+    const installProcess = await this.spawnProcess(this.options.pkgManager!, [
       'install',
     ]);
 
@@ -125,7 +123,7 @@ export class NodeContainerService {
 
     const webContainer = await this.bootOrGetContainer();
     const devServerProcess = await webContainer.spawn(
-      this.options!.pkgManager,
+      this.options.pkgManager!,
       ['run', this.options!.terminal || 'dev']
     );
 
@@ -147,7 +145,7 @@ export class NodeContainerService {
     return devServerProcess;
   }
 
-  private async detectTerminalCmd() {
+  private async detectTerminalCmdAndPkgManager() {
     if (!this.options.terminal) {
       const pkgString = await this.readFile('package.json');
       const pkgContent = JSON.parse(pkgString);
@@ -158,6 +156,23 @@ export class NodeContainerService {
           this.options.terminal = cmd;
         }
       });
+    }
+
+    if (!this.options.pkgManager) {
+      // auto detect by checking if package.json, yarn.lock, pnpm-lock.yaml exist
+      const hasFile = async (filePath: string) => {
+        return await this.readFile(filePath);
+      };
+
+      if (await hasFile('yarn.lock')) {
+        this.options.pkgManager = 'yarn';
+      } else if (await hasFile('pnpm-lock.yaml')) {
+        this.options.pkgManager = 'pnpm';
+      } else if (await hasFile('package-lock.json')) {
+        this.options.pkgManager = 'npm';
+      } else {
+        this.options.pkgManager = 'npm';
+      }
     }
   }
 
