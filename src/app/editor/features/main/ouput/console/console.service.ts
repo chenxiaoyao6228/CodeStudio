@@ -1,7 +1,8 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 
 interface IConsoleMessage {
-  type: 'log' | 'error' | 'warn' | 'info' | 'debug';
+  type: 'console' | 'thrown-error';
+  method: 'log' | 'error' | 'warn' | 'info' | 'debug';
   content: any[];
 }
 
@@ -31,12 +32,16 @@ export class ConsoleService {
       return;
     }
 
-    const { method, args } = event.data;
-    if (['log', 'error', 'warn', 'info', 'debug'].includes(method)) {
-      this.controlMessages.set([
-        ...this.controlMessages(),
-        { type: method, content: args },
-      ]);
+    const { method, data, type } = event.data;
+    if (type === 'console') {
+      if (['log', 'error', 'warn', 'info', 'debug'].includes(method)) {
+        this.controlMessages.set([
+          ...this.controlMessages(),
+          { type, method, content: data },
+        ]);
+      }
+    } else if (type === 'thrown-error') {
+      // TODO:
     }
   }
 }
