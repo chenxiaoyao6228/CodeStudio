@@ -14,11 +14,11 @@
   </div>
 </div>
 <div class="console-wrap">
-  <div class="console-entries short-no-scroll">
-    @for(message of consoleService.controlMessages; track message.content) {
-    <pre>
-            <span class="console-message-content">{{ message.content }}</span>
-          </pre>
+  <div class="console-entries">
+    @for(message of consoleService.controlMessages(); track message.content) {
+    <div class="console-item">
+      {{ message.content }}
+    </div>
     }
   </div>
 </div>

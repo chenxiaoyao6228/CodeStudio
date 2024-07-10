@@ -1,5 +1,4 @@
-import { Injectable, signal } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 
 interface IConsoleMessage {
   type: 'log' | 'error' | 'warn' | 'info' | 'debug';
@@ -11,15 +10,14 @@ interface IConsoleMessage {
 })
 export class ConsoleService {
   messages = signal([]);
-  private messagesSubject = new Subject<IConsoleMessage>();
-  controlMessages: IConsoleMessage[] = [];
+  controlMessages: WritableSignal<IConsoleMessage[]> = signal([]);
 
   constructor() {
     window.addEventListener('message', this.handleMessage.bind(this));
   }
 
   clearConsole() {
-    this.controlMessages = [];
+    this.controlMessages.set([]);
   }
 
   executeCommand(event: Event) {
@@ -27,13 +25,18 @@ export class ConsoleService {
   }
 
   private handleMessage(event: MessageEvent) {
-    // if (event.origin !== 'your-iframe-origin') {
-    //   return;
-    // }
+    if (
+      !['webcontainer.io', 'localhost'].some((h) => event.origin.includes(h))
+    ) {
+      return;
+    }
 
     const { method, args } = event.data;
     if (['log', 'error', 'warn', 'info', 'debug'].includes(method)) {
-      this.controlMessages.push({ type: method, content: args });
+      this.controlMessages.set([
+        ...this.controlMessages(),
+        { type: method, content: args },
+      ]);
     }
   }
 }

@@ -30,10 +30,6 @@
   }
 }
 
-.console-wrap {
-  flex: 1;
-}
-
 .command-line {
   display: flex;
   align-items: center;
@@ -45,5 +41,30 @@
     outline: none;
     border: none;
     resize: none;
+  }
+}
+
+.console-wrap {
+  flex: 1;
+  .console-entries {
+  }
+  .console-item {
+    padding: 0 4px;
+    border-bottom: 1px solid #ccc;
+    font-size: 13px;
+    .icon {
+    }
+    .badge {
+    }
+    .value {
+    }
+    &.info {
+    }
+    &.warn {
+    }
+    &.debug {
+    }
+    &.error {
+    }
   }
 }

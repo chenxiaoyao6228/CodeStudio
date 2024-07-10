@@ -1,25 +1,37 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+  AfterViewInit,
+  inject,
+} from '@angular/core';
 import { ConsoleService } from './console.service';
+import { MatIcon } from '@angular/material/icon';
 import { MainService } from '../../main.service';
 
 @Component({
   selector: 'app-console',
+  templateUrl: './console.component.html',
+  styleUrls: ['./console.component.scss'],
   standalone: true,
   imports: [MatIcon],
-  templateUrl: './console.component.html',
-  styleUrl: './console.component.scss',
 })
-export class ConsoleComponent implements OnInit {
+export class ConsoleComponent {
   consoleService = inject(ConsoleService);
   mainService = inject(MainService);
-  consoleMessages: { type: string; content: string }[] = [];
+
+  constructor() {}
 
   toggleConsole() {
     this.mainService.toggleConsole();
   }
 
-  ngOnInit() {
-    // TODO:
+  clearConsole() {
+    this.consoleService.clearConsole();
+  }
+
+  executeCommand(event: Event) {
+    this.consoleService.executeCommand(event);
   }
 }

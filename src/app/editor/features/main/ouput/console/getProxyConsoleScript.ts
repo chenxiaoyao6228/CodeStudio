@@ -19,6 +19,11 @@ function getProxyConsoleScript() {
           }
         });
       })();
+
+      console.log('111')
+      console.error('error')
+      console.debug('debug')
+      console.warn('warning')
   </script>`;
 }
 

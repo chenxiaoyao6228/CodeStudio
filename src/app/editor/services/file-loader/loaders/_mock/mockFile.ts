@@ -1,3 +1,39 @@
+export const consoleProxyMock = {
+  'index.html': {
+    file: {
+      contents: `
+        <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Test proxy console</title>
+            </head>
+            <body>
+              <h1>proxy</h1>
+            </body>
+          </html> 
+      `,
+    },
+  },
+
+  'package.json': {
+    file: {
+      contents: `
+        {
+  "scripts": {
+    "start": "servor --reload"
+  },
+  "dependencies": {
+    "servor": "^4.0.2"
+  }
+}
+
+      `,
+    },
+  },
+};
+
 export const mockFiles2 = {
   myproject: {
     directory: {

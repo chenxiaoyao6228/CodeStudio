@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proxy console</title>
+  </head>
+  <body>
+    <h1>Proxy console</h1>
+    <script src="index.js"></script>
+    <script>
+      // Log various JavaScript types
+      console.log("String:", "Hello, World!");
+      console.log("Number:", 12345);
+      console.log("Boolean:", true);
+      console.log("Undefined:", undefined);
+      console.log("Null:", null);
+      console.log("Array:", [1, 2, 3, 4, 5]);
+      console.log("Object:", { key: "value" });
+      console.log("Date:", new Date());
+      console.log("RegExp:", /abc/i);
+      console.log("Function:", function () {
+        return "Hello";
+      });
+      console.log("BigInt:", 123n);
+      console.log("Symbol:", Symbol("symbol"));
+
+      // Log different types of messages
+      console.log("This is a log message");
+      console.error("This is an error message");
+      console.info("This is an info message");
+      console.debug("This is a debug message");
+      console.warn("This is a warning message");
+
+      // Test Promise
+      const promise = Promise.resolve("Promise resolved");
+      promise.then((value) => console.log("Promise:", value));
+
+      // Test Error object
+      const error = new Error("This is an error object");
+      console.error("Error object:", error);
+
+      // Test different types with different console methods
+      console.error("String (error):", "This is an error string");
+      console.info("Number (info):", 67890);
+      console.debug("Boolean (debug):", false);
+      console.warn("Undefined (warn):", undefined);
+      console.log("Null (log):", null);
+
+      // Test complex object
+      const complexObject = {
+        string: "string",
+        number: 42,
+        boolean: true,
+        array: [1, 2, 3],
+        nestedObject: { a: 1, b: 2 },
+        date: new Date(),
+        regex: /test/i,
+        func: function () {
+          return "I'm a function";
+        },
+        bigint: 9007199254740991n,
+        symbol: Symbol("symbol"),
+      };
+      console.log("Complex Object:", complexObject);
+
+      // Test HTML element
+      const div = document.createElement("div");
+      div.innerHTML = "<strong>This is a div element</strong>";
+      console.log("HTML Element:", div);
+
+      // Test Map and Set
+      const map = new Map();
+      map.set("key1", "value1");
+      map.set("key2", "value2");
+      console.log("Map:", map);
+
+      const set = new Set();
+      set.add(1);
+      set.add(2);
+      set.add(3);
+      console.log("Set:", set);
+
+      // Test WeakMap and WeakSet
+      const weakMap = new WeakMap();
+      const obj = {};
+      weakMap.set(obj, "WeakMap value");
+      console.log("WeakMap:", weakMap);
+
+      const weakSet = new WeakSet();
+      weakSet.add(obj);
+      console.log("WeakSet:", weakSet);
+
+      // Test ArrayBuffer and TypedArray
+      const buffer = new ArrayBuffer(16);
+      const typedArray = new Uint8Array(buffer);
+      console.log("ArrayBuffer:", buffer);
+      console.log("TypedArray:", typedArray);
+
+      // Test DataView
+      const dataView = new DataView(buffer);
+      console.log("DataView:", dataView);
+
+      // Test custom object with methods and getters
+      const customObject = {
+        get value() {
+          return "Getter value";
+        },
+        method() {
+          return "Method value";
+        },
+      };
+      console.log("Custom Object:", customObject);
+      console.log("Custom Object method:", customObject.method());
+      console.log("Custom Object getter:", customObject.value);
+
+      // Log a cyclic object
+      const cyclicObject = {};
+      cyclicObject.self = cyclicObject;
+      try {
+        console.log("Cyclic Object:", cyclicObject);
+      } catch (error) {
+        console.error("Error logging cyclic object:", error);
+      }
+    </script>
+  </body>
+</html>
