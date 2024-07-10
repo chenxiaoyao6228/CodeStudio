@@ -16,7 +16,8 @@
 <div class="console-wrap">
   <div class="console-entries">
     @for(message of consoleService.controlMessages(); track message.content) {
-    <div class="console-item">
+    <div class="console-item" [ngClass]="getItemType(message.method)">
+      <i class="icon"></i>
       {{ message.content }}
     </div>
     }

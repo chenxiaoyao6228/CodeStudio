@@ -27,27 +27,29 @@
       console.log("Array:", [1, 2, 3, 4, 5]);
       console.log("Object:", { key: "value" });
 
+      console.log("-------------------------------");
+
       // // Log different types of messages
-      // console.log("This is a log message");
-      // console.error("This is an error message");
-      // console.info("This is an info message");
-      // console.debug("This is a debug message");
-      // console.warn("This is a warning message");
+      console.log("This is a log message");
+      console.error("This is an error message");
+      console.info("This is an info message");
+      console.debug("This is a debug message");
+      console.warn("This is a warning message");
 
       // // Test Promise
-      // const promise = Promise.resolve("Promise resolved");
-      // promise.then((value) => console.log("Promise:", value));
+      const promise = Promise.resolve("Promise resolved");
+      promise.then((value) => console.log("Promise:", value));
 
       // // Test Error object
-      // const error = new Error("This is an error object");
-      // console.error("Error object:", error);
+      const error = new Error("This is an error object");
+      console.error("Error object:", error);
 
       // // Test different types with different console methods
-      // console.error("String (error):", "This is an error string");
-      // console.info("Number (info):", 67890);
-      // console.debug("Boolean (debug):", false);
-      // console.warn("Undefined (warn):", undefined);
-      // console.log("Null (log):", null);
+      console.error("String (error):", "This is an error string");
+      console.info("Number (info):", 67890);
+      console.debug("Boolean (debug):", false);
+      console.warn("Undefined (warn):", undefined);
+      console.log("Null (log):", null);
 
       // // Test complex object
       // const complexObject = {
