@@ -34,7 +34,6 @@
         return { type, value: arg.toISOString() };
       case "regexp":
         return { type, value: arg.toString() };
-
       case "array":
         return { type, value: arg.map((o) => handleArg(o)) };
       case "object":
@@ -46,18 +45,29 @@
         }
         return { type, value: formattedObj };
       case "map":
-        return { type: "map", value: Array.from(arg.entries()) };
+        return {
+          type: "map",
+          value: Array.from(arg.entries()).map(([key, value]) => [
+            key,
+            handleArg(value),
+          ]),
+        };
       case "set":
-        return { type: "set", value: Array.from(arg.values()) };
-
-      // TODO:
+        return {
+          type: "set",
+          value: Array.from(arg.values()).map((value) => handleArg(value)),
+        };
       case "promise":
         return { type: "promise", value: "[Promise]" };
-
       case "weakmap":
         return { type: "weakmap", value: "[WeakMap]" };
       case "weakset":
         return { type: "weakset", value: "[WeakSet]" };
+      case "typedarray":
+        return {
+          type: "typedarray",
+          value: [`[TypeArray(${arg.length})]`],
+        };
       case "arraybuffer":
         return {
           type: "arraybuffer",
@@ -122,6 +132,9 @@
       }
       if (value instanceof ArrayBuffer) {
         return "arraybuffer";
+      }
+      if (ArrayBuffer.isView(value)) {
+        return "typedarray";
       }
       if (value instanceof DataView) {
         return "dataview";

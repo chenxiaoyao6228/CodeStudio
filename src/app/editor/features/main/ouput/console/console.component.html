@@ -19,7 +19,7 @@
     <div class="console-item" [ngClass]="getItemType(message.method)">
       <i class="icon"></i>
       @for(content of message.args; track content.value ) {
-      @if(['array','object'].indexOf(content.type)> -1 ) {
+      @if(['array','object', 'set', 'map' ].indexOf(content.type)> -1 ) {
       <app-compound-obj-renderer [data]="content"></app-compound-obj-renderer>
       } @else {
       <app-primitive-renderer [data]="content"></app-primitive-renderer>

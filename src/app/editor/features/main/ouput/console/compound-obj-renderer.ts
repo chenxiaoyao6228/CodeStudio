@@ -22,15 +22,28 @@ export class CompoundObjRendererComponent {
   }
 
   isCompound(value: any) {
-    return this.isArray(value) || this.isObject(value);
+    return (
+      this.isArray(value) ||
+      this.isObject(value) ||
+      this.isMap(value) ||
+      this.isSet(value)
+    );
   }
 
   isObject(value: any): boolean {
-    return value && typeof value === 'object' && !Array.isArray(value);
+    return value.type === 'object';
   }
 
   isArray(value: any): boolean {
-    return Array.isArray(value);
+    return value.type === 'array';
+  }
+
+  isSet(value: any): boolean {
+    return value.type === 'set';
+  }
+
+  isMap(value: any): boolean {
+    return value.type === 'map';
   }
 
   objectKeys(obj: any): string[] {

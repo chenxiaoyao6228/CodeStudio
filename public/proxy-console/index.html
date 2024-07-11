@@ -50,33 +50,33 @@
 
       // console.log("-------------------------------");
       //  Test array and object
-      console.log("Array:", [
-        1,
-        2,
-        3,
-        [1, { value: 2 }, [4, 5, 6]],
-        {
-          value: {
-            value: {
-              value: 3,
-              c: [5, 6, 7],
-            },
-          },
-        },
-        4,
-        5,
-        new Date(),
-        Symbol("symbol"),
-        /test/i,
-        function () {
-          return "I'm a function";
-        },
-        // new Set([1, 2, 3]),
-        // new Map([
-        //   ["key1", "value1"],
-        //   ["key2", "value2"],
-        // ]),
-      ]);
+      // console.log("Array:", [
+      //   1,
+      //   2,
+      //   3,
+      //   [1, { value: 2 }, [4, 5, 6]],
+      //   {
+      //     value: {
+      //       value: {
+      //         value: 3,
+      //         c: [5, 6, 7],
+      //       },
+      //     },
+      //   },
+      //   4,
+      //   5,
+      //   new Date(),
+      //   Symbol("symbol"),
+      //   /test/i,
+      //   function () {
+      //     return "I'm a function";
+      //   },
+      //   new Set([1, 2, 3]),
+      //   new Map([
+      //     ["key1", "value1"],
+      //     ["key2", "value2"],
+      //   ]),
+      // ]);
       // console.log("Object:", { key: "value" });
       const complexObject = {
         // string: "string",
@@ -102,7 +102,7 @@
         // dataView: new DataView(new ArrayBuffer(8)),
         // promise: Promise.resolve("resolved"),
       };
-      console.log("Complex Object:", complexObject);
+      // console.log("Complex Object:", complexObject);
 
       // // Test custom object with methods and getters
       // const customObject = {
@@ -127,18 +127,18 @@
       // }
 
       // Test Map and Set
-      const map = new Map();
-      map.set("key1", "value1");
-      map.set("key2", "value2");
-      console.log("Map:", map);
+      // const map = new Map();
+      // map.set("key1", "value1");
+      // map.set("key2", "value2");
+      // console.log("Map:", map);
 
-      const set = new Set();
-      set.add(1);
-      set.add(2);
-      set.add(3);
-      console.log("Set:", set);
+      // const set = new Set();
+      // set.add(1);
+      // set.add(2);
+      // set.add(3);
+      // console.log("Set:", set);
 
-      // // Test WeakMap and WeakSet
+      // // // Test WeakMap and WeakSet
       // const weakMap = new WeakMap();
       // const obj = {};
       // weakMap.set(obj, "WeakMap value");
@@ -149,10 +149,10 @@
       // console.log("WeakSet:", weakSet);
 
       // // Test ArrayBuffer and TypedArray
-      // const buffer = new ArrayBuffer(16);
-      // const typedArray = new Uint8Array(buffer);
-      // console.log("ArrayBuffer:", buffer);
-      // console.log("TypedArray:", typedArray);
+      const buffer = new ArrayBuffer(16);
+      console.log("ArrayBuffer:", buffer);
+      const typedArray = new Uint8Array(buffer);
+      console.log("TypedArray:", typedArray);
 
       // // Test DataView
       // const dataView = new DataView(buffer);
