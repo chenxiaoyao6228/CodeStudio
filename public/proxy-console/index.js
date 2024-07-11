@@ -15,6 +15,44 @@
     },
   });
 
+  window.addEventListener("message", (event) => {
+    if (event.data.type === "execute" && event.data.code) {
+      try {
+        eval(event.data.code);
+      } catch (error) {
+        console.error("Error executing code:", error);
+      }
+    }
+  });
+
+  function sendErrorEvent(event) {
+    window.parent.postMessage(
+      {
+        type: "error",
+        message: event.message,
+        codeInfo: event.lineno
+          ? `${event.filename}:${event.lineno}: ${event.colno}`
+          : "",
+        stacks: event.error && event.error.stack.split("\n"),
+      },
+      "*"
+    );
+  }
+
+  window.addEventListener("error", (event) => {
+    sendErrorEvent(event);
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    window.parent.postMessage(
+      {
+        type: "error",
+        message: event.reason,
+      },
+      "*"
+    );
+  });
+
   function handleArg(arg) {
     const type = checkType(arg);
     switch (type) {
@@ -75,6 +113,8 @@
         };
       case "dataview":
         return { type: "dataview", value: `[DataView(${arg.byteLength})]` };
+      case "error":
+        sendErrorEvent(arg);
       default:
         return { type: "unknown", value: "[Unknown]" };
     }
@@ -141,6 +181,10 @@
       }
       if (value instanceof Promise) {
         return "promise";
+      }
+
+      if (value instanceof Error) {
+        return "error";
       }
       return "object";
     }

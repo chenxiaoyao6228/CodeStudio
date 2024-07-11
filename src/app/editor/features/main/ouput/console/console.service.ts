@@ -6,47 +6,49 @@ export interface dataType {
 }
 
 interface IConsoleMessage {
-  type: 'console' | 'thrown-error';
+  type: 'console';
   method: 'log' | 'error' | 'warn' | 'info' | 'debug';
-  args: any[];
+  args: dataType[];
+}
+
+interface IError {
+  type: 'error';
+  message: string;
+  codeInfo: string;
+  stacks: string[];
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConsoleService {
-  messages = signal([]);
-  controlMessages: WritableSignal<IConsoleMessage[]> = signal([]);
+  logs: WritableSignal<IConsoleMessage[]> = signal([]);
+  errors: WritableSignal<IError[]> = signal([]);
 
   constructor() {
     window.addEventListener('message', this.handleMessage.bind(this));
   }
 
   clearConsole() {
-    this.controlMessages.set([]);
+    this.logs.set([]);
+    this.errors.set([]);
   }
 
-  executeCommand(event: Event) {
-    // TODO:
-  }
-
-  private handleMessage(event: MessageEvent<IConsoleMessage>) {
+  private handleMessage(event: MessageEvent<IConsoleMessage | IError>) {
     if (
       !['webcontainer.io', 'localhost'].some((h) => event.origin.includes(h))
     ) {
       return;
     }
 
-    const { method, args, type } = event.data;
+    const { type } = event.data;
     if (type === 'console') {
+      const { method, args } = event.data;
       if (['log', 'error', 'warn', 'info', 'debug'].includes(method)) {
-        this.controlMessages.set([
-          ...this.controlMessages(),
-          { type, method, args },
-        ]);
+        this.logs.set([...this.logs(), { type, method, args }]);
       }
-    } else if (type === 'thrown-error') {
-      // TODO:
+    } else if (type === 'error') {
+      this.errors.set([...this.errors(), event.data]);
     }
   }
 }

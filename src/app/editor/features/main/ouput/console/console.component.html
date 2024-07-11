@@ -15,15 +15,30 @@
 </div>
 <div class="console-wrap">
   <div class="console-entries">
-    @for(message of consoleService.controlMessages(); track message.args) {
-    <div class="console-item" [ngClass]="getItemType(message.method)">
+    @for(log of consoleService.logs(); track log.args) {
+    <div class="console-item" [ngClass]="getItemType(log.method)">
       <i class="icon"></i>
-      @for(content of message.args; track content.value ) {
-      @if(['array','object', 'set', 'map' ].indexOf(content.type)> -1 ) {
+      @for(content of log.args; track content.value ) { @if(['array','object',
+      'set', 'map' ].indexOf(content.type)> -1 ) {
       <app-compound-obj-renderer [data]="content"></app-compound-obj-renderer>
       } @else {
       <app-primitive-renderer [data]="content"></app-primitive-renderer>
       } }
+    </div>
+    }
+  </div>
+  <div class="error-entries">
+    @for(error of consoleService.errors(); track error.message) {
+    <div class="error-item">
+      <i class="icon"></i>
+      <div class="msg">
+        <p>{{ error.message }}</p>
+        <div class="stacks">
+          @if(error.stacks.length) { @for(s of error.stacks; track s) {
+          <p class="stack">{{ s }}</p>
+          } }
+        </div>
+      </div>
     </div>
     }
   </div>
@@ -33,6 +48,6 @@
   <textarea
     class="input"
     rows="1"
-    (keydown.enter)="consoleService.executeCommand($event)"
+    (keydown.enter)="executeCommand($event)"
   ></textarea>
 </div>

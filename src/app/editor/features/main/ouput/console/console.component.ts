@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { ConsoleService } from './console.service';
 import { MatIcon } from '@angular/material/icon';
 import { MainService } from '../../main.service';
@@ -33,7 +33,18 @@ export class ConsoleComponent {
   }
 
   executeCommand(event: Event) {
-    this.consoleService.executeCommand(event);
+    event.preventDefault();
+    const textarea = event.target as HTMLTextAreaElement;
+    const code = textarea.value;
+
+    const previewIframe = document
+      .querySelector('#preview-panel')
+      ?.querySelector('iframe');
+    if (previewIframe && previewIframe.contentWindow) {
+      previewIframe.contentWindow.postMessage({ type: 'execute', code }, '*');
+      textarea.value = '';
+      textarea.focus();
+    }
   }
 
   getItemType(type: string) {
