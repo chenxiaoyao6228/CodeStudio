@@ -1,0 +1,96 @@
+@if(simple) {
+<span class="desc">
+  @if(isArray(data.value)) { Array({{data.value.length}}) }
+  @if(isObject(data.value)) { Object({{objectKeys(data.value).length}}) }
+</span>
+}@else {
+<div class="compound">
+  <!-- head -->
+  <button class="reset-btn header" (click)="toggleExpand($event)">
+    <mat-icon
+      class="icon"
+      [class.arrayIndex]="arrayIndex !== undefined"
+      [class.expanded]="expanded()"
+      >chevron_right</mat-icon
+    >
+    <span class="desc">
+      @if(isArray(data.value)) { Array({{data.value.length}}) }
+      @if(isObject(data.value)) { Object({{objectKeys(data.value).length}}) }
+    </span>
+    <span class="child-desc">
+      <!---------------- array -------------------------->
+      @if (isArray(data.value)) { [@for (subData of data.value; track $index) {
+      @if(isCompound(subData.value)) {
+      <span style="display: inline-flex">
+        <app-compound-obj-renderer
+          [data]="subData"
+          [simple]="true"
+        ></app-compound-obj-renderer>
+      </span>
+      }@else {
+      <app-primitive-renderer [data]="subData"></app-primitive-renderer>
+      }
+      <!-- join array with , -->
+      @if($index !== $count-1) {,} } ] }
+      <!--------------------- object ----------------->
+      @if (isObject(data.value)) { @for (key of objectKeys(data.value) ; track
+      key) { @if(isCompound(data.value[key].value)) {
+      <span style="display: inline-flex">
+        <app-compound-obj-renderer
+          [data]="data.value[key]"
+          [simple]="true"
+        ></app-compound-obj-renderer>
+      </span>
+      }@else {
+      <app-primitive-renderer [data]="data.value[key]"></app-primitive-renderer>
+      }
+      <!-- join array with , -->
+      @if($index !== $count-1) {,} } }
+    </span>
+  </button>
+  <!-- expanded children -->
+  @if (expanded()) {
+  <div class="content">
+    <!---------------------------- array -------------------->
+    @if (isArray(data.value)) { @for (subData of data.value; track $index) {
+    <div style="display: flex">
+      <!-- index -->
+      <span style="margin-top: 2px"> {{$index}} : &nbsp; </span>
+      <!-- value -->
+      @if(isCompound(subData.value)) {
+
+      <app-compound-obj-renderer
+        [data]="subData"
+        [arrayIndex]="$index"
+      ></app-compound-obj-renderer>
+      } @else {
+
+      <app-primitive-renderer [data]="subData"></app-primitive-renderer>
+
+      }
+    </div>
+    } }
+
+    <!-------------- object ------------------>
+    @if (isObject(data.value)) { @for (key of objectKeys(data.value) ; track
+    key) {
+    <div style="display: flex">
+      <!-- index -->
+      <span style="margin-top: 2px"> {{key}} : &nbsp; </span>
+      <!-- value -->
+      @if(isCompound(data.value[key].value)) {
+      <app-compound-obj-renderer
+        [data]="data.value[key]"
+        [arrayIndex]="$index"
+      ></app-compound-obj-renderer>
+      }@else {
+
+      <app-primitive-renderer [data]="data.value[key]"></app-primitive-renderer>
+
+      }
+    </div>
+    } }
+  </div>
+  }
+</div>
+}

@@ -5,7 +5,7 @@
       if (typeof target[prop] === "function") {
         return function (...args) {
           window.parent.postMessage(
-            { type: "console", method: prop, data: args.map(handleArg) },
+            { type: "console", method: prop, args: args.map(handleArg) },
             "*"
           );
           target[prop].apply(target, args);
@@ -19,40 +19,54 @@
     const type = checkType(arg);
     switch (type) {
       case "undefined":
-        return "undefined";
+        return { type: "undefined", value: "undefined" };
       case "null":
-        return "null";
+        return { type: "null", value: "null" };
       case "boolean":
       case "number":
-      case "bigint":
       case "string":
       case "symbol":
       case "function":
-        return arg.toString();
-      case "array":
-        return `[Array(${arg.length})]`;
+        return { type, value: arg.toString() };
+      case "bigint":
+        return { type, value: arg.toString() + "n" };
       case "date":
-        return `[Date: ${arg.toISOString()}]`;
+        return { type, value: arg.toISOString() };
       case "regexp":
-        return `[RegExp: ${arg.toString()}]`;
-      case "map":
-        return `[Map(${arg.size})]`;
-      case "set":
-        return `[Set(${arg.size})]`;
-      case "weakmap":
-        return "[WeakMap]";
-      case "weakset":
-        return "[WeakSet]";
-      case "arraybuffer":
-        return `[ArrayBuffer(${arg.byteLength})]`;
-      case "dataview":
-        return `[DataView(${arg.byteLength})]`;
-      case "promise":
-        return "[Promise]";
+        return { type, value: arg.toString() };
+
+      case "array":
+        return { type, value: arg.map((o) => handleArg(o)) };
       case "object":
-        return `[Object: ${JSON.stringify(arg)}]`;
+        const formattedObj = {};
+        for (const key in arg) {
+          if (arg.hasOwnProperty(key)) {
+            formattedObj[key] = handleArg(arg[key]);
+          }
+        }
+        return { type, value: formattedObj };
+      case "map":
+        return { type: "map", value: Array.from(arg.entries()) };
+      case "set":
+        return { type: "set", value: Array.from(arg.values()) };
+
+      // TODO:
+      case "promise":
+        return { type: "promise", value: "[Promise]" };
+
+      case "weakmap":
+        return { type: "weakmap", value: "[WeakMap]" };
+      case "weakset":
+        return { type: "weakset", value: "[WeakSet]" };
+      case "arraybuffer":
+        return {
+          type: "arraybuffer",
+          value: `[ArrayBuffer(${arg.byteLength})]`,
+        };
+      case "dataview":
+        return { type: "dataview", value: `[DataView(${arg.byteLength})]` };
       default:
-        return "[Unknown]";
+        return { type: "unknown", value: "[Unknown]" };
     }
   }
 

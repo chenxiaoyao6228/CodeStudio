@@ -1,9 +1,14 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 
+export interface dataType {
+  type: string;
+  value: string;
+}
+
 interface IConsoleMessage {
   type: 'console' | 'thrown-error';
   method: 'log' | 'error' | 'warn' | 'info' | 'debug';
-  content: any[];
+  args: any[];
 }
 
 @Injectable({
@@ -25,19 +30,19 @@ export class ConsoleService {
     // TODO:
   }
 
-  private handleMessage(event: MessageEvent) {
+  private handleMessage(event: MessageEvent<IConsoleMessage>) {
     if (
       !['webcontainer.io', 'localhost'].some((h) => event.origin.includes(h))
     ) {
       return;
     }
 
-    const { method, data, type } = event.data;
+    const { method, args, type } = event.data;
     if (type === 'console') {
       if (['log', 'error', 'warn', 'info', 'debug'].includes(method)) {
         this.controlMessages.set([
           ...this.controlMessages(),
-          { type, method, content: data },
+          { type, method, args },
         ]);
       }
     } else if (type === 'thrown-error') {

@@ -15,10 +15,15 @@
 </div>
 <div class="console-wrap">
   <div class="console-entries">
-    @for(message of consoleService.controlMessages(); track message.content) {
+    @for(message of consoleService.controlMessages(); track message.args) {
     <div class="console-item" [ngClass]="getItemType(message.method)">
       <i class="icon"></i>
-      {{ message.content }}
+      @for(content of message.args; track content.value ) {
+      @if(['array','object'].indexOf(content.type)> -1 ) {
+      <app-compound-obj-renderer [data]="content"></app-compound-obj-renderer>
+      } @else {
+      <app-primitive-renderer [data]="content"></app-primitive-renderer>
+      } }
     </div>
     }
   </div>

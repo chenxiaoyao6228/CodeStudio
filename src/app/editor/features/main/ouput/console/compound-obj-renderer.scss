@@ -1,0 +1,29 @@
+.compound {
+  margin: 2px;
+  border-radius: 3px;
+}
+.header {
+  .icon {
+    transition: transform 0.2s ease-in-out;
+    font-family: "Material Icons";
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    &.expanded {
+      transform: rotate(90deg);
+    }
+  }
+  .desc {
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .child-desc {
+    vertical-align: middle;
+  }
+}
+.content {
+  line-height: 24px;
+  margin-left: 15px;
+  vertical-align: middle;
+}
