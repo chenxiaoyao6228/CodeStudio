@@ -96,7 +96,7 @@ export class EditorComponent implements AfterViewInit {
       }
     }
     try {
-      // await this.nodeContainerService.init(params);
+      await this.nodeContainerService.init(params);
     } catch (error) {
       console.log('Failed to init webcontainer', error);
     }

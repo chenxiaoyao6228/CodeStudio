@@ -1,3 +1,5 @@
+// @ts-ignore
+import { proxyConsoleScript } from './_console-script.js';
 /**
  * due to "CROS policy", we can't directly inject script to iframe
  * cuz the domain of iframe are not the same as the main
@@ -5,25 +7,8 @@
  * before the project loaded to webContainer
  */
 function getProxyConsoleScript() {
-  return `<script id='code-studio-proxy-console-script'>(function() {
-        const originalConsole = window.console;
-        window.console = new Proxy(originalConsole, {
-          get(target, prop) {
-            if (typeof target[prop] === 'function') {
-              return function(...args) {
-                window.parent.postMessage({ method: prop, args }, '*');
-                target[prop].apply(target, args);
-              };
-            }
-            return target[prop];
-          }
-        });
-      })();
-
-      console.log('111')
-      console.error('error')
-      console.debug('debug')
-      console.warn('warning')
+  return `<script id='code-studio-proxy-console-script'>
+     ${proxyConsoleScript}
   </script>`;
 }
 

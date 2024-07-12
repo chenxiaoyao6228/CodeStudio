@@ -1,0 +1,7 @@
+{
+    "watch": [
+        "src/app/editor/features/main/ouput/console"
+    ],
+    "ext": "ts",
+    "exec": "node scripts/genProxyScript.js"
+}

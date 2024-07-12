@@ -20,17 +20,14 @@
     <!-- <mat-icon class="external-link">open_in_new</mat-icon> -->
     }
   </div>
-  <!-- FIXME: [hidden]="!isReady()" -->
-
   <iframe
     #previewIframe
     allow="cross-origin-isolated"
     class="preview-iframe"
-    src="./proxy-console/index.html"
+    [hidden]="!isReady()"
     (load)="onIframeLoad()"
   ></iframe>
-  <!-- FIXME:  [hidden]="isReady()" -->
-  <div class="loading-container" [hidden]="true">
+  <div class="loading-container" [hidden]="isReady()">
     <div class="loading-container-inner">
       <h5 class="loading-title">{{ currentPhaseItem()?.message }}</h5>
 
