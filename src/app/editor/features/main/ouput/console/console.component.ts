@@ -1,4 +1,10 @@
-import { Component, ElementRef, inject, ViewChild } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  ViewChild,
+} from '@angular/core';
 import { ConsoleService } from './console.service';
 import { MatIcon } from '@angular/material/icon';
 import { MainService } from '../../main.service';
@@ -19,10 +25,23 @@ import { PrimitiveRendererComponent } from './primitive-renderer.component';
   ],
 })
 export class ConsoleComponent {
+  @ViewChild('commandInput', { static: true })
+  commandInput!: ElementRef<HTMLTextAreaElement>;
   consoleService = inject(ConsoleService);
   mainService = inject(MainService);
 
-  constructor() {}
+  constructor() {
+    window.addEventListener(
+      'message',
+      this.consoleService.handleMessage.bind(this.consoleService)
+    );
+
+    effect(() => {
+      if (this.mainService.isConsoleOpen()) {
+        this.commandInput.nativeElement.focus();
+      }
+    });
+  }
 
   toggleConsole() {
     this.mainService.toggleConsole();
@@ -34,16 +53,39 @@ export class ConsoleComponent {
 
   executeCommand(event: Event) {
     event.preventDefault();
-    const textarea = event.target as HTMLTextAreaElement;
-    const code = textarea.value;
+    const textarea = this.commandInput.nativeElement;
+    const code = textarea.value.trim();
 
-    const previewIframe = document
-      .querySelector('#preview-panel')
-      ?.querySelector('iframe');
-    if (previewIframe && previewIframe.contentWindow) {
-      previewIframe.contentWindow.postMessage({ type: 'execute', code }, '*');
-      textarea.value = '';
-      textarea.focus();
+    if (code) {
+      this.consoleService.addCommandToHistory(code);
+      const previewIframe = document
+        .querySelector('#preview-panel')
+        ?.querySelector('iframe');
+      if (previewIframe && previewIframe.contentWindow) {
+        previewIframe.contentWindow.postMessage({ type: 'execute', code }, '*');
+        textarea.value = '';
+      }
+    }
+
+    textarea.focus();
+  }
+
+  handleKeyUp(event: KeyboardEvent) {
+    const textarea = this.commandInput.nativeElement;
+    if (event.key === 'ArrowUp') {
+      const previousCommand = this.consoleService.getPreviousCommand();
+      if (previousCommand !== null) {
+        textarea.value = previousCommand;
+        textarea.focus();
+      }
+    } else if (event.key === 'ArrowDown') {
+      const nextCommand = this.consoleService.getNextCommand();
+      if (nextCommand !== null) {
+        textarea.value = nextCommand;
+        textarea.focus();
+      } else {
+        textarea.value = '';
+      }
     }
   }
 

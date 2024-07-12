@@ -27,27 +27,32 @@
     </div>
     }
   </div>
+  @if(consoleService.errors() && consoleService.errors().length) {
   <div class="error-entries">
     @for(error of consoleService.errors(); track error.message) {
     <div class="error-item">
       <i class="icon"></i>
       <div class="msg">
-        <p>{{ error.message }}</p>
+        <div>{{ error.message }}</div>
         <div class="stacks">
-          @if(error.stacks.length) { @for(s of error.stacks; track s) {
-          <p class="stack">{{ s }}</p>
+          @if(error.stacks && error.stacks.length) { @for(s of error.stacks;
+          track s) {
+          <div class="stack">{{ s }}</div>
           } }
         </div>
       </div>
     </div>
     }
   </div>
+  }
 </div>
 <div class="command-line">
   <mat-icon class="common-icon icon">navigate_next</mat-icon>
   <textarea
+    #commandInput
     class="input"
     rows="1"
+    (keyup)="handleKeyUp($event)"
     (keydown.enter)="executeCommand($event)"
   ></textarea>
 </div>

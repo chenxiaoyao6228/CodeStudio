@@ -24,17 +24,41 @@ interface IError {
 export class ConsoleService {
   logs: WritableSignal<IConsoleMessage[]> = signal([]);
   errors: WritableSignal<IError[]> = signal([]);
-
-  constructor() {
-    window.addEventListener('message', this.handleMessage.bind(this));
-  }
+  commandHistory: string[] = [];
+  historyIndex = -1;
 
   clearConsole() {
     this.logs.set([]);
     this.errors.set([]);
+    this.commandHistory = [];
+    this.historyIndex = -1;
   }
 
-  private handleMessage(event: MessageEvent<IConsoleMessage | IError>) {
+  addCommandToHistory(command: string) {
+    this.commandHistory.push(command);
+    this.historyIndex = this.commandHistory.length;
+  }
+
+  getPreviousCommand(): string | null {
+    if (this.historyIndex > 0) {
+      this.historyIndex--;
+      return this.commandHistory[this.historyIndex];
+    }
+    return null;
+  }
+
+  getNextCommand(): string | null {
+    if (this.historyIndex === 0 && this.commandHistory.length === 1) {
+      return this.commandHistory[0];
+    }
+    if (this.historyIndex < this.commandHistory.length - 1) {
+      this.historyIndex++;
+      return this.commandHistory[this.historyIndex];
+    }
+    return null;
+  }
+
+  handleMessage(event: MessageEvent<IConsoleMessage | IError>) {
     if (
       !['webcontainer.io', 'localhost'].some((h) => event.origin.includes(h))
     ) {
