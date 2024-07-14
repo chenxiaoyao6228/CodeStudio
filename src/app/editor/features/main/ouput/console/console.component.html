@@ -13,7 +13,7 @@
     }}</mat-icon>
   </div>
 </div>
-<div class="console-wrap">
+<div class="console-wrap" #consoleWrap>
   <div class="console-entries">
     @for(log of consoleService.logs(); track log.args) {
     <div class="console-item" [ngClass]="getItemType(log.method)">

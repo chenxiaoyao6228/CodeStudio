@@ -20,7 +20,8 @@
   window.addEventListener('message', (event: MessageEvent) => {
     if (event.data.type === 'execute' && event.data.code) {
       try {
-        eval(event.data.code);
+        const evalRes = eval(event.data.code);
+        console.log(evalRes);
       } catch (error) {
         console.error('Error executing code:', error);
       }

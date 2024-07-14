@@ -27,6 +27,8 @@ import { PrimitiveRendererComponent } from './primitive-renderer.component';
 export class ConsoleComponent {
   @ViewChild('commandInput', { static: true })
   commandInput!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('consoleWrap', { static: true })
+  consoleWrap!: ElementRef<HTMLDivElement>;
   consoleService = inject(ConsoleService);
   mainService = inject(MainService);
 
@@ -39,6 +41,15 @@ export class ConsoleComponent {
     effect(() => {
       if (this.mainService.isConsoleOpen()) {
         this.commandInput.nativeElement.focus();
+      }
+    });
+
+    effect(() => {
+      const logs = this.consoleService.logs();
+      const errors = this.consoleService.errors();
+      if (logs.length || errors.length) {
+        this.consoleWrap.nativeElement.scrollTop =
+          this.consoleWrap.nativeElement.scrollHeight;
       }
     });
   }
