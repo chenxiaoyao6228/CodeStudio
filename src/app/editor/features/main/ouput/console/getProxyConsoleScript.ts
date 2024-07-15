@@ -8,6 +8,8 @@ import { proxyConsoleScript } from './_console-script.js';
  */
 function getProxyConsoleScript() {
   return `<script id='code-studio-proxy-console-script'>
+   // This script is for code-studio proxy console, please do not remove this script
+   // it's dynamic injected and will not saved to your code base
      ${proxyConsoleScript}
   </script>`;
 }
@@ -38,7 +40,7 @@ export function isEntryFile(path: string) {
 }
 
 export function removeProxyScriptOfEntryHTML(
-  contents: string | Uint8Array
+  contents: string | Uint8Array,
 ): string {
   if (contents instanceof Uint8Array) {
     contents = uint8ArrayToString(contents);
