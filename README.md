@@ -5,18 +5,23 @@
 </p>
 
 <h1 align="center">Code Studio</h1>
-<h3 align="center">Web code runner for JS and NodeJS</h3>
+<h3 align="center">Web Code Runner for JS and NodeJS</h3>
 
 ## Features
 
-- Create project from existing templates(10+ template included), without cloning and installing anything on your local machine
-- Support import from [github folder](<(https://code-studio.chenxiaoyao.cn/edit?terminal=dev&source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/Editor/_demo/webcontainers-express-app)>) or local folder
-- Sync your project to Gist (if github token is provided) or download as zip
-- Basic editing ability: path intellisense, go to definition and etc.
-- Integrated Console, no need to press 'F12' to open devtools
-- Prettier as default code formatter
-- Keyboard shortcuts, Long press 'CTRL'('CMD' in MAC) to show the shortcut list
-- Various VSCODE theme support
+- [x] Create projects from existing templates (10+ templates included) without cloning or installing anything locally
+- [x] Support import from [GitHub folder](https://code-studio.chenxiaoyao.cn/edit?source=https://github.com/chenxiaoyao6228/fe-notes/tree/main/React%E7%9B%B8%E5%85%B3/_demo/react-starter) or local folder
+- [x] Sync your project to Gist (if GitHub token is provided) or download as ZIP
+- [x] File Manager: easily create, edit, remove files and folders, with drag and drop support
+- [x] Basic code editing abilities: path IntelliSense, go to definition, etc.
+- [x] Integrated Console: no need to press 'F12' to open DevTools
+- [x] Prettier as the default code formatter
+- [ ] Keyboard shortcuts: long press 'CTRL' ('CMD' on Mac) to show the shortcut list
+- [ ] Various VSCode theme support
+- [ ] File Sharing
+- [ ] Diff editor
+
+You can experience code-studio through [this link](https://code-studio.chenxiaoyao.cn)
 
 ## Screenshots
 
@@ -26,11 +31,11 @@
 
 ## Development
 
-Code studio use the following tech stack:
+Code Studio uses the following tech stack:
 
-> Angular18 + RxJS + WebContainers + Monaco Editor + XtermJS
+> Angular 18 + RxJS + WebContainers + Monaco Editor + XtermJS
 
-Run the following commands to get started
+Run the following commands to get started:
 
 ```sh
 yarn install
@@ -39,7 +44,7 @@ yarn start
 
 ## Contribute
 
-For anyone who interested in the project, any kind of contribution is greatly appreciated.
+For anyone interested in the project, any kind of contribution is greatly appreciated.
 
 ## Reference
 
@@ -49,4 +54,4 @@ For anyone who interested in the project, any kind of contribution is greatly ap
 - https://material.angular.io/
 - https://github.com/xtermjs/xterm.js
 
-Great thanks to these awesome open-source project!
+Great thanks to these awesome open-source projects!

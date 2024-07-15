@@ -48,16 +48,20 @@ export class HeaderComponent implements OnInit {
   router = inject(Router);
   activatedRoute = inject(ActivatedRoute);
   editId: string | null = null;
+  editName: string | null = null;
   ngOnInit() {
     this.activatedRoute.queryParamMap.subscribe((params) => {
       this.editId = params.get('editId');
+      const editName = params.get('editName');
+      if (editName) {
+        this.projectName.set(editName);
+      }
     });
 
     this.nodeContainerService.fileMounted$.subscribe(async (fileMounted) => {
-      if (fileMounted) {
-        const pkgContent = await this.nodeContainerService.readFile(
-          'package.json'
-        );
+      if (fileMounted && this.projectName() === UNTITLED_NAME) {
+        const pkgContent =
+          await this.nodeContainerService.readFile('package.json');
         const name = JSON.parse(pkgContent).name || UNTITLED_NAME;
         if (name) {
           this.projectName.set(name);
@@ -117,7 +121,17 @@ export class HeaderComponent implements OnInit {
   async performSave() {
     try {
       this.isSaving.set(true);
-      await this.fileSaverService.uploadToGist(this.projectName(), {
+      let name = UNTITLED_NAME;
+      if (this.projectName() !== UNTITLED_NAME) {
+        name = this.projectName();
+      }
+      if (!name) {
+        const pkgContent =
+          await this.nodeContainerService.readFile('package.json');
+        name = JSON.parse(pkgContent).name;
+      }
+
+      await this.fileSaverService.uploadToGist(name, {
         editId: this.editId,
       });
       this.snackBar.open(
@@ -125,7 +139,7 @@ export class HeaderComponent implements OnInit {
         'Close',
         {
           duration: 8000,
-        }
+        },
       );
       this.isSaving.set(false);
     } catch (error) {

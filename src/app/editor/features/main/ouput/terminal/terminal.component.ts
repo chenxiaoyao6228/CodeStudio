@@ -16,7 +16,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   selector: 'app-terminal',
   standalone: true,
   imports: [],
-  template: '<div #terminal class="terminal"></div>',
+  template: `
+    <div class="terminal-wrap">
+      <div #terminal class="terminal"></div>
+    </div>
+  `,
   styleUrls: ['./terminal.component.scss'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

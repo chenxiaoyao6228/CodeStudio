@@ -8,7 +8,7 @@
         return function (...args: any[]) {
           window.parent.postMessage(
             { type: 'console', method: prop, args: args.map(handleArg) },
-            '*'
+            '*',
           );
           return originalProp.apply(target, args);
         };
@@ -38,7 +38,7 @@
           : '',
         stacks: event.error && event.error.stack.split('\n'),
       },
-      '*'
+      '*',
     );
   }
 
@@ -54,9 +54,9 @@
           type: 'error',
           message: event.reason,
         },
-        '*'
+        '*',
       );
-    }
+    },
   );
 
   function handleArg(arg: any): { type: string; value: any } {
@@ -199,4 +199,6 @@
 
     return 'unknown';
   }
+
+  console.log('[CodeStudio]: 😊 happy coding!');
 })();

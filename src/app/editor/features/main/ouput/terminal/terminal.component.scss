@@ -6,9 +6,12 @@
   height: 100%;
 }
 
+.terminal-wrap {
+  padding: 2px;
+}
 .terminal {
   box-sizing: border-box;
   position: absolute;
   width: 100%;
-  height: calc(100% - 1px);
+  height: calc(100% - 2px);
 }

@@ -188,7 +188,12 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  openEdit(params: { source: string; terminal?: string; editId?: string }) {
+  openEdit(params: {
+    source: string;
+    terminal?: string;
+    editId?: string;
+    editName?: string;
+  }) {
     this.router.navigate(['/edit'], {
       queryParams: params,
     });
@@ -210,6 +215,7 @@ export class HomeComponent implements OnInit {
     this.openEdit({
       source: project.projectZipUrl,
       editId: project.id,
+      editName: project.title,
     });
   }
 
@@ -224,7 +230,7 @@ export class HomeComponent implements OnInit {
         'Close',
         {
           duration: 3000,
-        }
+        },
       );
       console.log('Delete project:', project);
       this.getList().then(() => {

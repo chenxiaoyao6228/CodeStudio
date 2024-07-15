@@ -60,19 +60,19 @@ app-root {
 
 /* Set the width of the scrollbar */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 10px;
 }
 
 /* Style the scrollbar track */
 ::-webkit-scrollbar-track {
   background: #2f2f2f; /* Background color of the scrollbar track */
-  border-radius: 10px; /* Rounded corners of the track */
+  border-radius: 8px; /* Rounded corners of the track */
 }
 
 /* Style the scrollbar thumb */
 ::-webkit-scrollbar-thumb {
   background-color: #555; /* Color of the scrollbar thumb */
-  border-radius: 10px; /* Rounded corners of the thumb */
+  border-radius: 8px; /* Rounded corners of the thumb */
   border: 3px solid #2f2f2f; /* Padding and background color of the thumb */
 }
 
