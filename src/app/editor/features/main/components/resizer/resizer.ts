@@ -19,12 +19,12 @@ interface IPosition {
   selector: 'resizer',
   standalone: true,
   template: `
-    @if(!isFirstElement){
-    <div
-      class="resizer-bar"
-      [class.row]="resizeService.direction === 'row'"
-      [class.col]="resizeService.direction === 'col'"
-    ></div>
+    @if (!isFirstElement) {
+      <div
+        class="resizer-bar"
+        [class.row]="resizeService.direction === 'row'"
+        [class.col]="resizeService.direction === 'col'"
+      ></div>
     }
     <ng-content></ng-content>
   `,
@@ -48,7 +48,6 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
     width: 100,
     height: 100,
   };
-
   constructor() {}
 
   ngAfterViewInit() {
@@ -60,7 +59,11 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   }
 
   initEvents() {
-    this.renderer.listen(document, 'pointerdown', this.startResize);
+    this.renderer.listen(
+      this.el.nativeElement,
+      'pointerdown',
+      this.startResize,
+    );
   }
 
   cleanupEvents() {
@@ -77,40 +80,61 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
       };
       document.addEventListener('pointermove', this.handleResize);
       document.addEventListener('pointerup', this.stopResize);
+
+      // disable selection
+      const style = document.createElement('style');
+      style.type = 'text/css';
+      style.id = 'disable-select';
+      style.innerHTML = `
+      * { 
+        user-select: none !important; 
+        pointer-events: none !important; 
+        cursor: ${this.resizeService.direction === 'row' ? 'col-resize' : 'row-resize'} !important; 
+      }
+    `;
+      document.head.appendChild(style);
     } else {
       this.stopResize();
     }
   };
 
   handleResize = (e: PointerEvent) => {
-    if (!this.pointerDownPosition) return;
+    requestAnimationFrame(() => {
+      if (!this.pointerDownPosition) return;
+      const direction = this.resizeService.direction;
+      const { clientX, clientY } = e;
+      let delta = 0;
+      if (direction === 'row') {
+        delta = clientX - this.pointerDownPosition!.x;
+      } else {
+        delta = clientY - this.pointerDownPosition!.y;
+      }
+      // update pointer location
+      this.pointerDownPosition = {
+        x: clientX,
+        y: clientY,
+      };
 
-    const direction = this.resizeService.direction;
-    const { clientX, clientY } = e;
-    let delta = 0;
-    if (direction === 'row') {
-      delta = clientX - this.pointerDownPosition.x;
-    } else {
-      delta = clientY - this.pointerDownPosition.y;
-    }
-    // update pointer location
-    this.pointerDownPosition = {
-      x: clientX,
-      y: clientY,
-    };
+      if (delta === 0) return;
 
-    // console.log('delta', delta);
-    if (delta === 0) return;
-
-    this.resizeService.calculateNewSize({
-      id: this.id,
-      delta: delta,
+      this.resizeService.calculateNewSize({
+        id: this.id,
+        delta: delta,
+      });
     });
   };
 
   stopResize = () => {
     this.cleanupEvents();
     this.pointerDownPosition = null;
+
+    // enable selection
+    const style = document.getElementById('disable-select');
+    if (style) {
+      style.parentNode?.removeChild(style);
+    }
+
+    document.body.style.cursor = '';
   };
 
   getOptions() {
