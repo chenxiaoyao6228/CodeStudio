@@ -1,0 +1,11 @@
+{
+    "*.ts": [
+        "npm run lint"
+    ],
+    "*.html": [
+        "npm run lint"
+    ],
+    "*.scss": [
+        "npm run lint"
+    ]
+}

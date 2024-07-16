@@ -14,7 +14,8 @@
     "build:proxy-console": "node scripts/genProxyScript.js",
     "watch:proxy-console": "nodemon",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint --fix",
+    "prepare": "husky"
   },
   "private": true,
   "dependencies": {
@@ -50,12 +51,14 @@
     "adm-zip": "^0.5.14",
     "angular-eslint": "18.0.1",
     "eslint": "^9.3.0",
+    "husky": "^9.0.11",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "lint-staged": "^15.2.7",
     "nodemon": "^3.1.4",
     "terser": "^5.31.2",
     "tslib": "^2.3.0",
