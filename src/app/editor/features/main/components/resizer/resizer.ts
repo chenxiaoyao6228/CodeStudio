@@ -71,6 +71,8 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   }
 
   startResize = (e: PointerEvent) => {
+    this.stopEvent(e)
+
     const resizerBar = this.el.nativeElement.querySelector('.resizer-bar');
     if (resizerBar && resizerBar.contains(e.target as Node)) {
       this.pointerDownPosition = {
@@ -100,7 +102,9 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   };
 
   handleResize = (e: PointerEvent) => {
+   this.stopEvent(e)
     requestAnimationFrame(() => {
+
       if (!this.pointerDownPosition) return;
       const direction = this.resizeService.direction;
       const { clientX, clientY } = e;
@@ -124,8 +128,10 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
       });
     });
   };
+  
 
   stopResize = () => {
+
     this.cleanupEvents();
     this.pointerDownPosition = null;
 
@@ -137,6 +143,12 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
 
     document.body.style.cursor = '';
   };
+
+  stopEvent(e: Event) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
 
   getOptions() {
     return {
