@@ -7,19 +7,21 @@ import {
   QueryList,
   SimpleChanges,
   inject,
+  OnChanges,
+  AfterContentInit,
 } from '@angular/core';
 import { ResizeManagerService } from './resize-manager.service';
 import { ResizerComponent } from './resizer';
 
 @Component({
   standalone: true,
-  selector: 'resizer-container',
+  selector: 'app-resizer-container',
   template: '<ng-content></ng-content>',
   styleUrls: ['./resize-container.scss'],
   providers: [ResizeManagerService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResizerContainerComponent {
+export class ResizerContainerComponent implements OnChanges, AfterContentInit {
   @Input() direction: 'col' | 'row' = 'row';
   @ContentChildren(ResizerComponent) resizers!: QueryList<ResizerComponent>;
 

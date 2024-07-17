@@ -30,9 +30,7 @@ export class NodeContainerService {
 
   devServerProcess: WebContainerProcess | null = null;
   webContainer: WebContainer | null = null;
-  packageJson: Record<string, any> | null = null;
-
-  constructor() {}
+  packageJson: Record<string, unknown> | null = null;
 
   async init(options: IRouteParams) {
     Object.assign(this.options, options);
@@ -329,7 +327,7 @@ export class NodeContainerService {
             filterFoldersPredicate(entry.name)
           ) {
             files[entry.name] = { directory: {} };
-            // @ts-ignore
+            //@ts-expect-error skip
             await loadContent(fullPath, files[entry.name].directory);
           }
         }

@@ -1,10 +1,8 @@
 import { FileSystemTree } from '@webcontainer/api';
-import { IFileLoader, IFileLoaderConfig } from '../type';
+import { IFileLoader } from '../type';
 
 export class LocalFileLoader implements IFileLoader {
-  constructor() {}
-
-  async loadFiles(config: IFileLoaderConfig): Promise<FileSystemTree> {
+  async loadFiles(): Promise<FileSystemTree> {
     try {
       const dirHandle = await (window as any).showDirectoryPicker();
       return await this.readDirectory(dirHandle);
@@ -18,7 +16,7 @@ export class LocalFileLoader implements IFileLoader {
 
   private async readDirectory(
     dirHandle: any,
-    path: string = ''
+    path = ''
   ): Promise<FileSystemTree> {
     const files: FileSystemTree = {};
     try {

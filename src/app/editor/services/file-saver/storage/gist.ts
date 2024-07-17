@@ -11,7 +11,6 @@ export const PROJECT_CODE_KEY = 'project_code';
 @Injectable({ providedIn: 'root' })
 export class GistStorage implements IStorage {
   gistService = inject(GistService);
-  constructor() {}
 
   async save(
     content: Blob,

@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error skip
 import { proxyConsoleScript } from './_console-script.js';
 /**
  * due to "CROS policy", we can't directly inject script to iframe
@@ -40,7 +40,7 @@ export function isEntryFile(path: string) {
 }
 
 export function removeProxyScriptOfEntryHTML(
-  contents: string | Uint8Array,
+  contents: string | Uint8Array
 ): string {
   if (contents instanceof Uint8Array) {
     contents = uint8ArrayToString(contents);

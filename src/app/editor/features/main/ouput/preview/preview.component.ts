@@ -4,7 +4,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  OnInit,
   ViewChild,
   computed,
   inject,
@@ -125,8 +124,6 @@ export class PreviewComponent implements AfterViewInit {
     );
     return (phaseIndex / (DEFAULT_PHASE_LIST.length - 1)) * 100;
   });
-
-  constructor() {}
 
   trackByPhaseKey(index: number, phase: IPhaseItem): StartupPhase {
     return phase.key;

@@ -1,5 +1,5 @@
 <header class="header-wrap">
-  <div class="left" (click)="goHome()">
+  <div class="left" tabindex="0" (click)="goHome()" (keyup)="goHome()">
     <img class="logo" [src]="logoPath" alt="logo" />
     <span class="name"> Code Studio </span>
   </div>

@@ -1,5 +1,5 @@
-export class EventEmitter<T = any> {
-  private events: { [K in keyof T]?: Array<(payload: T[K]) => void> } = {};
+export class EventEmitter<T = unknown> {
+  private events: { [K in keyof T]?: ((payload: T[K]) => void)[] } = {};
 
   on<K extends keyof T>(event: K, listener: (payload: T[K]) => void): void {
     if (!this.events[event]) {

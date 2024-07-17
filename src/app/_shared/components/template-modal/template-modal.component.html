@@ -1,7 +1,7 @@
 <h2 mat-dialog-title class="title">
   Choose a template
   <mat-dialog-actions>
-    <div mat-dialog-actions (click)="closeModal()" class="close">
+    <div  mat-dialog-actions  tabindex="0" (click)="closeModal()" (keyup)="closeModal()"  class="close">
       <mat-icon>close</mat-icon>
     </div>
   </mat-dialog-actions>
@@ -9,7 +9,7 @@
 <mat-dialog-content>
   <div class="template-list">
     @for(item of templateList(); track item.icon) {
-    <div class="template-item" (click)="selectTemplate(item)">
+    <div  class="template-item" tabindex="0" (click)="selectTemplate(item)" (keyup)="selectTemplate(item)">
       <div
         class="icon"
         [style.backgroundImage]="'url(' + item.icon + ')'"

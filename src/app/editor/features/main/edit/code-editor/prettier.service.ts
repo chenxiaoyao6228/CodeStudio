@@ -11,8 +11,6 @@ export class PrettierService {
   private prettierPlugins: any;
   private isLoaded = new BehaviorSubject<boolean>(false);
 
-  constructor() {}
-
   loadPrettier(): Observable<boolean> {
     if (this.isLoaded.value) {
       return this.isLoaded.asObservable();

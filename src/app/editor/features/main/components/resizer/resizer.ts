@@ -16,15 +16,15 @@ interface IPosition {
 }
 
 @Component({
-  selector: 'resizer',
+  selector: 'app-resizer',
   standalone: true,
   template: `
     @if (!isFirstElement) {
-      <div
-        class="resizer-bar"
-        [class.row]="resizeService.direction === 'row'"
-        [class.col]="resizeService.direction === 'col'"
-      ></div>
+    <div
+      class="resizer-bar"
+      [class.row]="resizeService.direction === 'row'"
+      [class.col]="resizeService.direction === 'col'"
+    ></div>
     }
     <ng-content></ng-content>
   `,
@@ -48,7 +48,6 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
     width: 100,
     height: 100,
   };
-  constructor() {}
 
   ngAfterViewInit() {
     this.initEvents();
@@ -62,7 +61,7 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
     this.renderer.listen(
       this.el.nativeElement,
       'pointerdown',
-      this.startResize,
+      this.startResize
     );
   }
 
@@ -89,7 +88,9 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
       * { 
         user-select: none !important; 
         pointer-events: none !important; 
-        cursor: ${this.resizeService.direction === 'row' ? 'col-resize' : 'row-resize'} !important; 
+        cursor: ${
+          this.resizeService.direction === 'row' ? 'col-resize' : 'row-resize'
+        } !important; 
       }
     `;
       document.head.appendChild(style);

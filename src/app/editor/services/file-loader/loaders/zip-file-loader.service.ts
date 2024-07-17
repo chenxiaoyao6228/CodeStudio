@@ -3,8 +3,6 @@ import JSZip from 'jszip';
 import { IFileLoaderConfig, IFileLoader } from '../type';
 
 export class ZipFileLoader implements IFileLoader {
-  constructor() {}
-
   async loadFiles({ source }: IFileLoaderConfig): Promise<FileSystemTree> {
     try {
       const response = await fetch(source, {
@@ -28,7 +26,7 @@ export class ZipFileLoader implements IFileLoader {
           if (i === segments.length - 1 && !file.dir) {
             let contents: string | Uint8Array;
 
-            // @ts-ignore
+            //@ts-expect-error private property of js-zip
             if (file._dataBinary) {
               // Handle binary files
               contents = await file.async('uint8array');
@@ -51,7 +49,7 @@ export class ZipFileLoader implements IFileLoader {
                 directory: {},
               };
             }
-            current = // @ts-ignore
+            current = // @ts-expect-error skip
               (current as FileSystemTree)[segment].directory as DirectoryNode;
           }
         }

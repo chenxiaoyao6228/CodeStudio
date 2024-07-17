@@ -1,6 +1,6 @@
 import { Component, inject, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButton, MatButtonModule } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -32,7 +32,7 @@ export class GithubUrlDialogComponent {
   githubUrl = '';
   readonly dialogRef = inject(MatDialogRef<GithubUrlDialogComponent>);
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: unknown) {}
 
   onNoClick(): void {
     this.dialogRef.close();

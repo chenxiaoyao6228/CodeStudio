@@ -17,7 +17,6 @@ export class FileSaverService {
   localSaver = inject(LocalStorage);
   gistSaver = inject(GistStorage);
   nodeContainerService = inject(NodeContainerService);
-  constructor() {}
 
   async downloadProject(name = 'project') {
     await this.saveProject(this.localSaver, `${name}.zip`);

@@ -60,8 +60,9 @@ export class HeaderComponent implements OnInit {
 
     this.nodeContainerService.fileMounted$.subscribe(async (fileMounted) => {
       if (fileMounted && this.projectName() === UNTITLED_NAME) {
-        const pkgContent =
-          await this.nodeContainerService.readFile('package.json');
+        const pkgContent = await this.nodeContainerService.readFile(
+          'package.json'
+        );
         const name = JSON.parse(pkgContent).name || UNTITLED_NAME;
         if (name) {
           this.projectName.set(name);
@@ -126,8 +127,9 @@ export class HeaderComponent implements OnInit {
         name = this.projectName();
       }
       if (!name) {
-        const pkgContent =
-          await this.nodeContainerService.readFile('package.json');
+        const pkgContent = await this.nodeContainerService.readFile(
+          'package.json'
+        );
         name = JSON.parse(pkgContent).name;
       }
 
@@ -139,7 +141,7 @@ export class HeaderComponent implements OnInit {
         'Close',
         {
           duration: 8000,
-        },
+        }
       );
       this.isSaving.set(false);
     } catch (error) {

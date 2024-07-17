@@ -8,7 +8,7 @@
         return function (...args: any[]) {
           window.parent.postMessage(
             { type: 'console', method: prop, args: args.map(handleArg) },
-            '*',
+            '*'
           );
           return originalProp.apply(target, args);
         };
@@ -38,7 +38,7 @@
           : '',
         stacks: event.error && event.error.stack.split('\n'),
       },
-      '*',
+      '*'
     );
   }
 
@@ -54,9 +54,9 @@
           type: 'error',
           message: event.reason,
         },
-        '*',
+        '*'
       );
-    },
+    }
   );
 
   function handleArg(arg: any): { type: string; value: any } {
@@ -92,7 +92,7 @@
       case 'map':
         return {
           type: 'map',
-          // @ts-ignore
+          //@ts-expect-error skip
           value: Array.from(arg.entries()).map(([key, value]: [any, any]) => [
             handleArg(key),
             handleArg(value),

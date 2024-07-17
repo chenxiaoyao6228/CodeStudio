@@ -117,7 +117,7 @@ export class HomeComponent implements OnInit {
           return item && item.files && item.files[`${PROJECT_KEY}.json`];
         };
 
-        //@ts-ignore
+        // @ts-expect-error skip
         const _data = res.data
           .filter(isCodeStudioProject)
           .map((item: IGistItem) => transformData(item));
@@ -230,7 +230,7 @@ export class HomeComponent implements OnInit {
         'Close',
         {
           duration: 3000,
-        },
+        }
       );
       console.log('Delete project:', project);
       this.getList().then(() => {

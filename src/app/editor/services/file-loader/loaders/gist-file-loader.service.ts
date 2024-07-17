@@ -3,8 +3,6 @@ import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
 import { IFileLoader, IFileLoaderConfig } from '../type';
 
 export class GistFileLoader implements IFileLoader {
-  constructor() {}
-
   async loadFiles(config: IFileLoaderConfig): Promise<FileSystemTree> {
     const { source } = config;
     const fileContent = await this.getFileContentFromUrl(source);
@@ -44,7 +42,7 @@ export class GistFileLoader implements IFileLoader {
         if (i === segments.length - 1 && !file.dir) {
           let contents: string | Uint8Array;
 
-          // @ts-ignore
+          //@ts-expect-error skip
           if (file._dataBinary) {
             // Handle binary files
             contents = await file.async('uint8array');
@@ -67,7 +65,7 @@ export class GistFileLoader implements IFileLoader {
               directory: {},
             };
           }
-          current = //@ts-ignore
+          current = //@ts-expect-error skip
             (current as FileSystemTree)[segment].directory as DirectoryNode;
         }
       }

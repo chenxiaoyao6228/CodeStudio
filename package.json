@@ -14,7 +14,7 @@
     "build:proxy-console": "node scripts/genProxyScript.js",
     "watch:proxy-console": "nodemon",
     "test": "ng test",
-    "lint": "ng lint --fix",
+    "lint": "eslint --fix",
     "prepare": "husky"
   },
   "private": true,
@@ -40,6 +40,8 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.0.2",
+    "@angular-eslint/eslint-plugin-template": "^18.1.0",
+    "@angular-eslint/template-parser": "^18.1.0",
     "@angular/cli": "^18.0.2",
     "@angular/compiler-cli": "^18.0.0",
     "@babel/cli": "^7.24.8",
@@ -51,6 +53,7 @@
     "adm-zip": "^0.5.14",
     "angular-eslint": "18.0.1",
     "eslint": "^9.3.0",
+    "eslint-plugin-unused-imports": "^4.0.0",
     "husky": "^9.0.11",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",

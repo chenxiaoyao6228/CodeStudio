@@ -51,7 +51,9 @@
       </div>
 
       <!-- editingBox -->
-      <div class="editing-box" (click)="onEditingBoxClick(node, $event)">
+      <div class="editing-box" tabindex="1" 
+      (click)="onEditingBoxClick(node, $event)" 
+      (keyup)="onEditingBoxClick(node, $event)" >
         @if(editingOperation() === 'creatingFile') {
         <mat-icon class="edit-icon">note_add</mat-icon>
         } @if(editingOperation() === 'creatingFolder') {
@@ -131,7 +133,10 @@
       <div class="file-text">{{ node.name }}</div>
 
       <!-- editingBox -->
-      <div class="editing-box" (click)="onEditingBoxClick(node, $event)">
+      <div class="editing-box" tabindex="0" 
+        (click)="onEditingBoxClick(node, $event)" 
+        (keyup)="onEditingBoxClick(node, $event)" 
+      >
         @if(editingOperation() === 'creatingFile') {
         <mat-icon class="edit-icon">note_add</mat-icon>
         } @if(editingOperation() === 'creatingFolder') {

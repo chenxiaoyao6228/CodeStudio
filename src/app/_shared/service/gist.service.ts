@@ -116,15 +116,15 @@ export class GistService {
  *  so try to store them in description
  * so that we can get some extra information like title in the home page
  */
-export function stringifyDescription(params: Record<string, any>): string {
+export function stringifyDescription(params: Record<string, unknown>): string {
   return Object.keys(params)
     .map((key) => `${key}: ${params[key]}`)
     .join('\n');
 }
 
-export function parseDescription(description: string): Record<string, any> {
+export function parseDescription(description: string): Record<string, unknown> {
   const lines = description.split('\n');
-  const params: Record<string, any> = {};
+  const params: Record<string, unknown> = {};
   lines.forEach((line) => {
     const [key, ...rest] = line.split(': ');
     if (key) {

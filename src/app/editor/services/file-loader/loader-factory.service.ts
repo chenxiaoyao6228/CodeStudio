@@ -15,8 +15,6 @@ import {
   providedIn: 'root',
 })
 export class FileLoaderFactory {
-  constructor() {}
-
   async loadFiles(config: IFileLoaderConfig) {
     const loader = this.createFileLoader(config);
     const fileTree = await loader.loadFiles(config);

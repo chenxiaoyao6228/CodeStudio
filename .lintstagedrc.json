@@ -1,11 +1,11 @@
 {
     "*.ts": [
-        "npm run lint"
+        "eslint --fix"
     ],
     "*.html": [
-        "npm run lint"
+        "eslint --fix"
     ],
     "*.scss": [
-        "npm run lint"
+        "eslint --fix"
     ]
 }
