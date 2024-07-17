@@ -143,6 +143,7 @@ export class PreviewComponent implements AfterViewInit {
     if (this.previewUrl()) {
       this.isRefreshing.set(true);
       this.previewIframe!.nativeElement.src = this.previewUrl();
+      this.consoleService.clearConsole();
     }
   }
 

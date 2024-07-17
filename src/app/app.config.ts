@@ -11,12 +11,14 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { RedirectGuard } from './_shared/service/redirect-guard';
+import { PcOnlyGuard } from './_shared/service/device-guard';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent, canActivate: [RedirectGuard] },
+  { path: '', component: HomeComponent, canActivate: [RedirectGuard, PcOnlyGuard] },
   {
     path: 'edit',
     component: EditorComponent,
+    canActivate: [PcOnlyGuard]
   },
 ];
 
