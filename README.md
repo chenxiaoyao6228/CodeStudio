@@ -16,7 +16,7 @@
 - [x] Basic code editing abilities: path IntelliSense, go to definition, etc.
 - [x] Integrated Console: no need to press 'F12' to open DevTools
 - [x] Prettier as the default code formatter
-- [ ] Keyboard shortcuts: long press 'CTRL' ('CMD' on Mac) to show the shortcut list
+- [x] Keyboard shortcuts: long press 'CTRL' ('CMD' on Mac) to show the shortcut list
 - [ ] Various VSCode theme support
 - [ ] File Sharing
 - [ ] Diff editor

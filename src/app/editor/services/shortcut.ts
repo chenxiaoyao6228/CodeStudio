@@ -1,6 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MainService } from '../features/main/main.service';
 import hotkeys from 'hotkeys-js';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ShortcutDialogComponent } from '../components/shortcut-dialog.component';
+import {
+  filter,
+  fromEvent,
+  Subscription,
+  switchMap,
+  takeUntil,
+  timer,
+} from 'rxjs';
 
 /*
  * reference
@@ -21,7 +31,11 @@ interface ShortcutConfig {
   providedIn: 'root',
 })
 export class ShortcutService {
+  private dialog = inject(MatDialog);
   private shortcuts: ShortcutConfig[] = [];
+  private dialogRef: MatDialogRef<ShortcutDialogComponent> | null = null;
+  private longPressSubscription: Subscription | null = null;
+  private keyUpSubscription: Subscription | null = null;
 
   constructor(private mainService: MainService) {
     this.initializeShortcuts();
@@ -37,6 +51,8 @@ export class ShortcutService {
     this.addShortcut('ctrl+shift+o', 'Toggle Console', () =>
       this.mainService.toggleConsole()
     );
+
+    this.setupLongPress();
   }
 
   private addShortcut(
@@ -85,6 +101,57 @@ export class ShortcutService {
         );
       default:
         return null;
+    }
+  }
+
+  private setupLongPress() {
+    const ctrlOrMetaKeyDown$ = fromEvent<KeyboardEvent>(
+      document,
+      'keydown'
+    ).pipe(
+      filter(
+        (event) =>
+          (event.key === 'Control' || event.key === 'Meta') && !event.repeat
+      )
+    );
+
+    const keyUp$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
+      filter((event) => event.key === 'Control' || event.key === 'Meta')
+    );
+
+    this.longPressSubscription = ctrlOrMetaKeyDown$
+      .pipe(switchMap(() => timer(500).pipe(takeUntil(keyUp$))))
+      .subscribe(() => {
+        this.showShortcuts();
+      });
+
+    this.keyUpSubscription = keyUp$.subscribe(() => {
+      this.closeShortcuts();
+    });
+  }
+
+  private showShortcuts() {
+    if (!this.dialogRef) {
+      this.dialogRef = this.dialog.open(ShortcutDialogComponent);
+      this.dialogRef.afterClosed().subscribe(() => {
+        this.dialogRef = null;
+      });
+    }
+  }
+
+  private closeShortcuts() {
+    if (this.dialogRef) {
+      this.dialogRef.close(true);
+    }
+  }
+
+  // FIXME: provide all service that only available on Editor instead of root
+  public cleanup() {
+    if (this.longPressSubscription) {
+      this.longPressSubscription.unsubscribe();
+    }
+    if (this.keyUpSubscription) {
+      this.keyUpSubscription.unsubscribe();
     }
   }
 }

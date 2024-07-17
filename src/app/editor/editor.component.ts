@@ -1,5 +1,5 @@
 import { ShortcutService } from './services/shortcut';
-import { AfterViewInit, Component, inject } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy } from '@angular/core';
 import { HeaderComponent } from './features/header/header.component';
 import { FooterComponent } from './features/footer/footer.component';
 import { MainComponent } from './features/main/main.component';
@@ -15,6 +15,7 @@ import { TypeLoaderService } from './features/main/edit/code-editor/type-loader.
 import { TemplateModalComponent } from '@app/_shared/components/template-modal/template-modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../_shared/components/confirm-dialog/confirm-dialog';
+import { ShortcutDialogComponent } from './components/shortcut-dialog.component';
 
 export interface IRouteParams {
   source: string; // mock, local, template name, github folder , zip url
@@ -32,6 +33,7 @@ export interface IRouteParams {
     MainComponent,
     MatCheckbox,
     TemplateModalComponent,
+    ShortcutDialogComponent,
   ],
   providers: [],
   template: `
@@ -50,7 +52,7 @@ export interface IRouteParams {
     `,
   ],
 })
-export class EditorComponent implements AfterViewInit {
+export class EditorComponent implements AfterViewInit, OnDestroy {
   routeParams: IRouteParams = {
     source: 'local',
   };
@@ -61,6 +63,7 @@ export class EditorComponent implements AfterViewInit {
   editorStateService = inject(EditorStateService);
   typeLoadingService = inject(TypeLoaderService);
   codeEditorService = inject(CodeEditorService);
+  shortcutService = inject(ShortcutService);
 
   async ngAfterViewInit() {
     // support direct access from route params
@@ -99,5 +102,9 @@ export class EditorComponent implements AfterViewInit {
     } catch (error) {
       console.log('Failed to init webcontainer', error);
     }
+  }
+
+  ngOnDestroy() {
+    this.shortcutService.cleanup();
   }
 }
