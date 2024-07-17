@@ -33,6 +33,7 @@
     "@webcontainer/api": "^1.1.9",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
+    "hotkeys-js": "^3.13.7",
     "jszip": "^3.10.1",
     "lodash-es": "^4.17.21",
     "monaco-editor": "^0.50.0",

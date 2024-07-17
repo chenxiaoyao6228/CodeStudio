@@ -1,3 +1,4 @@
+import { ShortcutService } from './services/shortcut';
 import { AfterViewInit, Component, inject } from '@angular/core';
 import { HeaderComponent } from './features/header/header.component';
 import { FooterComponent } from './features/footer/footer.component';
@@ -14,8 +15,6 @@ import { TypeLoaderService } from './features/main/edit/code-editor/type-loader.
 import { TemplateModalComponent } from '@app/_shared/components/template-modal/template-modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../_shared/components/confirm-dialog/confirm-dialog';
-import { MainService } from './features/main/main.service';
-import { ConsoleService } from './features/main/ouput/console/console.service';
 
 export interface IRouteParams {
   source: string; // mock, local, template name, github folder , zip url
@@ -34,7 +33,7 @@ export interface IRouteParams {
     MatCheckbox,
     TemplateModalComponent,
   ],
-  providers: [MainService, ConsoleService],
+  providers: [],
   template: `
     <app-editor-header></app-editor-header>
     <app-editor-main></app-editor-main>

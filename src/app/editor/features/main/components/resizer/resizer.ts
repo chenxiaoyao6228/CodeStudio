@@ -71,10 +71,10 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   }
 
   startResize = (e: PointerEvent) => {
-    this.stopEvent(e)
-
     const resizerBar = this.el.nativeElement.querySelector('.resizer-bar');
     if (resizerBar && resizerBar.contains(e.target as Node)) {
+      // remember to stop only when needed
+      this.stopEvent(e);
       this.pointerDownPosition = {
         x: e.clientX,
         y: e.clientY,

@@ -36,10 +36,12 @@ import { ConsoleComponent } from './ouput/console/console.component';
 export class MainComponent implements AfterViewInit {
   @ViewChild('mainResizer') mainResizer!: ResizerComponent;
   @ViewChild('outputResizer') outputResizer!: ResizerComponent;
+  @ViewChild('editResizer') editResizer!: ResizerComponent;
   mainService = inject(MainService);
 
   ngAfterViewInit() {
     this.mainService.setMainResizer(this.mainResizer);
     this.mainService.setOutputResizer(this.outputResizer);
+    this.mainService.setEditResizer(this.editResizer);
   }
 }

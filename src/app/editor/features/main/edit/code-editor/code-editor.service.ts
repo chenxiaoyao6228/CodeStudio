@@ -12,6 +12,7 @@ import { TypeDefinition, TypeLoaderService } from './type-loader.service';
 import { IDisposable } from '@xterm/xterm';
 import debounce from 'lodash/debounce';
 import { PrettierService } from './prettier.service';
+import { ShortcutService } from '@src/app/editor/services/shortcut';
 
 export interface CodeEditorEvents {
   contentChanged: { content: string; filePath: string };
@@ -35,6 +36,7 @@ export class CodeEditorService implements IDisposable {
   private editor: monaco.editor.IStandaloneCodeEditor | undefined;
   private eventEmitter = new EventEmitter<CodeEditorEvents>();
   private disposables: monaco.IDisposable[] = [];
+  private shortcutService = inject(ShortcutService);
   debouncedResolveContents: () => void;
 
   constructor(@Optional() @Inject(APP_MONACO_BASE_HREF) private base: string) {
@@ -129,6 +131,7 @@ export class CodeEditorService implements IDisposable {
 
       this.setUpPathIntellisenseListeners();
       this.listenToGoToDefinition(this.editor);
+      this.shortcutService.overrideMonacoShortcuts(this.editor);
 
       // load prettier
       this.prettierService
