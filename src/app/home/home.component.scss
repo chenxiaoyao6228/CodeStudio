@@ -68,21 +68,26 @@ $table-height: calc(100vh - 40px - 30px - 96px - 30px - 20px - 20px);
           flex: none;
           height: 100%;
           margin-inline-start: auto;
+          display: flex;
+          align-items: center;
           .img {
             width: 118px;
             height: 100%;
             background-size: contain;
             &.template {
-              background-image: url("/assets/imgs/home-template-bg.png");
+              background-image: url('/assets/imgs/home-template-bg.png');
             }
 
             &.github {
-              background-image: url("/assets/imgs/home-github.svg");
+              background-image: url('/assets/imgs/home-github.svg');
               width: 90px;
             }
 
             &.local {
-              background-image: url("/assets/imgs/home-local.webp");
+              background-repeat: no-repeat;
+              width: 80px;
+              height: 76%;
+              background-image: url('/assets/imgs/home-local.svg');
             }
           }
         }
