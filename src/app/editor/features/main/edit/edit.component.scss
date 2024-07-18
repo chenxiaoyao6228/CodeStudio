@@ -49,6 +49,9 @@
         padding: 2px;
         text-align: center;
         cursor: pointer;
+        &:hover {
+          opacity: 0.8;
+        }
       }
       .pending {
         display: flex;

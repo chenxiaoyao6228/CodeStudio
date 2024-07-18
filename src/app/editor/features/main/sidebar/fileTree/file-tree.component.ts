@@ -502,6 +502,10 @@ export class FileTreeComponent {
 
     this.stopEditing();
     if (newFilePath) {
+      await this.codeEditorService.openOrCreateFile({
+        filePath: newFilePath,
+        content: ' ',
+      });
       this.editorState.setCurrentFilePath(newFilePath);
     }
   }

@@ -10,7 +10,7 @@
             <div class="dot"></div>
           </div>
         } @else {
-          <div class="close" (clickEvent)="closeTab(tab, $event)">&#x2715;</div>
+          <div class="close" tabindex="0" (click)="closeTab(tab, $event)" (keyup)="closeTab(tab, $event)">&#x2715;</div>
         }
       </div>
     }
