@@ -19,17 +19,18 @@ export const APP_MONACO_BASE_HREF = new InjectionToken<string>('appMonacoBaseHre
   providedIn: 'root',
 })
 export class CodeEditorService implements IDisposable {
-  typeLoaderService = inject(TypeLoaderService);
-  nodeContainerService = inject(NodeContainerService);
-  prettierService = inject(PrettierService);
   hasEdit = false;
+  private typeLoaderService = inject(TypeLoaderService);
+  private nodeContainerService = inject(NodeContainerService);
+  private prettierService = inject(PrettierService);
   private afterScriptLoad$ = new AsyncSubject<boolean>();
   private isScriptLoaded = false;
   private editor: monaco.editor.IStandaloneCodeEditor | undefined;
   private eventEmitter = new EventEmitter<CodeEditorEvents>();
   private disposables: monaco.IDisposable[] = [];
   private shortcutService = inject(ShortcutService);
-  debouncedResolveContents: () => void;
+  private editorStates = new Map<string, monaco.editor.ICodeEditorViewState>();
+  private debouncedResolveContents: () => void;
 
   constructor(@Optional() @Inject(APP_MONACO_BASE_HREF) private base: string) {
     this.loadMonacoScript();
@@ -417,8 +418,18 @@ export class CodeEditorService implements IDisposable {
 
   async openOrCreateFile(params: { filePath: string; content?: string }) {
     const { content, filePath } = params;
+
     const language = this.getLanguageByFilePath(filePath);
     await this.setLanguage(language);
+
+    // save the current state before switching
+    if (this.editor) {
+      const currentModel = this.editor.getModel();
+      if (currentModel) {
+        const currentFilePath = currentModel.uri.path.slice(1);
+        this.saveEditorState(currentFilePath);
+      }
+    }
 
     const uri = monaco.Uri.parse(filePath);
     let model = monaco.editor.getModel(uri);
@@ -435,12 +446,16 @@ export class CodeEditorService implements IDisposable {
     }
     this.editor!.setModel(model);
     this.editor!.focus();
+
+    // restore the state for the new file
+    this.restoreEditorState(filePath);
   }
 
   closeFile(filePath: string) {
     const uri = monaco.Uri.parse(filePath);
     const model = monaco.editor.getModel(uri);
     if (model) {
+      this.saveEditorState(filePath);
       model.dispose();
     }
   }
@@ -493,6 +508,24 @@ export class CodeEditorService implements IDisposable {
     };
 
     return languageMap[suffix] || 'json';
+  }
+
+  saveEditorState(filePath: string): void {
+    if (this.editor) {
+      const state = this.editor.saveViewState();
+      if (state) {
+        this.editorStates.set(filePath, state);
+      }
+    }
+  }
+
+  restoreEditorState(filePath: string): void {
+    if (this.editor) {
+      const state = this.editorStates.get(filePath);
+      if (state) {
+        this.editor.restoreViewState(state);
+      }
+    }
   }
 
   dispose() {
