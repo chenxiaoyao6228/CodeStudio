@@ -118,6 +118,7 @@ export class CodeEditorService implements IDisposable {
       });
 
       this.setUpPathIntellisenseListeners();
+      this.setupAutoCompleteTag();
       this.listenToGoToDefinition(this.editor);
       this.shortcutService.overrideMonacoShortcuts(this.editor);
 
@@ -298,6 +299,80 @@ export class CodeEditorService implements IDisposable {
         console.log('F12 error: ', error);
       }
     });
+  }
+
+  private setupAutoCompleteTag() {
+    const commonHtmlTags =
+      'div,span,h1,h2,h3,h4,h5,h6,table,form,p,ul,ol,li,header,footer,nav,section,article,aside,main,figure,figcaption,blockquote,pre,code,button,label,select,option,optgroup,fieldset,legend,canvas,video,audio,source'.split(
+        ','
+      );
+
+    const selfCloseTags = 'meta,img,link,input,textarea,br,hr,a'.split(',');
+
+    // Map of self-closing tags with their key attributes
+    const selfCloseTagAttributes: Record<string, string> = {
+      meta: 'name',
+      img: 'src',
+      a: 'href',
+      link: 'href',
+      input: 'type',
+      textarea: 'placeholder',
+      br: '',
+      hr: '',
+    };
+
+    const htmlCompletionItems = commonHtmlTags
+      .filter(tag => !selfCloseTags.includes(tag))
+      .map(tag => ({
+        label: tag,
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: `<${tag}>\n\t$0\n</${tag}>`,
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        documentation: `A snippet for a <${tag}> element`,
+        range: null, // will be set dynamically
+      }));
+
+    const selfCloseCompletionItems = selfCloseTags.map(tag => {
+      const keyAttr = selfCloseTagAttributes[tag] ? ` ${selfCloseTagAttributes[tag]}="$0"` : '$0';
+      return {
+        label: tag,
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: `<${tag}${keyAttr} />`,
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        documentation: `A self-closing <${tag}> element`,
+        range: null,
+      };
+    });
+
+    const additionalCompletionItems = [
+      {
+        label: 'iframe',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertText: `<iframe src="$0" frameborder="0"></iframe>`,
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        documentation: 'A snippet for an iframe element',
+        range: null,
+      },
+    ];
+
+    const htmlSuggestions = [...htmlCompletionItems, ...selfCloseCompletionItems, ...additionalCompletionItems];
+
+    const registerCompletionProvider = (language: string) => {
+      monaco.languages.registerCompletionItemProvider(language, {
+        provideCompletionItems: (model, position) => {
+          const word = model.getWordUntilPosition(position);
+          const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
+
+          return {
+            suggestions: htmlSuggestions.map(item => ({ ...item, range })),
+          };
+        },
+      });
+    };
+
+    registerCompletionProvider('html');
+    registerCompletionProvider('javascript');
+    registerCompletionProvider('typescript');
   }
 
   async setLanguage(language: string) {
