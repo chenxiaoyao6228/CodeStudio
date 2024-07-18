@@ -75,6 +75,32 @@ export class CodeEditorService implements IDisposable {
     }
   }
 
+  setupContextMenu() {
+    /*
+     * https://github.com/microsoft/monaco-editor/issues/1280#issuecomment-2099873176
+     * https://github.com/microsoft/monaco-editor/issues/1280
+     */
+    const removableIds = [
+      'editor.action.quickOutline',
+      'editor.action.rename',
+      'editor.action.quickCommand',
+      'editor.action.changeAll',
+      // 'editor.action.clipboardCopyAction',
+      // 'editor.action.clipboardPasteAction',
+    ];
+    // @ts-expect-error skip
+    const contextmenu = this.editor.getContribution('editor.contrib.contextmenu');
+    // @ts-expect-error skip
+    const realMethod = contextmenu._getMenuActions;
+    // @ts-expect-error skip
+    contextmenu._getMenuActions = function (...args) {
+      const items = realMethod.apply(contextmenu, args);
+      return items.filter(function (item: any) {
+        return !removableIds.includes(item.id);
+      });
+    };
+  }
+
   initEditor(
     editorWrapper: HTMLElement,
     options: monaco.editor.IStandaloneEditorConstructionOptions
@@ -119,6 +145,7 @@ export class CodeEditorService implements IDisposable {
 
       this.setUpPathIntellisenseListeners();
       this.setupAutoCompleteTag();
+      this.setupContextMenu();
       this.listenToGoToDefinition(this.editor);
       this.shortcutService.overrideMonacoShortcuts(this.editor);
 
