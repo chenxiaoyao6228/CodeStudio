@@ -51,8 +51,9 @@ export class ShortcutService {
     this.addShortcut('ctrl+shift+o', 'Toggle Console', () =>
       this.mainService.toggleConsole()
     );
-
-    this.setupLongPress();
+    this.addShortcut('ctrl+/', 'Toggle ShortCut Menu', () =>
+      this.toggleShortcuts()
+    );
   }
 
   private addShortcut(
@@ -91,6 +92,8 @@ export class ShortcutService {
 
   private convertToMonacoKeybinding(shortcut: string): number | null {
     switch (shortcut) {
+      case 'ctrl+/':
+        return monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash;
       case 'ctrl+b':
         return monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB;
       case 'ctrl+`':
@@ -104,43 +107,13 @@ export class ShortcutService {
     }
   }
 
-  private setupLongPress() {
-    const ctrlOrMetaKeyDown$ = fromEvent<KeyboardEvent>(
-      document,
-      'keydown'
-    ).pipe(
-      filter(
-        (event) =>
-          (event.key === 'Control' || event.key === 'Meta') && !event.repeat
-      )
-    );
-
-    const keyUp$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
-      filter((event) => event.key === 'Control' || event.key === 'Meta')
-    );
-
-    this.longPressSubscription = ctrlOrMetaKeyDown$
-      .pipe(switchMap(() => timer(500).pipe(takeUntil(keyUp$))))
-      .subscribe(() => {
-        this.showShortcuts();
-      });
-
-    this.keyUpSubscription = keyUp$.subscribe(() => {
-      this.closeShortcuts();
-    });
-  }
-
-  private showShortcuts() {
+  private toggleShortcuts() {
     if (!this.dialogRef) {
       this.dialogRef = this.dialog.open(ShortcutDialogComponent);
       this.dialogRef.afterClosed().subscribe(() => {
         this.dialogRef = null;
       });
-    }
-  }
-
-  private closeShortcuts() {
-    if (this.dialogRef) {
+    } else {
       this.dialogRef.close(true);
     }
   }
