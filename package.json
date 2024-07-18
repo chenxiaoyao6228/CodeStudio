@@ -14,7 +14,7 @@
     "build:proxy-console": "node scripts/genProxyScript.js",
     "watch:proxy-console": "nodemon",
     "test": "ng test",
-    "lint": "eslint --fix",
+    "lint": "npx eslint --fix",
     "prepare": "husky"
   },
   "private": true,
@@ -49,11 +49,17 @@
     "@babel/core": "^7.24.8",
     "@babel/preset-env": "^7.24.8",
     "@babel/preset-typescript": "^7.24.7",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.7.0",
     "@types/jasmine": "~5.1.0",
     "@types/lodash": "^4.17.6",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "^7.16.1",
     "adm-zip": "^0.5.14",
     "angular-eslint": "18.0.1",
     "eslint": "^9.3.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-unused-imports": "^4.0.0",
     "husky": "^9.0.11",
     "jasmine-core": "~5.1.0",
@@ -64,9 +70,10 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "lint-staged": "^15.2.7",
     "nodemon": "^3.1.4",
+    "prettier": "^3.3.3",
+    "prettier-eslint": "^16.3.0",
     "terser": "^5.31.2",
     "tslib": "^2.3.0",
-    "typescript": "~5.4.2",
-    "typescript-eslint": "8.0.0-alpha.20"
+    "typescript": "~5.4.2"
   }
 }

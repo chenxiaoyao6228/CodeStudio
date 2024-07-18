@@ -22,12 +22,7 @@ export class CompoundObjRendererComponent {
   }
 
   isCompound(value: any) {
-    return (
-      this.isArray(value) ||
-      this.isObject(value) ||
-      this.isMap(value) ||
-      this.isSet(value)
-    );
+    return this.isArray(value) || this.isObject(value) || this.isMap(value) || this.isSet(value);
   }
 
   isObject(value: any): boolean {

@@ -20,12 +20,10 @@ export class HeaderComponent {
   readonly snackBar = inject(MatSnackBar);
   logoPath = 'assets/imgs/header-logo.png';
   githubLogoPath = 'assets/imgs/github.png';
-  isSaving = signal(false)
+  isSaving = signal(false);
   localStorageService = inject(LocalStorageService);
 
-
   openTemplateModal() {
-    this.dialog.open(TemplateModalComponent)
+    this.dialog.open(TemplateModalComponent);
   }
-
 }

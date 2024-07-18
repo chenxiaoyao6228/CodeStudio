@@ -59,7 +59,7 @@ export class ConsoleService {
   }
 
   handleMessage(event: MessageEvent<IConsoleMessage | IError>) {
-    if (!['webcontainer', 'localhost'].some((h) => event.origin.includes(h))) {
+    if (!['webcontainer', 'localhost'].some(h => event.origin.includes(h))) {
       return;
     }
 

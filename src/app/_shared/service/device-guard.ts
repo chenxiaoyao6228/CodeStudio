@@ -7,11 +7,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   providedIn: 'root',
 })
 export class PcOnlyGuard implements CanActivate {
-
-    private deviceService = inject(DeviceService)
-    private snackBar =  inject(MatSnackBar)
-  constructor(
-  ) {}
+  private deviceService = inject(DeviceService);
+  private snackBar = inject(MatSnackBar);
+  constructor() {}
 
   canActivate(): boolean {
     if (this.deviceService.isPC()) {

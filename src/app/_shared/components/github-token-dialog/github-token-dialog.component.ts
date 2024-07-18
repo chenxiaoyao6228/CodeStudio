@@ -1,6 +1,4 @@
-import {
-  Component
-} from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -8,7 +6,7 @@ import {
   MatDialogClose,
   MatDialogContent,
   MatDialogRef,
-  MatDialogTitle
+  MatDialogTitle,
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -32,7 +30,7 @@ import { MatInputModule } from '@angular/material/input';
 export class GitHubTokenDialogComponent {
   token = '';
 
-  constructor(public dialogRef: MatDialogRef<GitHubTokenDialogComponent>) { }
+  constructor(public dialogRef: MatDialogRef<GitHubTokenDialogComponent>) {}
 
   onNoClick(): void {
     this.dialogRef.close();

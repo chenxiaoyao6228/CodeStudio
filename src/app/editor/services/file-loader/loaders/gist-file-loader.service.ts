@@ -24,16 +24,10 @@ export class GistFileLoader implements IFileLoader {
     }
   }
 
-  private async processZipFile(
-    fileSystemTree: FileSystemTree,
-    arrayBuffer: ArrayBuffer
-  ): Promise<void> {
+  private async processZipFile(fileSystemTree: FileSystemTree, arrayBuffer: ArrayBuffer): Promise<void> {
     const zip = await JSZip.loadAsync(arrayBuffer);
 
-    const processFile = async (
-      relativePath: string,
-      file: JSZip.JSZipObject
-    ) => {
+    const processFile = async (relativePath: string, file: JSZip.JSZipObject) => {
       const segments = relativePath.split('/');
       let current: FileSystemTree | DirectoryNode = fileSystemTree;
 
@@ -72,7 +66,7 @@ export class GistFileLoader implements IFileLoader {
     };
 
     await Promise.all(
-      Object.keys(zip.files).map(async (relativePath) => {
+      Object.keys(zip.files).map(async relativePath => {
         const file = zip.files[relativePath];
         await processFile(relativePath, file);
       })

@@ -6,10 +6,7 @@ import { LocalFileLoader } from './loaders/local-filer-loader';
 import { mockFileLoader } from './loaders/mock-filer-loader';
 import { GistFileLoader } from './loaders/gist-file-loader.service';
 import { FileSystemTree } from '@webcontainer/api';
-import {
-  isEntryFile,
-  injectProxyScriptToEntryHTML,
-} from '../../features/main/ouput/console/getProxyConsoleScript';
+import { isEntryFile, injectProxyScriptToEntryHTML } from '../../features/main/ouput/console/getProxyConsoleScript';
 
 @Injectable({
   providedIn: 'root',
@@ -46,9 +43,7 @@ export class FileLoaderFactory {
         const node = fileTree[key];
         if ('file' in node) {
           if (isEntryFile(key)) {
-            node.file.contents = injectProxyScriptToEntryHTML(
-              node.file.contents
-            );
+            node.file.contents = injectProxyScriptToEntryHTML(node.file.contents);
             break; // break after found
           }
         } else if ('directory' in node) {

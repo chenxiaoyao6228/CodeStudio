@@ -37,9 +37,7 @@ export class ResizerContainerComponent implements OnChanges, AfterContentInit {
   ngAfterContentInit() {
     const resizerArray = this.resizers.toArray();
     // setFirst to get childIndex set for later resize
-    this.resizeService.setResizelist(
-      resizerArray.map((resizer) => resizer.getOptions())
-    );
+    this.resizeService.setResizelist(resizerArray.map(resizer => resizer.getOptions()));
 
     const initialRect = this.el.nativeElement.getBoundingClientRect();
     this.resizeService.setContainerSize({

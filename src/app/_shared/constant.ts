@@ -1,2 +1,1 @@
-
-export const PROJECT_KEY = 'codestudio'
+export const PROJECT_KEY = 'codestudio';

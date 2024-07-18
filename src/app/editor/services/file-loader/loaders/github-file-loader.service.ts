@@ -7,24 +7,17 @@ export class GithubFileLoader implements IFileLoader {
   constructor() {}
 
   static validatePath(path: string): boolean {
-    const urlPattern =
-      /^https:\/\/github\.com\/[^\/]+\/[^\/]+\/tree\/[^\/]+\/.+/;
+    const urlPattern = /^https:\/\/github\.com\/[^\/]+\/[^\/]+\/tree\/[^\/]+\/.+/;
     return urlPattern.test(path);
   }
 
   async loadFiles({ source }: { source: string }): Promise<FileSystemTree> {
     const { owner, repo, branch, folderPath } = this.parseGitHubUrl(source);
-    return await this.fetchGitHubFolderAsFileSystemTree(
-      owner,
-      repo,
-      branch,
-      folderPath
-    );
+    return await this.fetchGitHubFolderAsFileSystemTree(owner, repo, branch, folderPath);
   }
 
   private parseGitHubUrl(url: string) {
-    const urlPattern =
-      /https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/tree\/([^\/]+)\/(.+)/;
+    const urlPattern = /https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/tree\/([^\/]+)\/(.+)/;
     const match = url.match(urlPattern);
     if (!match) {
       throw new Error('Invalid GitHub URL');
@@ -49,9 +42,7 @@ export class GithubFileLoader implements IFileLoader {
     const files = await response.json();
 
     if (!Array.isArray(files)) {
-      throw new Error(
-        'Failed to fetch folder contents. Ensure the path is correct.'
-      );
+      throw new Error('Failed to fetch folder contents. Ensure the path is correct.');
     }
 
     const fileSystemTree: FileSystemTree = {};
@@ -61,18 +52,9 @@ export class GithubFileLoader implements IFileLoader {
         if (file.type === 'file') {
           const fileResponse = await fetch(file.download_url);
           const fileContent = await fileResponse.text();
-          this.addToTree(
-            fileSystemTree,
-            file.path.replace(`${folderPath}/`, ''),
-            fileContent
-          );
+          this.addToTree(fileSystemTree, file.path.replace(`${folderPath}/`, ''), fileContent);
         } else if (file.type === 'dir') {
-          const subTree = await this.fetchGitHubFolderAsFileSystemTree(
-            owner,
-            repo,
-            branch,
-            file.path
-          );
+          const subTree = await this.fetchGitHubFolderAsFileSystemTree(owner, repo, branch, file.path);
           fileSystemTree[file.name] = { directory: subTree };
         }
       })
@@ -86,7 +68,7 @@ export class GithubFileLoader implements IFileLoader {
     const fileName = parts.pop();
     let current: FileSystemTree = tree;
 
-    parts.forEach((part) => {
+    parts.forEach(part => {
       if (!current[part]) {
         current[part] = { directory: {} };
       }

@@ -1,11 +1,5 @@
 import { NodeContainerService } from '@app/editor/services/node-container.service';
-import {
-  Injectable,
-  Inject,
-  InjectionToken,
-  Optional,
-  inject,
-} from '@angular/core';
+import { Injectable, Inject, InjectionToken, Optional, inject } from '@angular/core';
 import { EventEmitter } from '@app/_shared/service/Emitter';
 import { AsyncSubject, take } from 'rxjs';
 import { TypeDefinition, TypeLoaderService } from './type-loader.service';
@@ -19,9 +13,7 @@ export interface CodeEditorEvents {
   goToDefinition: { filePath: string };
 }
 
-export const APP_MONACO_BASE_HREF = new InjectionToken<string>(
-  'appMonacoBaseHref'
-);
+export const APP_MONACO_BASE_HREF = new InjectionToken<string>('appMonacoBaseHref');
 
 @Injectable({
   providedIn: 'root',
@@ -41,10 +33,7 @@ export class CodeEditorService implements IDisposable {
 
   constructor(@Optional() @Inject(APP_MONACO_BASE_HREF) private base: string) {
     this.loadMonacoScript();
-    this.debouncedResolveContents = debounce(
-      this.resolveContent.bind(this),
-      3000
-    );
+    this.debouncedResolveContents = debounce(this.resolveContent.bind(this), 3000);
   }
 
   public getScriptLoadSubject(): AsyncSubject<boolean> {
@@ -112,8 +101,7 @@ export class CodeEditorService implements IDisposable {
 
       monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
         target: monaco.languages.typescript.ScriptTarget.ESNext,
-        moduleResolution:
-          monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+        moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
         module: monaco.languages.typescript.ModuleKind.ESNext,
         baseUrl: '.',
         paths: {
@@ -151,23 +139,15 @@ export class CodeEditorService implements IDisposable {
       .subscribe(() => {
         const model = this.editor!.getModel();
         if (model) {
-          const formattedCode = this.prettierService.format(
-            model.getValue(),
-            model.uri.path
-          );
+          const formattedCode = this.prettierService.format(model.getValue(), model.uri.path);
           model.setValue(formattedCode);
         }
       });
   }
 
   private registerFormattingProviders() {
-    const provideDocumentFormattingEdits = (
-      model: monaco.editor.ITextModel
-    ) => {
-      const text = this.prettierService.format(
-        model.getValue(),
-        model.uri.path
-      );
+    const provideDocumentFormattingEdits = (model: monaco.editor.ITextModel) => {
+      const text = this.prettierService.format(model.getValue(), model.uri.path);
       return [
         {
           range: model.getFullModelRange(),
@@ -202,21 +182,17 @@ export class CodeEditorService implements IDisposable {
       throw Error('No editor');
     }
 
-    const changeModelDisposable = this.editor.onDidChangeModel(
-      ({ newModelUrl }) => {
-        console.log('newModelUrl', newModelUrl);
-        this.resolveContent();
-      }
-    );
+    const changeModelDisposable = this.editor.onDidChangeModel(({ newModelUrl }) => {
+      console.log('newModelUrl', newModelUrl);
+      this.resolveContent();
+    });
 
     this.disposables.push(changeModelDisposable);
 
-    const changeModelContentDisposable = this.editor.onDidChangeModelContent(
-      (e) => {
-        this.hasEdit = true; // mark as dirty
-        this.debouncedResolveContents();
-      }
-    );
+    const changeModelContentDisposable = this.editor.onDidChangeModelContent(e => {
+      this.hasEdit = true; // mark as dirty
+      this.debouncedResolveContents();
+    });
 
     this.disposables.push(changeModelContentDisposable);
 
@@ -232,10 +208,7 @@ export class CodeEditorService implements IDisposable {
 
     const content = model.getLinesContent().join('\n');
 
-    const res = await this.typeLoaderService.loadCurrentFileTypeDefinitions(
-      model.uri.path,
-      content
-    );
+    const res = await this.typeLoaderService.loadCurrentFileTypeDefinitions(model.uri.path, content);
 
     if (res) {
       const { typeDefinitions, pathMappings } = res;
@@ -243,10 +216,7 @@ export class CodeEditorService implements IDisposable {
     }
   }
 
-  async setupLibPathIntellisense(
-    typeDefinitions: TypeDefinition[],
-    pathMappings: any
-  ) {
+  async setupLibPathIntellisense(typeDefinitions: TypeDefinition[], pathMappings: any) {
     await this.ensureMonacoLoaded();
     /*
      * https://stackoverflow.com/questions/77342362/monaco-editor-typescript-how-to-add-global-types
@@ -259,16 +229,12 @@ export class CodeEditorService implements IDisposable {
      */
 
     // load external ts files
-    typeDefinitions.forEach((def) => {
+    typeDefinitions.forEach(def => {
       const path = 'file://' + def.path.slice(1);
-      monaco.languages.typescript.typescriptDefaults.addExtraLib(
-        def.content,
-        path
-      );
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(def.content, path);
     });
 
-    const oldOptions =
-      monaco.languages.typescript.typescriptDefaults.getCompilerOptions();
+    const oldOptions = monaco.languages.typescript.typescriptDefaults.getCompilerOptions();
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       ...oldOptions,
       paths: {
@@ -286,14 +252,10 @@ export class CodeEditorService implements IDisposable {
         if (model && position) {
           const word = model.getWordAtPosition(position);
           if (word) {
-            const tsWorker =
-              await monaco.languages.typescript.getTypeScriptWorker();
+            const tsWorker = await monaco.languages.typescript.getTypeScriptWorker();
             const client = await tsWorker(model.uri);
 
-            const defs = await client.getDefinitionAtPosition(
-              model.uri.toString(),
-              model.getOffsetAt(position)
-            );
+            const defs = await client.getDefinitionAtPosition(model.uri.toString(), model.getOffsetAt(position));
 
             if (defs && defs.length > 0) {
               const def = defs[0];
@@ -302,14 +264,8 @@ export class CodeEditorService implements IDisposable {
 
               if (!targetModel) {
                 // Load the target file if not already opened in the editor
-                const content = await this.nodeContainerService.readFile(
-                  resource.path.slice(1)
-                );
-                const newModel = monaco.editor.createModel(
-                  content,
-                  'typescript',
-                  resource
-                );
+                const content = await this.nodeContainerService.readFile(resource.path.slice(1));
+                const newModel = monaco.editor.createModel(content, 'typescript', resource);
                 monaco.editor.setModelLanguage(newModel, 'typescript');
                 targetModel = newModel;
               }
@@ -321,12 +277,8 @@ export class CodeEditorService implements IDisposable {
               });
 
               // Move the cursor to the correct position
-              const startPosition = targetModel.getPositionAt(
-                def.textSpan.start
-              );
-              const endPosition = targetModel.getPositionAt(
-                def.textSpan.start + def.textSpan.length
-              );
+              const startPosition = targetModel.getPositionAt(def.textSpan.start);
+              const endPosition = targetModel.getPositionAt(def.textSpan.start + def.textSpan.length);
               // might jump to ref file
               if (startPosition && endPosition) {
                 editor.setSelection(
@@ -401,11 +353,7 @@ export class CodeEditorService implements IDisposable {
       const content = model.getValue();
 
       // Create a new model with the same content at the new URI
-      const newModel = monaco.editor.createModel(
-        content,
-        model.getLanguageId(),
-        newUri
-      );
+      const newModel = monaco.editor.createModel(content, model.getLanguageId(), newUri);
 
       // Dispose of the old model
       model.dispose();
@@ -446,27 +394,18 @@ export class CodeEditorService implements IDisposable {
   }
 
   dispose() {
-    this.disposables.forEach((d) => d.dispose());
+    this.disposables.forEach(d => d.dispose());
   }
 
-  on<K extends keyof CodeEditorEvents>(
-    event: K,
-    listener: (payload: CodeEditorEvents[K]) => void
-  ): void {
+  on<K extends keyof CodeEditorEvents>(event: K, listener: (payload: CodeEditorEvents[K]) => void): void {
     this.eventEmitter.on(event, listener);
   }
 
-  off<K extends keyof CodeEditorEvents>(
-    event: K,
-    listener: (payload: CodeEditorEvents[K]) => void
-  ): void {
+  off<K extends keyof CodeEditorEvents>(event: K, listener: (payload: CodeEditorEvents[K]) => void): void {
     this.eventEmitter.off(event, listener);
   }
 
-  emit<K extends keyof CodeEditorEvents>(
-    event: K,
-    payload: CodeEditorEvents[K]
-  ): void {
+  emit<K extends keyof CodeEditorEvents>(event: K, payload: CodeEditorEvents[K]): void {
     this.eventEmitter.emit(event, payload);
   }
 }

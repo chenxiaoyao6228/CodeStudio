@@ -7,11 +7,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TemplateModalComponent } from '../_shared/components/template-modal/template-modal.component';
 import { HomeService } from './home.service';
-import {
-  IGistItem,
-  GistService,
-  parseDescription,
-} from '../_shared/service/gist.service';
+import { IGistItem, GistService, parseDescription } from '../_shared/service/gist.service';
 import { formatTime } from '../_shared/utils';
 import { PROJECT_KEY } from '../_shared/constant';
 import { Router } from '@angular/router';
@@ -22,10 +18,7 @@ import { EditorStateService } from '../editor/services/editor-state.service';
 import { GithubUrlDialogComponent } from '../_shared/components/github-url-dialog/github-url-dialog.component';
 import { LocalStorageService } from '../_shared/service/local-storage.service';
 import { GitHubTokenDialogComponent } from '../_shared/components/github-token-dialog/github-token-dialog.component';
-import {
-  META_DATA__KEY,
-  PROJECT_CODE_KEY,
-} from '../editor/services/file-saver/storage/gist';
+import { META_DATA__KEY, PROJECT_CODE_KEY } from '../editor/services/file-saver/storage/gist';
 
 export interface Project {
   id: string;
@@ -118,30 +111,22 @@ export class HomeComponent implements OnInit {
         };
 
         // @ts-expect-error skip
-        const _data = res.data
-          .filter(isCodeStudioProject)
-          .map((item: IGistItem) => transformData(item));
+        const _data = res.data.filter(isCodeStudioProject).map((item: IGistItem) => transformData(item));
 
         this.dataSource.data = _data;
 
         this.loading.set(false);
 
         function transformData(item: IGistItem) {
-          const descriptionObj = item.description
-            ? parseDescription(item.description)
-            : {};
+          const descriptionObj = item.description ? parseDescription(item.description) : {};
           return {
             id: item.id,
             title: descriptionObj['title'],
             description: descriptionObj['description'],
             updated: formatTime(item.updated_at),
             gistUrl: item.url,
-            metaUrl: item.files[META_DATA__KEY]
-              ? item.files[META_DATA__KEY].raw_url
-              : '',
-            projectZipUrl: item.files[PROJECT_CODE_KEY]
-              ? item.files[PROJECT_CODE_KEY].raw_url
-              : '',
+            metaUrl: item.files[META_DATA__KEY] ? item.files[META_DATA__KEY].raw_url : '',
+            projectZipUrl: item.files[PROJECT_CODE_KEY] ? item.files[PROJECT_CODE_KEY].raw_url : '',
           } as Project;
         }
       }
@@ -163,7 +148,7 @@ export class HomeComponent implements OnInit {
     const tokenDialogRef = this.dialog.open(GitHubTokenDialogComponent, {
       width: '400px',
     });
-    tokenDialogRef.afterClosed().subscribe((result) => {
+    tokenDialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.localStorageService.setItem('githubToken', result);
         this.getList();
@@ -178,7 +163,7 @@ export class HomeComponent implements OnInit {
       data: {},
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.openEdit({
           source: result,
@@ -188,12 +173,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  openEdit(params: {
-    source: string;
-    terminal?: string;
-    editId?: string;
-    editName?: string;
-  }) {
+  openEdit(params: { source: string; terminal?: string; editId?: string; editName?: string }) {
     this.router.navigate(['/edit'], {
       queryParams: params,
     });

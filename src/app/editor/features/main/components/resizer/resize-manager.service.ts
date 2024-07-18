@@ -35,7 +35,7 @@ export class ResizeManagerService {
     this.resizeList = list;
 
     let percentage = 0;
-    this.resizeList.forEach((item) => {
+    this.resizeList.forEach(item => {
       percentage += item.percentage;
       if (percentage > 100) {
         throw new Error('resizer percentage sum > 100');
@@ -48,10 +48,9 @@ export class ResizeManagerService {
   }
 
   calculateNewSize({ id, delta: _delta }: { id: string; delta: number }) {
-    const delta =
-      (_delta / this.containerSize[this.getSizeFlagFromDir()]) * 100;
+    const delta = (_delta / this.containerSize[this.getSizeFlagFromDir()]) * 100;
 
-    const index = this.resizeList.findIndex((i) => i.id === id);
+    const index = this.resizeList.findIndex(i => i.id === id);
 
     if (index === -1) {
       return;
@@ -65,21 +64,18 @@ export class ResizeManagerService {
     const newSizeOfPrev = preEle[sizeFlag] + delta;
     const newSizeOfNext = nextEle[sizeFlag] - delta;
 
-    if (
-      newSizeOfPrev < preEle.minSize / preEle[sizeFlag] ||
-      newSizeOfNext < nextEle.minSize / nextEle[sizeFlag]
-    ) {
+    if (newSizeOfPrev < preEle.minSize / preEle[sizeFlag] || newSizeOfNext < nextEle.minSize / nextEle[sizeFlag]) {
       return;
     }
 
-    this.resizeList.forEach((item) => {
+    this.resizeList.forEach(item => {
       if (item.id === id) {
         item[sizeFlag] = newSizeOfNext;
       } else if (item.id === preEle.id) {
         item[sizeFlag] = newSizeOfPrev;
       }
     });
-    this.resizeList.forEach((item) => {
+    this.resizeList.forEach(item => {
       item.resizer.updateSize(sizeFlag, item[sizeFlag]);
     });
 

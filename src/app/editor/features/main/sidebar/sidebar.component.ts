@@ -15,6 +15,6 @@ import { CommonModule } from '@angular/common';
 export class SidebarComponent {
   fileSaverService = inject(FileSaverService);
   download() {
-    this.fileSaverService.downloadProject()
+    this.fileSaverService.downloadProject();
   }
 }

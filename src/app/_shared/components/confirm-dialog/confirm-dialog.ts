@@ -23,13 +23,7 @@ import {
       <button mat-button (click)="onYesClick()">Yes</button>
     </div>
   `,
-  imports: [
-    MatButtonModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatDialogClose,
-  ],
+  imports: [MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose],
 })
 export class ConfirmDialogComponent {
   constructor(

@@ -13,10 +13,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
 import { DirectoryNode, FileSystemTree } from '@webcontainer/api';
 import { FlatTreeControl } from '@angular/cdk/tree';
-import {
-  MatTreeFlatDataSource,
-  MatTreeFlattener,
-} from '@angular/material/tree';
+import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
 import { CommonModule } from '@angular/common';
 import { getFileOrFolderName } from '@app/editor/utils/file';
@@ -39,11 +36,7 @@ export interface FileNode {
   children?: FileNode[];
 }
 
-type fileOperation =
-  | 'creatingFile'
-  | 'creatingFolder'
-  | 'renaming'
-  | 'deleting';
+type fileOperation = 'creatingFile' | 'creatingFolder' | 'renaming' | 'deleting';
 
 @Component({
   selector: 'app-file-tree',
@@ -92,15 +85,15 @@ export class FileTreeComponent {
   };
 
   treeControl = new FlatTreeControl<FileNode>(
-    (node) => node.level,
-    (node) => node.expandable
+    node => node.level,
+    node => node.expandable
   );
 
   treeFlattener = new MatTreeFlattener(
     this._transformer,
-    (node) => node.level,
-    (node) => node.expandable,
-    (node) => node.children
+    node => node.level,
+    node => node.expandable,
+    node => node.children
   );
 
   // data derived from fileSystemTree
@@ -109,10 +102,7 @@ export class FileTreeComponent {
   hasChild = (_: number, node: FileNode) => node.expandable;
 
   activeNode = computed(() => {
-    const node = this.findNodeByFilePath(
-      this.editorState.geCurrentFilePath() || '',
-      this.dataSource.data
-    );
+    const node = this.findNodeByFilePath(this.editorState.geCurrentFilePath() || '', this.dataSource.data);
     return node;
   });
 
@@ -134,11 +124,7 @@ export class FileTreeComponent {
     });
   }
 
-  buildFileTree(
-    obj: FileSystemTree,
-    level = 0,
-    basePath = ''
-  ): [FileNode[], string[]] {
+  buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): [FileNode[], string[]] {
     const filePaths: string[] = [];
     const _obj = {
       FILES: {
@@ -150,15 +136,10 @@ export class FileTreeComponent {
     return [realTree, filePaths];
 
     // https://stackoverflow.com/questions/53280079/tree-how-to-keep-opened-states-when-tree-updated
-    function _buildFileTree(
-      obj: FileSystemTree,
-      level = 0,
-      basePath = ''
-    ): FileNode[] {
-      const nodes: FileNode[] = Object.keys(obj).map((key) => {
+    function _buildFileTree(obj: FileSystemTree, level = 0, basePath = ''): FileNode[] {
+      const nodes: FileNode[] = Object.keys(obj).map(key => {
         const value = obj[key];
-        const filePath =
-          level === 0 ? '' : level === 1 ? key : basePath + '/' + key;
+        const filePath = level === 0 ? '' : level === 1 ? key : basePath + '/' + key;
 
         const node: FileNode = {
           name: key,
@@ -175,11 +156,7 @@ export class FileTreeComponent {
           node.children = _buildFileTree(
             (value as DirectoryNode).directory,
             level + 1,
-            level === 0
-              ? ''
-              : level === 1
-              ? node.name
-              : basePath + '/' + node.name
+            level === 0 ? '' : level === 1 ? node.name : basePath + '/' + node.name
           ).sort((a, b) => (b.type === 'directory' ? 1 : -1)); // directory shows first
           node.expandable = node.children?.length > 0;
         } else {
@@ -197,11 +174,8 @@ export class FileTreeComponent {
   saveExpandedState() {
     if (this.treeControl.dataNodes) {
       const expandedNodesIds: string[] = [];
-      this.treeControl.dataNodes.forEach((node) => {
-        if (
-          this.treeControl.isExpandable(node) &&
-          this.treeControl.isExpanded(node)
-        ) {
+      this.treeControl.dataNodes.forEach(node => {
+        if (this.treeControl.isExpandable(node) && this.treeControl.isExpanded(node)) {
           expandedNodesIds.push(node.id);
         }
       });
@@ -214,8 +188,8 @@ export class FileTreeComponent {
   restoreExpandedState(expandedNodesIds: string[]) {
     if (expandedNodesIds.length) {
       this.treeControl.dataNodes
-        .filter((node) => expandedNodesIds.includes(node.id))
-        .forEach((node) => {
+        .filter(node => expandedNodesIds.includes(node.id))
+        .forEach(node => {
           this.treeControl.expand(node);
         });
     }
@@ -232,10 +206,7 @@ export class FileTreeComponent {
     event.preventDefault();
     if (node === this.dragNodeExpandOverNode) {
       if (this.dragNode !== node && !this.treeControl.isExpanded(node)) {
-        if (
-          new Date().getTime() - this.dragNodeExpandOverTime >
-          this.dragNodeExpandOverWaitTimeMs
-        ) {
+        if (new Date().getTime() - this.dragNodeExpandOverTime > this.dragNodeExpandOverWaitTimeMs) {
           this.treeControl.expand(node);
         }
       }
@@ -267,10 +238,7 @@ export class FileTreeComponent {
     const movedNode = JSON.parse(event.dataTransfer?.getData('text') || '{}');
 
     // only allow to drag and drop into a folder
-    if (
-      toPlaceNode.type === 'file' &&
-      movedNode.parentPath === toPlaceNode.parentPath
-    ) {
+    if (toPlaceNode.type === 'file' && movedNode.parentPath === toPlaceNode.parentPath) {
       return;
     }
 
@@ -279,32 +247,23 @@ export class FileTreeComponent {
     }
 
     const oldFilePath = movedNode.filePath;
-    const newParentPath =
-      toPlaceNode.type === 'directory'
-        ? toPlaceNode.filePath
-        : toPlaceNode.parentPath;
+    const newParentPath = toPlaceNode.type === 'directory' ? toPlaceNode.filePath : toPlaceNode.parentPath;
     const newFilePath =
       newParentPath === '' // rootPath
         ? movedNode.name
         : `${newParentPath}/${movedNode.name}`;
 
-    await this.nodeContainerService.renameFileOrFolder(
-      oldFilePath,
-      newFilePath
-    );
+    await this.nodeContainerService.renameFileOrFolder(oldFilePath, newFilePath);
 
     // update monaco editor
     this.codeEditorService.moveFileOrFolder(oldFilePath, newFilePath);
 
     // handle tabs
     if (movedNode.type === 'directory') {
-      const node = this.findNodeByFilePath(
-        movedNode.filePath,
-        this.dataSource.data
-      );
+      const node = this.findNodeByFilePath(movedNode.filePath, this.dataSource.data);
       // close all opened tabs of moved folder
       if (node?.children) {
-        node.children.forEach((n) => {
+        node.children.forEach(n => {
           this.editService.closeTab(n.filePath);
         });
       }
@@ -323,10 +282,7 @@ export class FileTreeComponent {
   }
   // --------------- drag-and-drop end -------------------------
 
-  private findNodeByFilePath(
-    filePath: string,
-    nodes: FileNode[]
-  ): FileNode | null {
+  private findNodeByFilePath(filePath: string, nodes: FileNode[]): FileNode | null {
     for (const node of nodes) {
       if (node.filePath === filePath) {
         return node;
@@ -356,10 +312,7 @@ export class FileTreeComponent {
       this.expandNode(this.dataSource.data[0]);
       for (const segment of pathSegments) {
         currentPath += currentPath === '' ? `${segment}` : `/${segment}`;
-        const currentNode = this.findNodeByFilePath(
-          currentPath,
-          this.dataSource.data
-        );
+        const currentNode = this.findNodeByFilePath(currentPath, this.dataSource.data);
         if (currentNode) {
           this.expandNode(currentNode);
         }
@@ -489,8 +442,7 @@ export class FileTreeComponent {
 
   async createFile(parentNode: FileNode, name: string) {
     try {
-      const newFilePath =
-        parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
+      const newFilePath = parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
 
       await this.nodeContainerService.createFile(newFilePath);
 
@@ -502,8 +454,7 @@ export class FileTreeComponent {
 
   async createFolder(parentNode: FileNode, name: string) {
     try {
-      const newFilePath =
-        parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
+      const newFilePath = parentNode.filePath === '' ? name : `${parentNode.filePath}/${name}`;
 
       await this.nodeContainerService.createFolder(newFilePath);
 

@@ -14,10 +14,7 @@ export class ZipFileLoader implements IFileLoader {
       const zip = await JSZip.loadAsync(blob);
       const files: FileSystemTree = {};
 
-      const processFile = async (
-        relativePath: string,
-        file: JSZip.JSZipObject
-      ) => {
+      const processFile = async (relativePath: string, file: JSZip.JSZipObject) => {
         const segments = relativePath.split('/');
         let current: FileSystemTree | DirectoryNode = files;
 
@@ -56,7 +53,7 @@ export class ZipFileLoader implements IFileLoader {
       };
 
       await Promise.all(
-        Object.keys(zip.files).map(async (relativePath) => {
+        Object.keys(zip.files).map(async relativePath => {
           const file = zip.files[relativePath];
           await processFile(relativePath, file);
         })

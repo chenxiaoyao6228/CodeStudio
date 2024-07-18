@@ -28,9 +28,7 @@ export class EditService {
       const fileTree = this.editorStateService.getFileTree();
       if (currentFilePath && fileTree && isFile(fileTree, currentFilePath)) {
         try {
-          const content = await this.nodeContainerService.readFile(
-            currentFilePath
-          );
+          const content = await this.nodeContainerService.readFile(currentFilePath);
           this.updateTabs(currentFilePath);
           if (content !== undefined) {
             this.codeEditorService.openOrCreateFile({
@@ -48,7 +46,7 @@ export class EditService {
   async updateFileModels(filePaths: string[]) {
     await this.codeEditorService.ensureMonacoLoaded();
 
-    filePaths.forEach(async (filePath) => {
+    filePaths.forEach(async filePath => {
       if (!this.codeEditorService.isModelExist(filePath)) {
         try {
           const content = await this.nodeContainerService.readFile(filePath);
@@ -69,8 +67,8 @@ export class EditService {
 
   initEvents() {
     this.codeEditorService.on('contentChanged', ({ content, filePath }) => {
-      this.openedTabs.update((tabs) =>
-        tabs.map((t) => ({
+      this.openedTabs.update(tabs =>
+        tabs.map(t => ({
           ...t,
           isPendingWrite: t.filePath === filePath ? true : t.isPendingWrite,
         }))
@@ -82,7 +80,7 @@ export class EditService {
   }
 
   updateTabs(filePath: string) {
-    const isTabExist = this.openedTabs().find((t) => t.filePath === filePath);
+    const isTabExist = this.openedTabs().find(t => t.filePath === filePath);
     if (!isTabExist) {
       const newTab = {
         filePath: filePath,
@@ -90,16 +88,16 @@ export class EditService {
         isPendingWrite: false,
         active: true,
       };
-      this.openedTabs.update((tabs) => [
-        ...tabs.map((t) => ({
+      this.openedTabs.update(tabs => [
+        ...tabs.map(t => ({
           ...t,
           active: false,
         })),
         newTab,
       ]);
     } else {
-      this.openedTabs.update((tabs) =>
-        tabs.map((t) => ({
+      this.openedTabs.update(tabs =>
+        tabs.map(t => ({
           ...t,
           active: t.filePath === filePath,
         }))
@@ -113,7 +111,7 @@ export class EditService {
 
   closeTab(filePath: string, preserveModel = false) {
     const openedTabs = this.openedTabs().slice();
-    const findIndex = openedTabs.findIndex((t) => t.filePath === filePath);
+    const findIndex = openedTabs.findIndex(t => t.filePath === filePath);
 
     if (findIndex === -1) {
       // If the specified tab is not found, return directly
@@ -125,7 +123,7 @@ export class EditService {
       this.codeEditorService.closeFile(filePath);
     }
 
-    const newTabs = openedTabs.filter((t) => t.filePath !== filePath);
+    const newTabs = openedTabs.filter(t => t.filePath !== filePath);
     this.openedTabs.set(newTabs);
 
     if (newTabs.length === 0) {
@@ -134,9 +132,7 @@ export class EditService {
     } else {
       // Calculate the new active tab index, focusing on the previous tab if possible
       const newActiveIndex = findIndex > 0 ? findIndex - 1 : 0;
-      this.editorStateService.setCurrentFilePath(
-        newTabs[newActiveIndex].filePath
-      );
+      this.editorStateService.setCurrentFilePath(newTabs[newActiveIndex].filePath);
     }
   }
 
@@ -147,8 +143,8 @@ export class EditService {
       if (content) {
         this.nodeContainerService.writeFile(filePath, content);
 
-        this.openedTabs.update((tabs) =>
-          tabs.map((t) => ({
+        this.openedTabs.update(tabs =>
+          tabs.map(t => ({
             ...t,
             isPendingWrite: t.filePath === filePath ? false : t.isPendingWrite,
           }))

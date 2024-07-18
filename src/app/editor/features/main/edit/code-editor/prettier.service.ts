@@ -50,7 +50,13 @@ export class PrettierService {
       filepath,
       plugins: this.prettierPlugins,
       singleQuote: true,
-      tabWidth: 4,
+      tabWidth: 2,
+      useTabs: false,
+      semi: true,
+      bracketSpacing: true,
+      arrowParens: 'always',
+      trailingComma: 'es5',
+      printWidth: 80,
     };
 
     try {

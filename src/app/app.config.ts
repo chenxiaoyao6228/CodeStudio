@@ -1,7 +1,4 @@
-import {
-  ApplicationConfig,
-  provideExperimentalZonelessChangeDetection,
-} from '@angular/core';
+import { ApplicationConfig, provideExperimentalZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { Routes } from '@angular/router';
 import { EditorComponent } from './editor/editor.component';
@@ -18,7 +15,7 @@ export const routes: Routes = [
   {
     path: 'edit',
     component: EditorComponent,
-    canActivate: [PcOnlyGuard]
+    canActivate: [PcOnlyGuard],
   },
 ];
 

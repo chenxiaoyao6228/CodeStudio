@@ -1,23 +1,16 @@
 <div id="preview-panel">
   <!-- TODO: display error message and let the user retry maybe -->
   <div class="nav">
-    @if(isReady()) {
-    <div class="refresh-icon">
-      <mat-icon
-        class="common-icon icon"
-        [class.loading]="isRefreshing()"
-        (click)="refreshIframe()"
-        >refresh</mat-icon
-      >
-    </div>
-    <div class="url-bar">
-      {{ previewUrl() }}
-    </div>
+    @if (isReady()) {
+      <div class="refresh-icon">
+        <mat-icon class="common-icon icon" [class.loading]="isRefreshing()" (click)="refreshIframe()">refresh</mat-icon>
+      </div>
+      <div class="url-bar">
+        {{ previewUrl() }}
+      </div>
 
-    <mat-icon class="common-icon close-preview" (click)="collapsePreview()"
-      >keyboard_tab</mat-icon
-    >
-    <!-- <mat-icon class="external-link">open_in_new</mat-icon> -->
+      <mat-icon class="common-icon close-preview" (click)="collapsePreview()">keyboard_tab</mat-icon>
+      <!-- <mat-icon class="external-link">open_in_new</mat-icon> -->
     }
   </div>
   <iframe
@@ -31,35 +24,25 @@
     <div class="loading-container-inner">
       <h5 class="loading-title">{{ currentPhaseItem()?.message }}</h5>
 
-      <mat-progress-bar
-        mode="determinate"
-        [value]="progressValue()"
-        class="progress-bar"
-      ></mat-progress-bar>
+      <mat-progress-bar mode="determinate" [value]="progressValue()" class="progress-bar"></mat-progress-bar>
 
       <div class="loading-steps">
-        @for(phase of phases().slice(0, -1); track phase.key) {
-        <div class="loading-step">
-          @if(phase.loading){
-
-          <div class="loading-icon-wrap">
-            <mat-icon class="loading-icon">loop</mat-icon>
+        @for (phase of phases().slice(0, -1); track phase.key) {
+          <div class="loading-step">
+            @if (phase.loading) {
+              <div class="loading-icon-wrap">
+                <mat-icon class="loading-icon">loop</mat-icon>
+              </div>
+              <div class="loading-text">
+                {{ phase.message }}
+              </div>
+            } @else {
+              <mat-checkbox class="loading-checkbox" [checked]="phase.completed"></mat-checkbox>
+              <div>
+                {{ phase.message }}
+              </div>
+            }
           </div>
-          <div class="loading-text">
-            {{ phase.message }}
-          </div>
-
-          }@else {
-          <mat-checkbox
-            class="loading-checkbox"
-            [checked]="phase.completed"
-          ></mat-checkbox>
-          <div>
-            {{ phase.message }}
-          </div>
-
-          }
-        </div>
         }
       </div>
     </div>

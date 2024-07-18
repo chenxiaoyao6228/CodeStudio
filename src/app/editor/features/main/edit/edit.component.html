@@ -1,31 +1,24 @@
 <div class="top">
   <div class="tabs">
-    @for(tab of editService.openedTabs(); track tab.filePath) {
-    <div class="tab-item" tabindex="0" (click)="selectTab(tab)" (keyup)="selectTab(tab)" [class.active]="tab.active">
-      <div class="text">
-        {{ tab.name }}
+    @for (tab of editService.openedTabs(); track tab.filePath) {
+      <div class="tab-item" tabindex="0" (click)="selectTab(tab)" (keyup)="selectTab(tab)" [class.active]="tab.active">
+        <div class="text">
+          {{ tab.name }}
+        </div>
+        @if (tab.isPendingWrite) {
+          <div class="pending">
+            <div class="dot"></div>
+          </div>
+        } @else {
+          <div class="close" (clickEvent)="closeTab(tab, $event)">&#x2715;</div>
+        }
       </div>
-      @if(tab.isPendingWrite) {
-      <div class="pending">
-        <div class="dot"></div>
-      </div>
-
-      }@else {
-      <div class="close" (clickEvent)="closeTab(tab, $event)">&#x2715;</div>
-      }
-    </div>
     }
   </div>
   <div class="functions">
-    <mat-icon
-      svgIcon="prettier"
-      class="common-icon prettier"
-      (click)="formatCurrentFile()"
-    ></mat-icon>
-    @if(!isPreviewOpen()){
-    <mat-icon class="common-icon open-preview" (click)="openPreview()"
-      >keyboard_tab</mat-icon
-    >
+    <mat-icon svgIcon="prettier" class="common-icon prettier" (click)="formatCurrentFile()"></mat-icon>
+    @if (!isPreviewOpen()) {
+      <mat-icon class="common-icon open-preview" (click)="openPreview()">keyboard_tab</mat-icon>
     }
   </div>
 </div>

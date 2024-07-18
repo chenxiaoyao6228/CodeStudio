@@ -1,13 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
-import {
-  ITemplateItem,
-  TEMPLATES_CONFIG,
-} from '@app/_shared/components/template-modal/config';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ITemplateItem, TEMPLATES_CONFIG } from '@app/_shared/components/template-modal/config';
 import {
   MatDialog,
   MatDialogActions,
@@ -22,14 +14,7 @@ import { MatIcon } from '@angular/material/icon';
 @Component({
   selector: 'app-template-modal',
   standalone: true,
-  imports: [
-    MatDialogModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatDialogClose,
-    MatIcon,
-  ],
+  imports: [MatDialogModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, MatIcon],
   templateUrl: './template-modal.component.html',
   styleUrls: ['./template-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,9 +26,7 @@ export class TemplateModalComponent {
   templateList = signal(TEMPLATES_CONFIG);
 
   selectTemplate(item: ITemplateItem) {
-    const queryString = `source=${encodeURIComponent(
-      item.url
-    )}&terminal=${encodeURIComponent(item.terminal)}`;
+    const queryString = `source=${encodeURIComponent(item.url)}&terminal=${encodeURIComponent(item.terminal)}`;
     window.location.href = `${window.location.origin}/edit/?${queryString}`;
     this.closeModal(); // Close the modal after selection
   }

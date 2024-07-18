@@ -1,7 +1,4 @@
-import {
-  GistService,
-  stringifyDescription,
-} from '@src/app/_shared/service/gist.service';
+import { GistService, stringifyDescription } from '@src/app/_shared/service/gist.service';
 import { IStorage } from '../type';
 import { inject, Injectable } from '@angular/core';
 
@@ -12,11 +9,7 @@ export const PROJECT_CODE_KEY = 'project_code';
 export class GistStorage implements IStorage {
   gistService = inject(GistService);
 
-  async save(
-    content: Blob,
-    filename: string,
-    extraParams?: Record<string, any>
-  ): Promise<void> {
+  async save(content: Blob, filename: string, extraParams?: Record<string, any>): Promise<void> {
     return new Promise((resolve, reject) => {
       const gistId = extraParams ? extraParams['editId'] : '';
       const description = extraParams ? extraParams['description'] : '';
@@ -57,7 +50,7 @@ export class GistStorage implements IStorage {
           reject(error);
         }
       };
-      reader.onerror = (error) => {
+      reader.onerror = error => {
         reject(error);
       };
     });

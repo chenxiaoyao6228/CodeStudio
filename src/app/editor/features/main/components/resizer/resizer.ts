@@ -20,11 +20,11 @@ interface IPosition {
   standalone: true,
   template: `
     @if (!isFirstElement) {
-    <div
-      class="resizer-bar"
-      [class.row]="resizeService.direction === 'row'"
-      [class.col]="resizeService.direction === 'col'"
-    ></div>
+      <div
+        class="resizer-bar"
+        [class.row]="resizeService.direction === 'row'"
+        [class.col]="resizeService.direction === 'col'"
+      ></div>
     }
     <ng-content></ng-content>
   `,
@@ -58,11 +58,7 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   }
 
   initEvents() {
-    this.renderer.listen(
-      this.el.nativeElement,
-      'pointerdown',
-      this.startResize
-    );
+    this.renderer.listen(this.el.nativeElement, 'pointerdown', this.startResize);
   }
 
   cleanupEvents() {
@@ -90,9 +86,7 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
       * { 
         user-select: none !important; 
         pointer-events: none !important; 
-        cursor: ${
-          this.resizeService.direction === 'row' ? 'col-resize' : 'row-resize'
-        } !important; 
+        cursor: ${this.resizeService.direction === 'row' ? 'col-resize' : 'row-resize'} !important; 
       }
     `;
       document.head.appendChild(style);
@@ -102,9 +96,8 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   };
 
   handleResize = (e: PointerEvent) => {
-   this.stopEvent(e)
+    this.stopEvent(e);
     requestAnimationFrame(() => {
-
       if (!this.pointerDownPosition) return;
       const direction = this.resizeService.direction;
       const { clientX, clientY } = e;
@@ -128,10 +121,8 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
       });
     });
   };
-  
 
   stopResize = () => {
-
     this.cleanupEvents();
     this.pointerDownPosition = null;
 
@@ -145,9 +136,9 @@ export class ResizerComponent implements AfterViewInit, OnDestroy {
   };
 
   stopEvent(e: Event) {
-    e.preventDefault()
-    e.stopPropagation()
-    e.stopImmediatePropagation()
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
   }
 
   getOptions() {

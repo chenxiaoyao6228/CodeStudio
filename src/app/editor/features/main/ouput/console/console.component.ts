@@ -1,10 +1,4 @@
-import {
-  Component,
-  effect,
-  ElementRef,
-  inject,
-  ViewChild,
-} from '@angular/core';
+import { Component, effect, ElementRef, inject, ViewChild } from '@angular/core';
 import { ConsoleService } from './console.service';
 import { MatIcon } from '@angular/material/icon';
 import { MainService } from '../../main.service';
@@ -17,12 +11,7 @@ import { PrimitiveRendererComponent } from './primitive-renderer.component';
   templateUrl: './console.component.html',
   styleUrls: ['./console.component.scss'],
   standalone: true,
-  imports: [
-    MatIcon,
-    CommonModule,
-    CompoundObjRendererComponent,
-    PrimitiveRendererComponent,
-  ],
+  imports: [MatIcon, CommonModule, CompoundObjRendererComponent, PrimitiveRendererComponent],
 })
 export class ConsoleComponent {
   @ViewChild('commandInput', { static: true })
@@ -33,10 +22,7 @@ export class ConsoleComponent {
   mainService = inject(MainService);
 
   constructor() {
-    window.addEventListener(
-      'message',
-      this.consoleService.handleMessage.bind(this.consoleService)
-    );
+    window.addEventListener('message', this.consoleService.handleMessage.bind(this.consoleService));
 
     effect(() => {
       if (this.mainService.isConsoleOpen()) {
@@ -48,8 +34,7 @@ export class ConsoleComponent {
       const logs = this.consoleService.logs();
       const errors = this.consoleService.errors();
       if (logs.length || errors.length) {
-        this.consoleWrap.nativeElement.scrollTop =
-          this.consoleWrap.nativeElement.scrollHeight;
+        this.consoleWrap.nativeElement.scrollTop = this.consoleWrap.nativeElement.scrollHeight;
       }
     });
   }
@@ -69,9 +54,7 @@ export class ConsoleComponent {
 
     if (code) {
       this.consoleService.addCommandToHistory(code);
-      const previewIframe = document
-        .querySelector('#preview-panel')
-        ?.querySelector('iframe');
+      const previewIframe = document.querySelector('#preview-panel')?.querySelector('iframe');
       if (previewIframe && previewIframe.contentWindow) {
         previewIframe.contentWindow.postMessage({ type: 'execute', code }, '*');
         textarea.value = '';

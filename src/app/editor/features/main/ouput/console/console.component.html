@@ -3,47 +3,45 @@
     <span class="title">Console</span>
   </div>
   <div class="right">
-    <mat-icon
-      class="common-icon clear-btn"
-      (click)="consoleService.clearConsole()"
-      >delete</mat-icon
-    >
+    <mat-icon class="common-icon clear-btn" (click)="consoleService.clearConsole()">delete</mat-icon>
     <mat-icon class="common-icon toggle-btn" (click)="toggleConsole()">{{
-      mainService.isConsoleOpen() ? "expand_less" : "expand_more"
+      mainService.isConsoleOpen() ? 'expand_less' : 'expand_more'
     }}</mat-icon>
   </div>
 </div>
 <div class="console-wrap" #consoleWrap>
   <div class="console-entries">
-    @for(log of consoleService.logs(); track log.args) {
-    <div class="console-item" [ngClass]="getItemType(log.method)">
-      <i class="icon"></i>
-      @for(content of log.args; track content.value ) { @if(['array','object',
-      'set', 'map' ].indexOf(content.type)> -1 ) {
-      <app-compound-obj-renderer [data]="content"></app-compound-obj-renderer>
-      } @else {
-      <app-primitive-renderer [data]="content"></app-primitive-renderer>
-      } }
-    </div>
-    }
-  </div>
-  @if(consoleService.errors() && consoleService.errors().length) {
-  <div class="error-entries">
-    @for(error of consoleService.errors(); track error.message) {
-    <div class="error-item">
-      <i class="icon"></i>
-      <div class="msg">
-        <div>{{ error.message }}</div>
-        <div class="stacks">
-          @if(error.stacks && error.stacks.length) { @for(s of error.stacks;
-          track s) {
-          <div class="stack">{{ s }}</div>
-          } }
-        </div>
+    @for (log of consoleService.logs(); track log.args) {
+      <div class="console-item" [ngClass]="getItemType(log.method)">
+        <i class="icon"></i>
+        @for (content of log.args; track content.value) {
+          @if (['array', 'object', 'set', 'map'].indexOf(content.type) > -1) {
+            <app-compound-obj-renderer [data]="content"></app-compound-obj-renderer>
+          } @else {
+            <app-primitive-renderer [data]="content"></app-primitive-renderer>
+          }
+        }
       </div>
-    </div>
     }
   </div>
+  @if (consoleService.errors() && consoleService.errors().length) {
+    <div class="error-entries">
+      @for (error of consoleService.errors(); track error.message) {
+        <div class="error-item">
+          <i class="icon"></i>
+          <div class="msg">
+            <div>{{ error.message }}</div>
+            <div class="stacks">
+              @if (error.stacks && error.stacks.length) {
+                @for (s of error.stacks; track s) {
+                  <div class="stack">{{ s }}</div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
   }
 </div>
 <div class="command-line">

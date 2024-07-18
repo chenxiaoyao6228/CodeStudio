@@ -9,11 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import {
-  MAT_CHECKBOX_DEFAULT_OPTIONS,
-  MatCheckbox,
-  MatCheckboxDefaultOptions,
-} from '@angular/material/checkbox';
+import { MAT_CHECKBOX_DEFAULT_OPTIONS, MatCheckbox, MatCheckboxDefaultOptions } from '@angular/material/checkbox';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { StartupPhase } from '@app/editor/constants';
 import { EditorStateService } from '@app/editor/services/editor-state.service';
@@ -80,9 +76,7 @@ const DEFAULT_PHASE_LIST = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PreviewComponent implements AfterViewInit {
-  @ViewChild('previewIframe') previewIframe:
-    | ElementRef<HTMLIFrameElement>
-    | undefined;
+  @ViewChild('previewIframe') previewIframe: ElementRef<HTMLIFrameElement> | undefined;
   private readonly destroyRef = inject(DestroyRef);
   private editorStateService = inject(EditorStateService);
   private nodeContainerService = inject(NodeContainerService);
@@ -94,9 +88,7 @@ export class PreviewComponent implements AfterViewInit {
   isPreviewOpen = computed(() => this.mainService.isPreviewOpen());
   phases = computed<IPhaseItem[]>(() => {
     const currentPhase = this.editorStateService.getPhase();
-    const curIndex = DEFAULT_PHASE_LIST.findIndex(
-      (phase) => phase.key === currentPhase
-    );
+    const curIndex = DEFAULT_PHASE_LIST.findIndex(phase => phase.key === currentPhase);
     return DEFAULT_PHASE_LIST.map((phase, index) => ({
       ...phase,
       completed: index < curIndex || curIndex === DEFAULT_PHASE_LIST.length,
@@ -106,9 +98,7 @@ export class PreviewComponent implements AfterViewInit {
 
   currentPhaseItem = computed(() => {
     const currentPhase = this.editorStateService.getPhase();
-    const currentPhaseItem = DEFAULT_PHASE_LIST.find(
-      (phase) => phase.key === currentPhase
-    );
+    const currentPhaseItem = DEFAULT_PHASE_LIST.find(phase => phase.key === currentPhase);
     return currentPhaseItem;
   });
 
@@ -119,9 +109,7 @@ export class PreviewComponent implements AfterViewInit {
 
   progressValue = computed(() => {
     const currentPhase = this.editorStateService.getPhase();
-    const phaseIndex = DEFAULT_PHASE_LIST.findIndex(
-      (phase) => phase.key === currentPhase
-    );
+    const phaseIndex = DEFAULT_PHASE_LIST.findIndex(phase => phase.key === currentPhase);
     return (phaseIndex / (DEFAULT_PHASE_LIST.length - 1)) * 100;
   });
 
@@ -130,14 +118,12 @@ export class PreviewComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.nodeContainerService.previewUrl$
-      .pipe(map((url) => ({ url })))
-      .subscribe(({ url }) => {
-        if (url) {
-          this.previewIframe!.nativeElement.src = url ?? '';
-          this.previewUrl.set(url);
-        }
-      });
+    this.nodeContainerService.previewUrl$.pipe(map(url => ({ url }))).subscribe(({ url }) => {
+      if (url) {
+        this.previewIframe!.nativeElement.src = url ?? '';
+        this.previewUrl.set(url);
+      }
+    });
   }
   refreshIframe() {
     if (this.previewUrl()) {

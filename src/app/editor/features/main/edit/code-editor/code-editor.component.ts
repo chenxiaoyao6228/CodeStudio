@@ -67,7 +67,7 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
     this.codeEditorService
       .getScriptLoadSubject()
       .pipe(takeUntil(this.destroyRef$))
-      .subscribe((isLoaded) => {
+      .subscribe(isLoaded => {
         if (isLoaded) {
           this.initMonaco();
         }
@@ -89,11 +89,7 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
     if (!this.editor) {
       this.editor = this.codeEditorService.initEditor(editorWrapper, options);
     }
-    this.renderer.setStyle(
-      this.editorContentRef.nativeElement,
-      'height',
-      this.height
-    );
+    this.renderer.setStyle(this.editorContentRef.nativeElement, 'height', this.height);
 
     this.editor.layout();
   }
@@ -106,7 +102,7 @@ export class AppEditorComponent implements AfterViewInit, OnDestroy {
       this.editor = undefined;
     }
     if (this.disposables.length) {
-      this.disposables.forEach((disposable) => disposable.dispose());
+      this.disposables.forEach(disposable => disposable.dispose());
       this.disposables = [];
     }
   }

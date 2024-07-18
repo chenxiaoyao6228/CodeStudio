@@ -1,9 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  FileSystemTree,
-  WebContainer,
-  WebContainerProcess,
-} from '@webcontainer/api';
+import { FileSystemTree, WebContainer, WebContainerProcess } from '@webcontainer/api';
 import { BehaviorSubject } from 'rxjs';
 import { EditorStateService } from './editor-state.service';
 import { StartupPhase } from '../constants';
@@ -95,13 +91,11 @@ export class NodeContainerService {
   private async installDeps() {
     this.editorStateService.setPhase(StartupPhase.INSTALLING);
 
-    const installProcess = await this.spawnProcess(this.options.pkgManager!, [
-      'install',
-    ]);
+    const installProcess = await this.spawnProcess(this.options.pkgManager!, ['install']);
 
     installProcess.output.pipeTo(
       new WritableStream({
-        write: (data) => {
+        write: data => {
           this.terminalService.write(data);
         },
       })
@@ -120,14 +114,14 @@ export class NodeContainerService {
     this.editorStateService.setPhase(StartupPhase.STARTING_DEV_SERVER);
 
     const webContainer = await this.bootOrGetContainer();
-    const devServerProcess = await webContainer.spawn(
-      this.options.pkgManager!,
-      ['run', this.options!.terminal || 'dev']
-    );
+    const devServerProcess = await webContainer.spawn(this.options.pkgManager!, [
+      'run',
+      this.options!.terminal || 'dev',
+    ]);
 
     devServerProcess.output.pipeTo(
       new WritableStream({
-        write: (data) => {
+        write: data => {
           this.terminalService.write(data);
         },
       })
@@ -149,7 +143,7 @@ export class NodeContainerService {
       const pkgContent = JSON.parse(pkgString);
       const scripts = pkgContent.scripts;
       // simple detection
-      ['dev', 'start'].forEach((cmd) => {
+      ['dev', 'start'].forEach(cmd => {
         if (scripts[cmd]) {
           this.options.terminal = cmd;
         }
@@ -203,7 +197,7 @@ export class NodeContainerService {
     );
 
     const input = shellProcess.input.getWriter();
-    terminal.onData((data) => {
+    terminal.onData(data => {
       input.write(data);
     });
 
@@ -300,8 +294,7 @@ export class NodeContainerService {
 
   async getFileSystemTree(
     dir: string,
-    filterFoldersPredicate: ((path?: string) => boolean) | undefined = () =>
-      true
+    filterFoldersPredicate: ((path?: string) => boolean) | undefined = () => true
   ): Promise<FileSystemTree> {
     try {
       const webContainer = await this.bootOrGetContainer();
@@ -322,10 +315,7 @@ export class NodeContainerService {
           if (entry.isFile()) {
             const content = await fs.readFile(fullPath, 'utf-8');
             files[entry.name] = { file: { contents: content } };
-          } else if (
-            entry.isDirectory() &&
-            filterFoldersPredicate(entry.name)
-          ) {
+          } else if (entry.isDirectory() && filterFoldersPredicate(entry.name)) {
             files[entry.name] = { directory: {} };
             //@ts-expect-error skip
             await loadContent(fullPath, files[entry.name].directory);

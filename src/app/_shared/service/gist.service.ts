@@ -69,9 +69,7 @@ export class GistService {
 
   async deleteMultipleGists(params: { gistIds: string[] }) {
     try {
-      const deletePromises = params.gistIds.map((gistId) =>
-        this.deleteGist({ gistId })
-      );
+      const deletePromises = params.gistIds.map(gistId => this.deleteGist({ gistId }));
       await Promise.all(deletePromises);
       return { success: true };
     } catch (error) {
@@ -118,14 +116,14 @@ export class GistService {
  */
 export function stringifyDescription(params: Record<string, unknown>): string {
   return Object.keys(params)
-    .map((key) => `${key}: ${params[key]}`)
+    .map(key => `${key}: ${params[key]}`)
     .join('\n');
 }
 
 export function parseDescription(description: string): Record<string, unknown> {
   const lines = description.split('\n');
   const params: Record<string, unknown> = {};
-  lines.forEach((line) => {
+  lines.forEach(line => {
     const [key, ...rest] = line.split(': ');
     if (key) {
       params[key] = rest.join(': ');

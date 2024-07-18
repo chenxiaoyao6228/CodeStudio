@@ -5,10 +5,7 @@ import { LocalStorage } from './storage/local';
 import { IStorage } from './type';
 import { FileSystemTree } from '@webcontainer/api';
 import { GistStorage } from './storage/gist';
-import {
-  isEntryFile,
-  removeProxyScriptOfEntryHTML,
-} from '../../features/main/ouput/console/getProxyConsoleScript';
+import { isEntryFile, removeProxyScriptOfEntryHTML } from '../../features/main/ouput/console/getProxyConsoleScript';
 
 @Injectable({
   providedIn: 'root',
@@ -29,15 +26,11 @@ export class FileSaverService {
     });
   }
 
-  async saveProject(
-    storage: IStorage,
-    filename: string,
-    extraParams?: Record<string, any>
-  ) {
+  async saveProject(storage: IStorage, filename: string, extraParams?: Record<string, any>) {
     const zip = new JSZip();
     const fileSystemTree = await this.nodeContainerService.getFileSystemTree(
       '/',
-      (path) => !path?.includes('node_modules')
+      path => !path?.includes('node_modules')
     );
 
     // this.attachMetaData(fileSystemTree)
@@ -67,11 +60,7 @@ export class FileSaverService {
     };
   }
 
-  private async addFilesToZip(
-    zip: JSZip,
-    fileSystemTree: FileSystemTree,
-    parentPath: string
-  ) {
+  private async addFilesToZip(zip: JSZip, fileSystemTree: FileSystemTree, parentPath: string) {
     for (const key in fileSystemTree) {
       if (Object.prototype.hasOwnProperty.call(fileSystemTree, key)) {
         const item = fileSystemTree[key];

@@ -11,25 +11,18 @@
         required
         #githubUrlInput="ngModel"
       />
-      @if(githubUrlInput.invalid && githubUrlInput.touched) {
-      <mat-error> A Valid GitHub URL is required </mat-error>
+      @if (githubUrlInput.invalid && githubUrlInput.touched) {
+        <mat-error> A Valid GitHub URL is required </mat-error>
       }
     </mat-form-field>
     <p>
       Please enter the URL of your GitHub repository or
-      <b>a sub folder of a repo</b> to import your project. Make sure the
-      repository is public and have a <b>package.json</b> file in the root
+      <b>a sub folder of a repo</b> to import your project. Make sure the repository is public and have a
+      <b>package.json</b> file in the root
     </p>
   </div>
   <div mat-dialog-actions>
     <button mat-button (click)="onNoClick()">Cancel</button>
-    <button
-      mat-button
-      [disabled]="githubUrlForm.invalid"
-      (click)="onSave()"
-      cdkFocusInitial
-    >
-      Save
-    </button>
+    <button mat-button [disabled]="githubUrlForm.invalid" (click)="onSave()" cdkFocusInitial>Save</button>
   </div>
 </form>

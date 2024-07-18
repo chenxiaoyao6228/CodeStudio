@@ -14,8 +14,7 @@ export interface TypeDefinition {
 export class TypeLoaderService {
   private nodeContainerService = inject(NodeContainerService);
   private typeDefsSubject = new BehaviorSubject<TypeDefinition[]>([]);
-  public readonly typeDefs$: Observable<TypeDefinition[]> =
-    this.typeDefsSubject.asObservable();
+  public readonly typeDefs$: Observable<TypeDefinition[]> = this.typeDefsSubject.asObservable();
 
   constructor() {}
 
@@ -23,9 +22,7 @@ export class TypeLoaderService {
   async loadCurrentFileTypeDefinitions(
     parentPath: string,
     content: string
-  ): Promise<
-    { typeDefinitions: TypeDefinition[]; pathMappings: any } | undefined
-  > {
+  ): Promise<{ typeDefinitions: TypeDefinition[]; pathMappings: any } | undefined> {
     const typeDefs: TypeDefinition[] = [];
     const pathMaps: any = {};
 
@@ -53,19 +50,14 @@ export class TypeLoaderService {
     const dirList: string[] = [];
 
     await Promise.all(
-      imports.map(async (i) => {
+      imports.map(async i => {
         switch (i.kind) {
           case ImportKind.Package: {
             const pkgContent = await this.readPackageJson(i.path);
             if (pkgContent) {
               const pkgJson = JSON.parse(pkgContent);
               if (pkgJson.exports) {
-                this.extractFilesFromExports(
-                  pkgJson.exports,
-                  i.path,
-                  fileList,
-                  dirList
-                );
+                this.extractFilesFromExports(pkgJson.exports, i.path, fileList, dirList);
               }
             }
             const typesPath = await this.checkForTypesPackage(i.path);
@@ -103,9 +95,7 @@ export class TypeLoaderService {
   // read package.json file for a dependency
   private async readPackageJson(lib: string): Promise<string | undefined> {
     try {
-      return await this.nodeContainerService.readFile(
-        `./node_modules/${lib}/package.json`
-      );
+      return await this.nodeContainerService.readFile(`./node_modules/${lib}/package.json`);
     } catch (err: any) {
       if (err.message.startsWith('ENOENT')) return;
       throw err;
@@ -113,19 +103,12 @@ export class TypeLoaderService {
   }
 
   // extract file paths from package exports
-  private extractFilesFromExports(
-    exports: any,
-    lib: string,
-    fileList: string[],
-    dirList: string[]
-  ) {
+  private extractFilesFromExports(exports: any, lib: string, fileList: string[], dirList: string[]) {
     for (const key in exports) {
       const exportEntry = exports[key];
       const types = exportEntry.typings ?? exportEntry.types;
       if (types) {
-        const path = `./node_modules/${lib}/${this.normalize(
-          typeof types === 'string' ? types : types.default
-        )}`;
+        const path = `./node_modules/${lib}/${this.normalize(typeof types === 'string' ? types : types.default)}`;
         if (path.includes('*')) {
           dirList.push(path.substring(0, path.lastIndexOf('/')));
         } else {
@@ -137,28 +120,20 @@ export class TypeLoaderService {
 
   // collect type definition files from directories
   private async collectDirectoryFiles(dirList: string[]): Promise<string[]> {
-    const dirFiles = await Promise.all(
-      dirList.map((dir) => this.readTypeFilesFromDir(dir))
-    );
+    const dirFiles = await Promise.all(dirList.map(dir => this.readTypeFilesFromDir(dir)));
     return dirFiles.flat();
   }
 
   // read type definition files from a directory
   private async readTypeFilesFromDir(dir: string): Promise<string[]> {
     const files = await this.nodeContainerService.getDirectoryFiles(dir);
-    return files
-      .filter((file) => file.endsWith('.d.ts'))
-      .map((file) => `${dir}/${file}`);
+    return files.filter(file => file.endsWith('.d.ts')).map(file => `${dir}/${file}`);
   }
 
   // read files and populate type definitions
-  private async readFilesAndPopulateDefinitions(
-    files: string[],
-    typeDefs: TypeDefinition[],
-    pathMaps: any
-  ) {
+  private async readFilesAndPopulateDefinitions(files: string[], typeDefs: TypeDefinition[], pathMaps: any) {
     await Promise.all(
-      files.map(async (file) => {
+      files.map(async file => {
         const content = await this.nodeContainerService.readFile(file);
         typeDefs.push({ path: file, content });
         const moduleName = this.extractModuleName(file);
@@ -184,9 +159,7 @@ export class TypeLoaderService {
   private async checkForTypesPackage(lib: string): Promise<string | undefined> {
     const typesPackage = `@types/${lib.replace(/^@/, '').replace(/\//, '__')}`;
     try {
-      const content = await this.nodeContainerService.readFile(
-        `./node_modules/${typesPackage}/package.json`
-      );
+      const content = await this.nodeContainerService.readFile(`./node_modules/${typesPackage}/package.json`);
       const pkgJson = JSON.parse(content);
       return pkgJson.typings ?? pkgJson.types;
     } catch (err: any) {

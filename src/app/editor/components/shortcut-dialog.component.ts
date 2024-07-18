@@ -13,13 +13,7 @@ import { MatIcon } from '@angular/material/icon';
     <h2 mat-dialog-title class="title">
       Keyboard Shortcuts
       <mat-dialog-actions>
-        <div
-          mat-dialog-actions
-          tabindex="0"
-          (click)="close()"
-          (keyup)="close()"
-          class="close"
-        >
+        <div mat-dialog-actions tabindex="0" (click)="close()" (keyup)="close()" class="close">
           <mat-icon>close</mat-icon>
         </div>
       </mat-dialog-actions>

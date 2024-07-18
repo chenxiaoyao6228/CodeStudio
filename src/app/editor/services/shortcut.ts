@@ -3,14 +3,7 @@ import { MainService } from '../features/main/main.service';
 import hotkeys from 'hotkeys-js';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ShortcutDialogComponent } from '../components/shortcut-dialog.component';
-import {
-  filter,
-  fromEvent,
-  Subscription,
-  switchMap,
-  takeUntil,
-  timer,
-} from 'rxjs';
+import { filter, fromEvent, Subscription, switchMap, takeUntil, timer } from 'rxjs';
 
 /*
  * reference
@@ -42,25 +35,13 @@ export class ShortcutService {
   }
 
   private initializeShortcuts() {
-    this.addShortcut('ctrl+b', 'Toggle File Tree', () =>
-      this.mainService.toggleFileTree()
-    );
-    this.addShortcut('ctrl+`', 'Toggle Terminal', () =>
-      this.mainService.toggleTerminal()
-    );
-    this.addShortcut('ctrl+shift+o', 'Toggle Console', () =>
-      this.mainService.toggleConsole()
-    );
-    this.addShortcut('ctrl+/', 'Toggle ShortCut Menu', () =>
-      this.toggleShortcuts()
-    );
+    this.addShortcut('ctrl+b', 'Toggle File Tree', () => this.mainService.toggleFileTree());
+    this.addShortcut('ctrl+`', 'Toggle Terminal', () => this.mainService.toggleTerminal());
+    this.addShortcut('ctrl+shift+o', 'Toggle Console', () => this.mainService.toggleConsole());
+    this.addShortcut('ctrl+/', 'Toggle ShortCut Menu', () => this.toggleShortcuts());
   }
 
-  private addShortcut(
-    shortcut: string,
-    description: string,
-    action: () => void
-  ) {
+  private addShortcut(shortcut: string, description: string, action: () => void) {
     this.shortcuts.push({ shortcut, description, action });
     hotkeys(shortcut, (event, handler) => {
       event.preventDefault();
@@ -73,14 +54,14 @@ export class ShortcutService {
   }
 
   public handleShortcut(shortcut: string) {
-    const found = this.shortcuts.find((s) => s.shortcut === shortcut);
+    const found = this.shortcuts.find(s => s.shortcut === shortcut);
     if (found) {
       found.action();
     }
   }
 
   public overrideMonacoShortcuts(editor: monaco.editor.IStandaloneCodeEditor) {
-    this.shortcuts.forEach((sc) => {
+    this.shortcuts.forEach(sc => {
       const keybinding = this.convertToMonacoKeybinding(sc.shortcut);
       if (keybinding !== null) {
         editor.addCommand(keybinding, () => {
@@ -99,9 +80,7 @@ export class ShortcutService {
       case 'ctrl+`':
         return monaco.KeyMod.CtrlCmd | monaco.KeyCode.Backquote;
       case 'ctrl+shift+o':
-        return (
-          monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyO
-        );
+        return monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyO;
       default:
         return null;
     }

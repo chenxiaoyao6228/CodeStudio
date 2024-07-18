@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ViewChild,
-  OnInit,
-  OnDestroy,
-  inject,
-  computed,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, OnInit, OnDestroy, inject, computed } from '@angular/core';
 import { AppEditorComponent } from './code-editor/code-editor.component';
 import { EditService, ITabItem } from './edit.service';
 import { MatIcon } from '@angular/material/icon';
@@ -22,9 +14,7 @@ import { CodeEditorService } from './code-editor/code-editor.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditComponent implements OnInit, OnDestroy {
-  @ViewChild(AppEditorComponent) editorComponent:
-    | AppEditorComponent
-    | undefined;
+  @ViewChild(AppEditorComponent) editorComponent: AppEditorComponent | undefined;
 
   editService = inject(EditService);
   codeEditorService = inject(CodeEditorService);

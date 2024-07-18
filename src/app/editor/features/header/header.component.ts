@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -24,12 +18,7 @@ const UNTITLED_NAME = 'untitled_project';
 @Component({
   selector: 'app-editor-header',
   standalone: true,
-  imports: [
-    MatIcon,
-    MatButton,
-    MatProgressSpinnerModule,
-    ConfirmDialogComponent,
-  ],
+  imports: [MatIcon, MatButton, MatProgressSpinnerModule, ConfirmDialogComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,7 +39,7 @@ export class HeaderComponent implements OnInit {
   editId: string | null = null;
   editName: string | null = null;
   ngOnInit() {
-    this.activatedRoute.queryParamMap.subscribe((params) => {
+    this.activatedRoute.queryParamMap.subscribe(params => {
       this.editId = params.get('editId');
       const editName = params.get('editName');
       if (editName) {
@@ -58,11 +47,9 @@ export class HeaderComponent implements OnInit {
       }
     });
 
-    this.nodeContainerService.fileMounted$.subscribe(async (fileMounted) => {
+    this.nodeContainerService.fileMounted$.subscribe(async fileMounted => {
       if (fileMounted && this.projectName() === UNTITLED_NAME) {
-        const pkgContent = await this.nodeContainerService.readFile(
-          'package.json'
-        );
+        const pkgContent = await this.nodeContainerService.readFile('package.json');
         const name = JSON.parse(pkgContent).name || UNTITLED_NAME;
         if (name) {
           this.projectName.set(name);
@@ -80,7 +67,7 @@ export class HeaderComponent implements OnInit {
         },
       });
 
-      dialogRef.afterClosed().subscribe(async (result) => {
+      dialogRef.afterClosed().subscribe(async result => {
         if (result) {
           this._goHome();
         } else {
@@ -107,7 +94,7 @@ export class HeaderComponent implements OnInit {
         width: '400px',
       });
 
-      dialogRef.afterClosed().subscribe(async (result) => {
+      dialogRef.afterClosed().subscribe(async result => {
         if (result) {
           token = result;
           this.localStorageService.setItem('githubToken', token);
@@ -127,9 +114,7 @@ export class HeaderComponent implements OnInit {
         name = this.projectName();
       }
       if (!name) {
-        const pkgContent = await this.nodeContainerService.readFile(
-          'package.json'
-        );
+        const pkgContent = await this.nodeContainerService.readFile('package.json');
         name = JSON.parse(pkgContent).name;
       }
 

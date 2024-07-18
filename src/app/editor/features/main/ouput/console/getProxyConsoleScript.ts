@@ -39,15 +39,12 @@ export function isEntryFile(path: string) {
   return path.endsWith('index.html');
 }
 
-export function removeProxyScriptOfEntryHTML(
-  contents: string | Uint8Array
-): string {
+export function removeProxyScriptOfEntryHTML(contents: string | Uint8Array): string {
   if (contents instanceof Uint8Array) {
     contents = uint8ArrayToString(contents);
   }
 
-  const proxyScriptRegex =
-    /<script id='code-studio-proxy-console-script'>.*?<\/script>/s;
+  const proxyScriptRegex = /<script id='code-studio-proxy-console-script'>.*?<\/script>/s;
 
   return contents.replace(proxyScriptRegex, '');
 }

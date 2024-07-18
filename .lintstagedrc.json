@@ -1,11 +1,11 @@
 {
     "*.ts": [
-        "eslint --fix"
+        "npx eslint --fix"
     ],
     "*.html": [
-        "eslint --fix"
+        "npx eslint --fix"
     ],
     "*.scss": [
-        "eslint --fix"
+        "npx eslint --fix"
     ]
 }

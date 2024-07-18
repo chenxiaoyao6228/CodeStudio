@@ -8,16 +8,11 @@ export class LocalFileLoader implements IFileLoader {
       return await this.readDirectory(dirHandle);
     } catch (error) {
       console.error('Error accessing local directory:', error);
-      throw new Error(
-        'Unable to access local directory. Please ensure the correct permissions are granted.'
-      );
+      throw new Error('Unable to access local directory. Please ensure the correct permissions are granted.');
     }
   }
 
-  private async readDirectory(
-    dirHandle: any,
-    path = ''
-  ): Promise<FileSystemTree> {
+  private async readDirectory(dirHandle: any, path = ''): Promise<FileSystemTree> {
     const files: FileSystemTree = {};
     try {
       const EXCLUDE_DIRS = [

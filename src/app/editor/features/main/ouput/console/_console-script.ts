@@ -6,10 +6,7 @@
       const originalProp = target[prop] as any;
       if (typeof originalProp === 'function') {
         return function (...args: any[]) {
-          window.parent.postMessage(
-            { type: 'console', method: prop, args: args.map(handleArg) },
-            '*'
-          );
+          window.parent.postMessage({ type: 'console', method: prop, args: args.map(handleArg) }, '*');
           return originalProp.apply(target, args);
         };
       }
@@ -33,9 +30,7 @@
       {
         type: 'error',
         message: event.message,
-        codeInfo: event.lineno
-          ? `${event.filename}:${event.lineno}: ${event.colno}`
-          : '',
+        codeInfo: event.lineno ? `${event.filename}:${event.lineno}: ${event.colno}` : '',
         stacks: event.error && event.error.stack.split('\n'),
       },
       '*'
@@ -46,18 +41,15 @@
     sendErrorEvent(event);
   });
 
-  window.addEventListener(
-    'unhandledrejection',
-    (event: PromiseRejectionEvent) => {
-      window.parent.postMessage(
-        {
-          type: 'error',
-          message: event.reason,
-        },
-        '*'
-      );
-    }
-  );
+  window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+    window.parent.postMessage(
+      {
+        type: 'error',
+        message: event.reason,
+      },
+      '*'
+    );
+  });
 
   function handleArg(arg: any): { type: string; value: any } {
     const type = checkType(arg);
@@ -93,10 +85,7 @@
         return {
           type: 'map',
           //@ts-expect-error skip
-          value: Array.from(arg.entries()).map(([key, value]: [any, any]) => [
-            handleArg(key),
-            handleArg(value),
-          ]),
+          value: Array.from(arg.entries()).map(([key, value]: [any, any]) => [handleArg(key), handleArg(value)]),
         };
       case 'set':
         return {
