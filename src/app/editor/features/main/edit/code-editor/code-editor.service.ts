@@ -168,10 +168,31 @@ export class CodeEditorService implements IDisposable {
       .subscribe(() => {
         const model = this.editor!.getModel();
         if (model) {
+          const beforeCursorState = this.editor!.getSelections();
           const formattedCode = this.prettierService.format(model.getValue(), model.uri.path);
-          model.setValue(formattedCode);
+          this.updateModel(model.uri.path, formattedCode, beforeCursorState);
         }
       });
+  }
+
+  private updateModel(path: string, value: string, beforeCursorState: monaco.Selection[] | null) {
+    const model = monaco.editor.getModels().find(model => model.uri.path === path);
+
+    if (model && model.getValue() !== value) {
+      model.pushEditOperations(
+        beforeCursorState,
+        [
+          {
+            range: model.getFullModelRange(),
+            text: value,
+          },
+        ],
+        inverseEditOperations => {
+          // preserve cursor position
+          return beforeCursorState;
+        }
+      );
+    }
   }
 
   private registerFormattingProviders() {
